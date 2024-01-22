@@ -12,7 +12,10 @@ module.exports = {
   ignorePatterns: ['dist/', 'coverage/', 'node_modules/', '*.cjs'],
   rules: {
     '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
-    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      { argsIgnorePattern: '^_', varsIgnorePattern: '^_', ignoreRestSiblings: true },
+    ],
     'no-console': ['error', { allow: ['log', 'error'] }],
     eqeqeq: ['error', 'always'],
   },
