@@ -7,7 +7,7 @@
  * time anybody visited.
  */
 
-import { addMonths, type CivilDate } from '../util/dates';
+import { addDays, addMonths, daysBetween, type CivilDate } from '../util/dates';
 import { addWorkdays, type WorkCalendar } from '../util/workdays';
 import type { HazardDegree } from './hazard';
 
@@ -74,7 +74,7 @@ export function nextTestDue(input: CycleInput): DueDate {
   );
 
   if (input.lastPassingTestOn === undefined) {
-    const due = addDaysToDate(input.installedOn, input.policy.newInstallGraceDays);
+    const due = addDays(input.installedOn, input.policy.newInstallGraceDays);
     return {
       due,
       basis: 'first_test',
@@ -117,16 +117,5 @@ export function daysOverdue(due: DueDate, asOf: CivilDate): number {
   if (!isOverdue(due, asOf)) {
     return 0;
   }
-  return differenceInDays(due.due, asOf);
-}
-
-function addDaysToDate(date: CivilDate, days: number): CivilDate {
-  const instant = Date.parse(`${date}T00:00:00Z`) + days * 86_400_000;
-  return new Date(instant).toISOString().slice(0, 10);
-}
-
-function differenceInDays(from: CivilDate, to: CivilDate): number {
-  const start = Date.parse(`${from}T00:00:00Z`);
-  const end = Date.parse(`${to}T00:00:00Z`);
-  return Math.round((end - start) / 86_400_000);
+  return daysBetween(due.due, asOf);
 }

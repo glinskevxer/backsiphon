@@ -170,3 +170,30 @@ export function endOfMonth(date: CivilDate): CivilDate {
   }
   return fromParts({ ...parts.value, day: daysInMonth(parts.value.year, parts.value.month) });
 }
+
+/** A half open span of days, closed at both ends the way a licence reads. */
+export interface DateRange {
+  readonly from: CivilDate;
+  readonly to?: CivilDate;
+}
+
+export function rangeContains(range: DateRange, date: CivilDate): boolean {
+  if (date < range.from) {
+    return false;
+  }
+  return range.to === undefined || date <= range.to;
+}
+
+export function rangesOverlap(left: DateRange, right: DateRange): boolean {
+  const leftEnd = left.to ?? '9999-12-31';
+  const rightEnd = right.to ?? '9999-12-31';
+  return left.from <= rightEnd && right.from <= leftEnd;
+}
+
+/** Keep a date inside a span, which is what a prorated fee period needs. */
+export function clampToRange(date: CivilDate, range: DateRange): CivilDate {
+  if (date < range.from) {
+    return range.from;
+  }
+  return range.to !== undefined && date > range.to ? range.to : date;
+}

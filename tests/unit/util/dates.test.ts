@@ -21,6 +21,9 @@ import {
   isWeekend,
   latest,
   parse,
+  rangeContains,
+  rangesOverlap,
+  clampToRange,
   startOfMonth,
 } from '../../../src/util/dates';
 
@@ -144,5 +147,41 @@ describe('week and month edges', () => {
     expect(endOfMonth('2024-02-17')).toBe('2024-02-29');
     expect(endOfMonth('2023-02-17')).toBe('2023-02-28');
     expect(endOfMonth('2024-11-05')).toBe('2024-11-30');
+  });
+});
+
+describe('spans', () => {
+  it('holds a date inside a closed range', () => {
+    const range = { from: '2024-01-01', to: '2024-12-31' };
+    expect(rangeContains(range, '2024-01-01')).toBe(true);
+    expect(rangeContains(range, '2024-12-31')).toBe(true);
+    expect(rangeContains(range, '2023-12-31')).toBe(false);
+    expect(rangeContains(range, '2025-01-01')).toBe(false);
+  });
+
+  it('treats a missing end as open', () => {
+    const range = { from: '2024-01-01' };
+    expect(rangeContains(range, '2099-01-01')).toBe(true);
+    expect(rangeContains(range, '2023-01-01')).toBe(false);
+  });
+
+  it('reads an overlap between two spans', () => {
+    expect(rangesOverlap({ from: '2024-01-01', to: '2024-06-30' }, { from: '2024-06-30' })).toBe(
+      true,
+    );
+    expect(
+      rangesOverlap({ from: '2024-01-01', to: '2024-06-29' }, { from: '2024-06-30' }),
+    ).toBe(false);
+    expect(rangesOverlap({ from: '2024-01-01' }, { from: '2020-01-01', to: '2021-01-01' })).toBe(
+      false,
+    );
+  });
+
+  it('clamps a date into a span', () => {
+    const range = { from: '2024-04-01', to: '2024-04-30' };
+    expect(clampToRange('2024-01-01', range)).toBe('2024-04-01');
+    expect(clampToRange('2024-04-15', range)).toBe('2024-04-15');
+    expect(clampToRange('2024-09-01', range)).toBe('2024-04-30');
+    expect(clampToRange('2024-09-01', { from: '2024-04-01' })).toBe('2024-09-01');
   });
 });

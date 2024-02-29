@@ -7,7 +7,7 @@
  * them are answered as of a date rather than as of now.
  */
 
-import { addMonths, type CivilDate } from '../util/dates';
+import { addMonths, daysBetween, type CivilDate } from '../util/dates';
 import type { AssemblyClass } from './assembly';
 
 export interface TesterCertification {
@@ -105,15 +105,8 @@ export function certificatesLapsingBy(
   asOf: CivilDate,
   withinDays: number,
 ): TesterCertification[] {
-  const horizon = addMonths(asOf, 0);
   return testers
-    .filter((tester) => certificationStatus(tester, horizon) === 'valid')
-    .filter((tester) => daysUntil(horizon, tester.expiresOn) <= withinDays)
+    .filter((tester) => certificationStatus(tester, asOf) === 'valid')
+    .filter((tester) => daysBetween(asOf, tester.expiresOn) <= withinDays)
     .sort((left, right) => left.expiresOn.localeCompare(right.expiresOn));
-}
-
-function daysUntil(from: CivilDate, to: CivilDate): number {
-  const start = Date.parse(`${from}T00:00:00Z`);
-  const end = Date.parse(`${to}T00:00:00Z`);
-  return Math.round((end - start) / 86_400_000);
 }
