@@ -9,8 +9,9 @@ import { applyMigrations, type Migration, type MigrationRun } from './migrations
 import type { Database } from './db';
 import type { Result } from '../util/result';
 import { m001Connections } from './migrations/m001_connections';
+import { m002Assemblies } from './migrations/m002_assemblies';
 
-export const MIGRATIONS: ReadonlyArray<Migration> = [m001Connections];
+export const MIGRATIONS: ReadonlyArray<Migration> = [m001Connections, m002Assemblies];
 
 export function migrate(db: Database, now: string): Result<MigrationRun, string> {
   return applyMigrations(db, MIGRATIONS, now);

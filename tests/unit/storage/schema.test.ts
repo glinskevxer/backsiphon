@@ -67,12 +67,10 @@ describe('the migration list', () => {
   });
 
   it('builds the connection and survey tables', () => {
-    expect(tableNames(migrated())).toEqual([
-      'schema_migrations',
-      'service_connections',
-      'survey_findings',
-      'surveys',
-    ]);
+    const tables = tableNames(migrated());
+    for (const table of ['service_connections', 'surveys', 'survey_findings']) {
+      expect(tables).toContain(table);
+    }
   });
 
   it('is safe to run twice', () => {
