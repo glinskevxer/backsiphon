@@ -67,16 +67,10 @@ afterEach(() => {
 
 describe('the second migration', () => {
   it('adds the hardware tables', () => {
-    expect(tableNames(migrated())).toEqual([
-      'approved_models',
-      'assemblies',
-      'gauges',
-      'schema_migrations',
-      'service_connections',
-      'survey_findings',
-      'surveys',
-      'testers',
-    ]);
+    const tables = tableNames(migrated());
+    for (const table of ['approved_models', 'assemblies', 'gauges', 'testers']) {
+      expect(tables).toContain(table);
+    }
   });
 });
 

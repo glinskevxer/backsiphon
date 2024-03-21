@@ -10,8 +10,9 @@ import type { Database } from './db';
 import type { Result } from '../util/result';
 import { m001Connections } from './migrations/m001_connections';
 import { m002Assemblies } from './migrations/m002_assemblies';
+import { m003Testing } from './migrations/m003_testing';
 
-export const MIGRATIONS: ReadonlyArray<Migration> = [m001Connections, m002Assemblies];
+export const MIGRATIONS: ReadonlyArray<Migration> = [m001Connections, m002Assemblies, m003Testing];
 
 export function migrate(db: Database, now: string): Result<MigrationRun, string> {
   return applyMigrations(db, MIGRATIONS, now);
