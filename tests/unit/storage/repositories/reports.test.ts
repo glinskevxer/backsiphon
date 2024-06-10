@@ -58,6 +58,10 @@ beforeEach(() => {
     purveyorMetered: true,
     connectedOn: '2015-01-01',
     route: 'north',
+    outletElevationInches: 12,
+    indoorRiser: false,
+    downstreamShutoff: true,
+    continuousPressureHours: 24,
   });
   insertModel(db, {
     modelId: 'WK-375',

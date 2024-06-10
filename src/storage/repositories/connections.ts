@@ -25,6 +25,11 @@ export interface ConnectionRecord {
   readonly disconnectedOn?: CivilDate;
   readonly route: string;
   readonly note?: string;
+  /** Height of the isolation point above the highest outlet below it. */
+  readonly outletElevationInches: number;
+  readonly indoorRiser: boolean;
+  readonly downstreamShutoff: boolean;
+  readonly continuousPressureHours: number;
 }
 
 interface ConnectionRow {
@@ -40,10 +45,15 @@ interface ConnectionRow {
   disconnected_on: string | null;
   route: string;
   note: string | null;
+  outlet_elevation_inches: number;
+  indoor_riser: number;
+  downstream_shutoff: number;
+  continuous_pressure_hours: number;
 }
 
 const COLUMNS = `connection_id, account_number, premise_name, premise_address, premise_use_code,
-  service_size_inches, fire_service, purveyor_metered, connected_on, disconnected_on, route, note`;
+  service_size_inches, fire_service, purveyor_metered, connected_on, disconnected_on, route, note,
+  outlet_elevation_inches, indoor_riser, downstream_shutoff, continuous_pressure_hours`;
 
 function toRecord(row: ConnectionRow): ConnectionRecord {
   return {
@@ -59,6 +69,10 @@ function toRecord(row: ConnectionRow): ConnectionRecord {
     ...(row.disconnected_on === null ? {} : { disconnectedOn: row.disconnected_on }),
     route: row.route,
     ...(row.note === null ? {} : { note: row.note }),
+    outletElevationInches: row.outlet_elevation_inches,
+    indoorRiser: fromFlag(row.indoor_riser),
+    downstreamShutoff: fromFlag(row.downstream_shutoff),
+    continuousPressureHours: row.continuous_pressure_hours,
   };
 }
 
@@ -69,7 +83,8 @@ export function insertConnection(
   try {
     execute(
       db,
-      `insert into service_connections (${COLUMNS}) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `insert into service_connections (${COLUMNS})
+       values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         record.connectionId,
         record.accountNumber,
@@ -83,6 +98,10 @@ export function insertConnection(
         toNullable(record.disconnectedOn),
         record.route,
         toNullable(record.note),
+        record.outletElevationInches,
+        toFlag(record.indoorRiser),
+        toFlag(record.downstreamShutoff),
+        record.continuousPressureHours,
       ],
     );
     return ok(record);
@@ -140,6 +159,57 @@ export function listConnections(db: Database, filter: ConnectionFilter = {}): Co
     `select ${COLUMNS} from service_connections ${where} order by account_number`,
     params,
   ).map(toRecord);
+}
+
+export interface FixtureChange {
+  readonly outletElevationInches?: number;
+  readonly indoorRiser?: boolean;
+  readonly downstreamShutoff?: boolean;
+  readonly continuousPressureHours?: number;
+}
+
+/** Write the geometry the isolation requirement reads. */
+export function updateFixtureFacts(
+  db: Database,
+  connectionId: string,
+  change: FixtureChange,
+): Result<ConnectionRecord, string> {
+  const existing = findConnection(db, connectionId);
+  if (existing === undefined) {
+    return err(`there is no connection with the id ${connectionId}`);
+  }
+  const merged: ConnectionRecord = {
+    ...existing,
+    ...(change.outletElevationInches === undefined
+      ? {}
+      : { outletElevationInches: change.outletElevationInches }),
+    ...(change.indoorRiser === undefined ? {} : { indoorRiser: change.indoorRiser }),
+    ...(change.downstreamShutoff === undefined
+      ? {}
+      : { downstreamShutoff: change.downstreamShutoff }),
+    ...(change.continuousPressureHours === undefined
+      ? {}
+      : { continuousPressureHours: change.continuousPressureHours }),
+  };
+  if (merged.outletElevationInches < 0) {
+    return err('an elevation above the highest outlet cannot be negative');
+  }
+  if (merged.continuousPressureHours < 0 || merged.continuousPressureHours > 24) {
+    return err('hours under pressure have to sit between 0 and 24');
+  }
+  execute(
+    db,
+    `update service_connections set outlet_elevation_inches = ?, indoor_riser = ?,
+       downstream_shutoff = ?, continuous_pressure_hours = ? where connection_id = ?`,
+    [
+      merged.outletElevationInches,
+      toFlag(merged.indoorRiser),
+      toFlag(merged.downstreamShutoff),
+      merged.continuousPressureHours,
+      connectionId,
+    ],
+  );
+  return ok(merged);
 }
 
 export interface ConnectionChange {

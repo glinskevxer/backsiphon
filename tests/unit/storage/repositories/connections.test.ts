@@ -27,6 +27,10 @@ function record(overrides: Partial<ConnectionRecord> = {}): ConnectionRecord {
     purveyorMetered: true,
     connectedOn: '2019-04-02',
     route: 'north',
+    outletElevationInches: 12,
+    indoorRiser: false,
+    downstreamShutoff: true,
+    continuousPressureHours: 24,
     ...overrides,
   };
 }
@@ -98,6 +102,10 @@ describe('finding them', () => {
         premiseName: 'harbour cannery',
         premiseUseCode: 'FOOD_PROC',
         route: 'south',
+        outletElevationInches: 12,
+        indoorRiser: false,
+        downstreamShutoff: true,
+        continuousPressureHours: 24,
       }),
     );
     insertConnection(
@@ -107,6 +115,10 @@ describe('finding them', () => {
         accountNumber: 'A-1003',
         premiseName: 'old mill',
         route: 'north',
+        outletElevationInches: 12,
+        indoorRiser: false,
+        downstreamShutoff: true,
+        continuousPressureHours: 24,
         connectedOn: '2015-01-01',
         disconnectedOn: '2022-06-30',
       }),

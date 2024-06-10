@@ -22,6 +22,14 @@ import {
 import { withTransaction } from '../storage/db';
 import { mintId, type Register } from './register';
 
+/**
+ * What the office assumes about a riser nobody has measured: high enough for a
+ * vacuum breaker, outdoors, with a valve below it and under pressure all day.
+ * The last two are the conservative answer, the first is not, so a survey that
+ * finds a low riser has to say so.
+ */
+export const DEFAULT_OUTLET_ELEVATION_INCHES = 12;
+
 export interface NewConnection {
   readonly accountNumber: string;
   readonly premiseName: string;
@@ -33,6 +41,10 @@ export interface NewConnection {
   readonly connectedOn: CivilDate;
   readonly route?: string;
   readonly note?: string;
+  readonly outletElevationInches?: number;
+  readonly indoorRiser?: boolean;
+  readonly downstreamShutoff?: boolean;
+  readonly continuousPressureHours?: number;
 }
 
 export function openConnection(
@@ -65,6 +77,10 @@ export function openConnection(
     connectedOn: input.connectedOn,
     route: input.route ?? 'unassigned',
     ...(input.note === undefined ? {} : { note: input.note }),
+    outletElevationInches: input.outletElevationInches ?? DEFAULT_OUTLET_ELEVATION_INCHES,
+    indoorRiser: input.indoorRiser ?? false,
+    downstreamShutoff: input.downstreamShutoff ?? true,
+    continuousPressureHours: input.continuousPressureHours ?? 24,
   };
 
   return withTransaction(register.db, () => {

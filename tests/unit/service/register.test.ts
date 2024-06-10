@@ -12,6 +12,7 @@ import {
 import { CONNECTION_ID } from '../../../src/util/ids';
 import { execute, tableNames } from '../../../src/storage/db';
 import { schemaVersion } from '../../../src/storage/migrations';
+import { MIGRATIONS } from '../../../src/storage/schema';
 
 let register: Register | undefined;
 
@@ -35,7 +36,7 @@ describe('opening one', () => {
   it('migrates the store on the way in', () => {
     const open1 = open();
     expect(tableNames(open1.db)).toContain('service_connections');
-    expect(schemaVersion(open1.db)).toBe('003_testing');
+    expect(schemaVersion(open1.db)).toBe(MIGRATIONS[MIGRATIONS.length - 1]?.id);
   });
 
   it('takes the default policy when it is given none', () => {

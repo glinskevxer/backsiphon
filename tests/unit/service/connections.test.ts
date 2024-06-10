@@ -7,7 +7,11 @@ import {
   openConnection,
   type NewConnection,
 } from '../../../src/service/connections';
-import { findConnection, listConnections } from '../../../src/storage/repositories/connections';
+import {
+  findConnection,
+  listConnections,
+  updateFixtureFacts,
+} from '../../../src/storage/repositories/connections';
 import { eventsFor } from '../../../src/storage/repositories/events';
 
 let register: Register;
@@ -153,5 +157,59 @@ describe('closing one', () => {
     expect(closeConnection(register, 'SC-00001', '2024-05-31', '   ').ok).toBe(false);
     closeConnection(register, 'SC-00001', '2024-05-31', 'premise demolished');
     expect(closeConnection(register, 'SC-00001', '2024-06-30', 'again').ok).toBe(false);
+  });
+});
+
+describe('the fixture geometry', () => {
+  it('takes the conservative defaults when nobody has measured', () => {
+    const opened = openConnection(register, input());
+    expect(opened.ok).toBe(true);
+    if (!opened.ok) {
+      return;
+    }
+    expect(opened.value.outletElevationInches).toBe(12);
+    expect(opened.value.indoorRiser).toBe(false);
+    expect(opened.value.downstreamShutoff).toBe(true);
+    expect(opened.value.continuousPressureHours).toBe(24);
+  });
+
+  it('takes what the surveyor measured', () => {
+    const opened = openConnection(
+      register,
+      input({
+        outletElevationInches: 8,
+        indoorRiser: true,
+        downstreamShutoff: false,
+        continuousPressureHours: 4,
+      }),
+    );
+    expect(opened.ok).toBe(true);
+    if (!opened.ok) {
+      return;
+    }
+    expect(opened.value.outletElevationInches).toBe(8);
+    expect(opened.value.indoorRiser).toBe(true);
+    expect(opened.value.downstreamShutoff).toBe(false);
+    expect(opened.value.continuousPressureHours).toBe(4);
+  });
+
+  it('writes a correction onto an existing connection', () => {
+    openConnection(register, input());
+    const changed = updateFixtureFacts(register.db, 'SC-00001', {
+      outletElevationInches: 6,
+      indoorRiser: true,
+    });
+    expect(changed.ok).toBe(true);
+    const found = findConnection(register.db, 'SC-00001');
+    expect(found?.outletElevationInches).toBe(6);
+    expect(found?.indoorRiser).toBe(true);
+    expect(found?.downstreamShutoff).toBe(true);
+  });
+
+  it('refuses geometry that cannot be true', () => {
+    openConnection(register, input());
+    expect(updateFixtureFacts(register.db, 'SC-00001', { outletElevationInches: -2 }).ok).toBe(false);
+    expect(updateFixtureFacts(register.db, 'SC-00001', { continuousPressureHours: 30 }).ok).toBe(false);
+    expect(updateFixtureFacts(register.db, 'SC-00404', { indoorRiser: true }).ok).toBe(false);
   });
 });
