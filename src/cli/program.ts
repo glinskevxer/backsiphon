@@ -14,6 +14,7 @@ import { withContext, type CommandContext, type GlobalOptions } from './context'
 import { capturingIo, type CliIo } from './output';
 import { registerConnectionCommands } from './commands/connections';
 import { registerSurveyCommands } from './commands/surveys';
+import { registerAssemblyCommands } from './commands/assemblies';
 
 export type Runner = <T>(
   options: GlobalOptions,
@@ -51,6 +52,7 @@ export function buildProgram(options: ProgramOptions): Command {
 
   registerConnectionCommands(program, io, runner);
   registerSurveyCommands(program, io, runner);
+  registerAssemblyCommands(program, io, runner);
 
   return program;
 }
