@@ -18,6 +18,7 @@ import { registerAssemblyCommands } from './commands/assemblies';
 import { registerTesterCommands } from './commands/testers';
 import { registerTestCommands } from './commands/tests';
 import { registerStatusCommands } from './commands/status';
+import { registerNoticeCommands } from './commands/notices';
 
 export type Runner = <T>(
   options: GlobalOptions,
@@ -59,6 +60,7 @@ export function buildProgram(options: ProgramOptions): Command {
   registerTesterCommands(program, io, runner);
   registerTestCommands(program, io, runner);
   registerStatusCommands(program, io, runner);
+  registerNoticeCommands(program, io, runner);
 
   return program;
 }
