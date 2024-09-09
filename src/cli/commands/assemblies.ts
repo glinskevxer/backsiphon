@@ -15,14 +15,9 @@ import {
   listModels,
 } from '../../storage/repositories/assemblies';
 import type { AssemblyModel } from '../../domain/approvals';
-import type { GlobalOptions } from '../context';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { report } from './connections';
-
-function globals(command: Command): GlobalOptions {
-  return command.optsWithGlobals() as GlobalOptions;
-}
+import { globals, report } from '../shared';
 
 function sizes(value: string): number[] {
   return value

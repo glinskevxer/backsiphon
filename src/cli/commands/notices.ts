@@ -11,14 +11,9 @@ import {
   openNotices,
   type NoticeRecord,
 } from '../../storage/repositories/notices';
-import type { GlobalOptions } from '../context';
 import { heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { report } from './connections';
-
-function globals(command: Command): GlobalOptions {
-  return command.optsWithGlobals() as GlobalOptions;
-}
+import { globals, report } from '../shared';
 
 export function registerNoticeCommands(program: Command, io: CliIo, runner: Runner): void {
   const notice = program.command('notice').description('the letters that go out');

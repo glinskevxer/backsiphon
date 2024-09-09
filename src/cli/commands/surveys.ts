@@ -8,14 +8,9 @@ import { err, ok } from '../../util/result';
 import { HAZARD_FINDINGS } from '../../domain/hazard';
 import { dueSurveys, neverSurveyed, recordSurvey } from '../../service/surveys';
 import { currentSurvey, surveyHistory, type SurveyRow } from '../../storage/repositories/surveys';
-import type { GlobalOptions } from '../context';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { report } from './connections';
-
-function globals(command: Command): GlobalOptions {
-  return command.optsWithGlobals() as GlobalOptions;
-}
+import { globals, report } from '../shared';
 
 function splitCodes(value: string | undefined): string[] {
   if (value === undefined || value.trim() === '') {

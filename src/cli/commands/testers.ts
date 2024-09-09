@@ -23,14 +23,9 @@ import {
   retireGauge,
   suspendTester,
 } from '../../storage/repositories/testers';
-import type { GlobalOptions } from '../context';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { report } from './connections';
-
-function globals(command: Command): GlobalOptions {
-  return command.optsWithGlobals() as GlobalOptions;
-}
+import { globals, report } from '../shared';
 
 function endorsements(value: string): AssemblyClass[] {
   return value

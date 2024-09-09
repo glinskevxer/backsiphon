@@ -8,14 +8,9 @@ import type { Command } from 'commander';
 import { ok } from '../../util/result';
 import { complianceFor, noticeRank, type ComplianceStatus, type PointCompliance } from '../../service/compliance';
 import { listConnections } from '../../storage/repositories/connections';
-import type { GlobalOptions } from '../context';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { report } from './connections';
-
-function globals(command: Command): GlobalOptions {
-  return command.optsWithGlobals() as GlobalOptions;
-}
+import { globals, report } from '../shared';
 
 function pointLines(point: PointCompliance): string[] {
   const lines = describe([

@@ -4,7 +4,7 @@
 
 import type { Command } from 'commander';
 
-import { err, ok, type Result } from '../../util/result';
+import { err, ok } from '../../util/result';
 import { PREMISE_USES } from '../../domain/premise';
 import {
   changePremiseUse,
@@ -16,13 +16,9 @@ import {
   listConnections,
   type ConnectionRecord,
 } from '../../storage/repositories/connections';
-import type { GlobalOptions } from '../context';
 import { describe, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-
-function globals(command: Command): GlobalOptions {
-  return command.optsWithGlobals() as GlobalOptions;
-}
+import { globals, report } from '../shared';
 
 export function registerConnectionCommands(program: Command, io: CliIo, runner: Runner): void {
   const connection = program
@@ -172,13 +168,4 @@ export function registerConnectionCommands(program: Command, io: CliIo, runner: 
         io.out(`closed ${record.connectionId} on ${record.disconnectedOn ?? 'an unknown day'}`);
       });
     });
-}
-
-/** Print a refusal on the error channel and anything else through the caller. */
-export function report<T>(io: CliIo, outcome: Result<T, string>, onOk: (value: T) => void): void {
-  if (!outcome.ok) {
-    io.err(outcome.error);
-    return;
-  }
-  onOk(outcome.value);
 }

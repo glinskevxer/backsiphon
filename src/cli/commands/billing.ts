@@ -7,14 +7,9 @@ import type { Command } from 'commander';
 import { ok } from '../../util/result';
 import { formatCents } from '../../domain/fees';
 import { billingRun, describeInvoice, invoiceFor, type ConnectionInvoice } from '../../service/billing';
-import type { GlobalOptions } from '../context';
 import { heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { report } from './connections';
-
-function globals(command: Command): GlobalOptions {
-  return command.optsWithGlobals() as GlobalOptions;
-}
+import { globals, report } from '../shared';
 
 export function registerBillingCommands(program: Command, io: CliIo, runner: Runner): void {
   const billing = program.command('billing').description('the annual fee and the penalties');

@@ -15,14 +15,9 @@ import { fileReport } from '../../service/filing';
 import { requiredReadingKeys } from '../../domain/procedure';
 import { findAssembly } from '../../storage/repositories/assemblies';
 import { reportsForAssembly, type StoredReport } from '../../storage/repositories/reports';
-import type { GlobalOptions } from '../context';
 import { bullet, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { report } from './connections';
-
-function globals(command: Command): GlobalOptions {
-  return command.optsWithGlobals() as GlobalOptions;
-}
+import { globals, report } from '../shared';
 
 const TRUE_WORDS = ['yes', 'y', 'true', 'held', 'tight'];
 const FALSE_WORDS = ['no', 'n', 'false', 'weeping', 'leaking'];
