@@ -22,6 +22,7 @@ import { registerNoticeCommands } from './commands/notices';
 import { registerVarianceCommands } from './commands/variances';
 import { registerBillingCommands } from './commands/billing';
 import { registerAuditCommands } from './commands/audit';
+import { registerExportCommands } from './commands/exports';
 
 export type Runner = <T>(
   options: GlobalOptions,
@@ -67,6 +68,7 @@ export function buildProgram(options: ProgramOptions): Command {
   registerVarianceCommands(program, io, runner);
   registerBillingCommands(program, io, runner);
   registerAuditCommands(program, io, runner);
+  registerExportCommands(program, io, runner);
 
   return program;
 }
