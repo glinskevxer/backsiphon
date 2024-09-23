@@ -17,7 +17,8 @@ export function registerImportCommands(program: Command, io: CliIo, runner: Runn
     .command('import')
     .description('take a batch of test reports off a contractor file')
     .argument('<file>', 'the csv file they sent')
-    .action((file: string, _options: unknown, command: Command) => {
+    .option('--dry-run', 'say what would happen without writing anything')
+    .action((file: string, options: Record<string, boolean | undefined>, command: Command) => {
       const outcome = runner(globals(command), io, (context) => {
         let text: string;
         try {
@@ -25,7 +26,9 @@ export function registerImportCommands(program: Command, io: CliIo, runner: Runn
         } catch (error) {
           return err(`${file} could not be read: ${error instanceof Error ? error.message : String(error)}`);
         }
-        const summary = importReportsCsv(context.register, text);
+        const summary = importReportsCsv(context.register, text, {
+          ...(options['dryRun'] === true ? { dryRun: true } : {}),
+        });
         return summary.ok ? ok({ context, summary: summary.value }) : summary;
       });
       report(io, outcome, ({ context, summary }) => {
@@ -34,6 +37,9 @@ export function registerImportCommands(program: Command, io: CliIo, runner: Runn
           return;
         }
         io.out(describeImport(summary));
+        if (options['dryRun'] === true) {
+          io.out('this was a dry run, nothing was written');
+        }
         const refused = summary.filed.filter((row) => !row.outcome.ruling.admissible);
         if (refused.length > 0) {
           io.out('');

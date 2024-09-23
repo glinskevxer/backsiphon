@@ -9,6 +9,7 @@
  */
 
 import { parseCsv, toRecords } from '../util/csv';
+import { withTransaction } from '../storage/db';
 import { isCivilDate } from '../util/dates';
 import { err, ok, type Result } from '../util/result';
 import type { Readings } from '../domain/report';
@@ -40,7 +41,20 @@ export interface ImportSummary {
   readonly passed: number;
 }
 
-export function importReportsCsv(register: Register, text: string): Result<ImportSummary, string> {
+export interface ImportOptions {
+  /**
+   * Read the file and say what would happen without writing anything. The
+   * rows are checked in the same order and by the same code, so a dry run that
+   * comes back clean is a promise about the real one.
+   */
+  readonly dryRun?: boolean;
+}
+
+export function importReportsCsv(
+  register: Register,
+  text: string,
+  options: ImportOptions = {},
+): Result<ImportSummary, string> {
   const table = parseCsv(text);
   if (!table.ok) {
     return err(table.error);
@@ -62,7 +76,9 @@ export function importReportsCsv(register: Register, text: string): Result<Impor
       rejected.push({ line, reason: row.error });
       continue;
     }
-    const outcome = fileReport(register, row.value);
+    const outcome = withRollback(register, options.dryRun === true, () =>
+      fileReport(register, row.value),
+    );
     if (!outcome.ok) {
       rejected.push({ line, reason: outcome.error });
       continue;
@@ -80,6 +96,35 @@ export function importReportsCsv(register: Register, text: string): Result<Impor
     ).length,
   });
 }
+
+/**
+ * Run a filing and throw it away afterwards when this is a dry run. The work
+ * has to happen for real to find out what the register would say, so it is
+ * done inside a transaction that is then rolled back.
+ */
+function withRollback<T>(
+  register: Register,
+  rollback: boolean,
+  work: () => Result<T, string>,
+): Result<T, string> {
+  if (!rollback) {
+    return work();
+  }
+  let held: Result<T, string> | undefined;
+  try {
+    withTransaction(register.db, () => {
+      held = work();
+      throw new DryRun();
+    });
+  } catch (error) {
+    if (!(error instanceof DryRun)) {
+      throw error;
+    }
+  }
+  return held ?? err('the dry run produced nothing at all');
+}
+
+class DryRun extends Error {}
 
 interface RowInput {
   readonly assemblyId: string;
