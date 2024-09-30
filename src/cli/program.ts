@@ -24,6 +24,7 @@ import { registerBillingCommands } from './commands/billing';
 import { registerAuditCommands } from './commands/audit';
 import { registerExportCommands } from './commands/exports';
 import { registerImportCommands } from './commands/imports';
+import { registerReportCommands } from './commands/reports';
 
 export type Runner = <T>(
   options: GlobalOptions,
@@ -71,6 +72,7 @@ export function buildProgram(options: ProgramOptions): Command {
   registerAuditCommands(program, io, runner);
   registerExportCommands(program, io, runner);
   registerImportCommands(program, io, runner);
+  registerReportCommands(program, io, runner);
 
   return program;
 }
