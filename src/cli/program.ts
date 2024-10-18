@@ -26,6 +26,7 @@ import { registerExportCommands } from './commands/exports';
 import { registerImportCommands } from './commands/imports';
 import { registerReportCommands } from './commands/reports';
 import { registerDoctorCommands } from './commands/doctor';
+import { registerBackupCommands } from './commands/backup';
 
 export type Runner = <T>(
   options: GlobalOptions,
@@ -75,6 +76,7 @@ export function buildProgram(options: ProgramOptions): Command {
   registerImportCommands(program, io, runner);
   registerReportCommands(program, io, runner);
   registerDoctorCommands(program, io, runner);
+  registerBackupCommands(program, io, runner);
 
   return program;
 }
