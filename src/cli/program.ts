@@ -27,6 +27,7 @@ import { registerImportCommands } from './commands/imports';
 import { registerReportCommands } from './commands/reports';
 import { registerDoctorCommands } from './commands/doctor';
 import { registerBackupCommands } from './commands/backup';
+import { registerConfigCommands } from './commands/config';
 
 export type Runner = <T>(
   options: GlobalOptions,
@@ -51,7 +52,7 @@ export function buildProgram(options: ProgramOptions): Command {
     .name(PROGRAM_NAME)
     .description('cross connection control register for a drinking water purveyor')
     .version(options.version ?? '0.1.0')
-    .option('-s, --store <file>', 'the register file', 'backsiphon.sqlite')
+    .option('-s, --store <file>', 'the register file, or whatever the config file says')
     .option('--as-of <date>', 'answer as at this day rather than today')
     .option('--actor <name>', 'the clerk the trail is written against', 'cli')
     .option('--purveyor <name>', 'the name that goes at the bottom of a notice')
@@ -77,6 +78,7 @@ export function buildProgram(options: ProgramOptions): Command {
   registerReportCommands(program, io, runner);
   registerDoctorCommands(program, io, runner);
   registerBackupCommands(program, io, runner);
+  registerConfigCommands(program, io, runner);
 
   return program;
 }

@@ -8,11 +8,13 @@
 
 import { isCivilDate, type CivilDate } from '../util/dates';
 import { err, ok, type Result } from '../util/result';
-import { closeRegister, openRegister, type Register } from '../service/register';
+import { loadConfig } from '../service/config';
+import { closeRegister, openRegister, type ProgramPolicy, type Register } from '../service/register';
 import type { CliIo } from './output';
 
 export interface GlobalOptions {
-  readonly store: string;
+  /** Defaults to whatever the config file says, and then to a local file. */
+  readonly store?: string;
   /** The day the command is answered as at. Defaults to today. */
   readonly asOf?: string;
   readonly actor?: string;
@@ -25,7 +27,12 @@ export interface CommandContext {
   readonly io: CliIo;
   readonly asOf: CivilDate;
   readonly json: boolean;
+  /** Where the settings came from, for the config command to print. */
+  readonly configFile?: string;
 }
+
+/** Used when neither the command line nor a config file names a store. */
+export const DEFAULT_STORE = 'backsiphon.sqlite';
 
 export function todayIso(): CivilDate {
   return new Date().toISOString().slice(0, 10);
@@ -47,12 +54,20 @@ export function withContext<T>(
   if (!asOf.ok) {
     return err(asOf.error);
   }
+  const config = loadConfig(process.cwd());
+  if (!config.ok) {
+    return err(config.error);
+  }
+
+  // the command line beats the file, and the file beats the default
+  const policy: Partial<ProgramPolicy> = {
+    ...config.value.policy,
+    ...(options.purveyor === undefined ? {} : { purveyorName: options.purveyor }),
+  };
   const opened = openRegister({
-    file: options.store,
+    file: options.store ?? config.value.store ?? DEFAULT_STORE,
     actor: options.actor ?? 'cli',
-    ...(options.purveyor === undefined
-      ? {}
-      : { policy: { purveyorName: options.purveyor } }),
+    policy,
   });
   if (!opened.ok) {
     return err(opened.error);
@@ -63,6 +78,7 @@ export function withContext<T>(
       io,
       asOf: asOf.value,
       json: options.json ?? false,
+      ...(config.value.file === undefined ? {} : { configFile: config.value.file }),
     });
   } finally {
     closeRegister(opened.value);

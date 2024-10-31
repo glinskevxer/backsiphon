@@ -1,4 +1,10 @@
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 import { describe, expect, it } from 'vitest';
+
+import { CONFIG_FILENAME } from '../../../src/service/config';
 
 import { contextFor, resolveAsOf, todayIso, withContext } from '../../../src/cli/context';
 import { capturingIo } from '../../../src/cli/output';
@@ -82,5 +88,61 @@ describe('borrowing a register', () => {
     expect(context.asOf).toBe('2024-08-02');
     expect(context.json).toBe(true);
     closeRegister(opened.value);
+  });
+});
+
+describe('the config file', () => {
+  it('takes the store and the policy from it when the command line is quiet', () => {
+    const scratch = mkdtempSync(join(tmpdir(), 'backsiphon-ctx-'));
+    const previous = process.cwd();
+    writeFileSync(
+      join(scratch, CONFIG_FILENAME),
+      JSON.stringify({ store: ':memory:', purveyorName: 'north valley water', filingWindowDays: 20 }),
+    );
+    process.chdir(scratch);
+    try {
+      withContext({}, capturingIo(), (context) => {
+        expect(context.register.policy.purveyorName).toBe('north valley water');
+        expect(context.register.policy.filingWindowDays).toBe(20);
+        expect(context.configFile).toContain(CONFIG_FILENAME);
+        return ok(true);
+      });
+    } finally {
+      process.chdir(previous);
+      rmSync(scratch, { recursive: true, force: true });
+    }
+  });
+
+  it('lets the command line beat the file', () => {
+    const scratch = mkdtempSync(join(tmpdir(), 'backsiphon-ctx-'));
+    const previous = process.cwd();
+    writeFileSync(
+      join(scratch, CONFIG_FILENAME),
+      JSON.stringify({ store: ':memory:', purveyorName: 'north valley water' }),
+    );
+    process.chdir(scratch);
+    try {
+      withContext({ store: ':memory:', purveyor: 'coast district water' }, capturingIo(), (context) => {
+        expect(context.register.policy.purveyorName).toBe('coast district water');
+        return ok(true);
+      });
+    } finally {
+      process.chdir(previous);
+      rmSync(scratch, { recursive: true, force: true });
+    }
+  });
+
+  it('refuses to run at all when the file is wrong', () => {
+    const scratch = mkdtempSync(join(tmpdir(), 'backsiphon-ctx-'));
+    const previous = process.cwd();
+    writeFileSync(join(scratch, CONFIG_FILENAME), '{ "filingWindowDays": -3 }');
+    process.chdir(scratch);
+    try {
+      const result = withContext({ store: ':memory:' }, capturingIo(), () => ok(true));
+      expect(result.ok).toBe(false);
+    } finally {
+      process.chdir(previous);
+      rmSync(scratch, { recursive: true, force: true });
+    }
   });
 });
