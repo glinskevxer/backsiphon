@@ -6,11 +6,36 @@ import type { Command } from 'commander';
 
 import { ok } from '../../util/result';
 import { CONFIG_FILENAME } from '../../service/config';
+import { loadDemoDistrict } from '../../service/demo';
 import { describe, heading, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, report } from '../shared';
 
 export function registerConfigCommands(program: Command, io: CliIo, runner: Runner): void {
+  program
+    .command('demo')
+    .description('fill an empty register with a small district to train on')
+    .action((_options: unknown, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => {
+        const loaded = loadDemoDistrict(context.register, context.asOf);
+        return loaded.ok ? ok({ context, loaded: loaded.value }) : loaded;
+      });
+      report(io, outcome, ({ context, loaded }) => {
+        if (context.json) {
+          writeJson(io, loaded);
+          return;
+        }
+        for (const line of describe([
+          ['connections', loaded.connections],
+          ['assemblies fitted', loaded.assemblies],
+          ['reports filed', loaded.reports],
+          ['letters that went out', loaded.notices],
+        ])) {
+          io.out(line);
+        }
+      });
+    });
+
   program
     .command('config')
     .description(`show the policy in force and where it came from`)
