@@ -5,29 +5,15 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { closeRegister, openRegister, type Register } from '../../src/service/register';
-import { contextFor, type CommandContext, type GlobalOptions } from '../../src/cli/context';
-import { capturingIo, type CliIo } from '../../src/cli/output';
-import { run, type Runner } from '../../src/cli/program';
 import { parseCsv, toRecords } from '../../src/util/csv';
-import type { Result } from '../../src/util/result';
+import { borrow, cliRunner } from '../support/cli';
+import { capturingIo } from '../../src/cli/output';
+import { run } from '../../src/cli/program';
 
 let register: Register;
+
+const cli = cliRunner(() => register, '2024-10-20');
 let scratch: string;
-
-function borrow(): Runner {
-  return <T>(
-    options: GlobalOptions,
-    io: CliIo,
-    work: (context: CommandContext) => Result<T, string>,
-  ): Result<T, string> =>
-    work(contextFor(register, io, options.asOf ?? '2024-10-20', options.json === true));
-}
-
-async function cli(...argv: string[]): Promise<{ code: number; out: string; err: string }> {
-  const io = capturingIo();
-  const code = await run(argv, { io, runner: borrow() });
-  return { code, out: io.lines.join('\n'), err: io.errors.join('\n') };
-}
 
 beforeEach(async () => {
   scratch = mkdtempSync(join(tmpdir(), 'backsiphon-'));
@@ -132,7 +118,7 @@ describe('export', () => {
 
   it('writes json when it is asked to', async () => {
     const io = capturingIo();
-    await run(['--json', 'export', 'connections'], { io, runner: borrow() });
+    await run(['--json', 'export', 'connections'], { io, runner: borrow(() => register, '2024-10-20') });
     const rows = JSON.parse(io.lines.join('\n')) as Array<Record<string, string>>;
     expect(rows[0]?.['connection']).toBe('SC-00001');
   });

@@ -1,27 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { closeRegister, openRegister, type Register } from '../../src/service/register';
-import { contextFor, type CommandContext, type GlobalOptions } from '../../src/cli/context';
-import { capturingIo, type CliIo } from '../../src/cli/output';
-import { run, type Runner } from '../../src/cli/program';
-import type { Result } from '../../src/util/result';
+import { borrow, cliRunner } from '../support/cli';
+import { capturingIo } from '../../src/cli/output';
+import { run } from '../../src/cli/program';
 
 let register: Register;
 
-function borrow(): Runner {
-  return <T>(
-    options: GlobalOptions,
-    io: CliIo,
-    work: (context: CommandContext) => Result<T, string>,
-  ): Result<T, string> =>
-    work(contextFor(register, io, options.asOf ?? '2024-09-01', options.json === true));
-}
-
-async function cli(...argv: string[]): Promise<{ code: number; out: string; err: string }> {
-  const io = capturingIo();
-  const code = await run(argv, { io, runner: borrow() });
-  return { code, out: io.lines.join('\n'), err: io.errors.join('\n') };
-}
+const cli = cliRunner(() => register, '2024-09-01');
 
 async function setUpConnection(account: string, use: string): Promise<void> {
   await cli(
@@ -110,7 +96,7 @@ describe('status', () => {
 
   it('writes the whole thing as json', async () => {
     const io = capturingIo();
-    await run(['--json', 'status', 'SC-00001'], { io, runner: borrow() });
+    await run(['--json', 'status', 'SC-00001'], { io, runner: borrow(() => register, '2024-09-01') });
     const parsed = JSON.parse(io.lines.join('\n')) as { standing: string; connectionId: string };
     expect(parsed.connectionId).toBe('SC-00001');
     expect(parsed.standing).toBe('deficient');

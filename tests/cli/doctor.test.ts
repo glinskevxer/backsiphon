@@ -4,30 +4,16 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { contextFor, type CommandContext, type GlobalOptions } from '../../src/cli/context';
-import { capturingIo, type CliIo } from '../../src/cli/output';
-import { run, type Runner } from '../../src/cli/program';
 import { suspendTester } from '../../src/storage/repositories/testers';
 import { openOffice, open, walk, fit, fileTest, type Office } from '../support/office';
-import type { Result } from '../../src/util/result';
+import { borrow, cliRunner } from '../support/cli';
+import { capturingIo } from '../../src/cli/output';
+import { run } from '../../src/cli/program';
 
 let office: Office;
+
+const cli = cliRunner(() => office.register, '2024-11-05');
 let scratch: string;
-
-function borrow(): Runner {
-  return <T>(
-    options: GlobalOptions,
-    io: CliIo,
-    work: (context: CommandContext) => Result<T, string>,
-  ): Result<T, string> =>
-    work(contextFor(office.register, io, options.asOf ?? '2024-11-05', options.json === true));
-}
-
-async function cli(...argv: string[]): Promise<{ code: number; out: string; err: string }> {
-  const io = capturingIo();
-  const code = await run(argv, { io, runner: borrow() });
-  return { code, out: io.lines.join('\n'), err: io.errors.join('\n') };
-}
 
 beforeEach(() => {
   scratch = mkdtempSync(join(tmpdir(), 'backsiphon-backup-'));
@@ -91,7 +77,7 @@ describe('backup and verify', () => {
 
   it('writes the verification as json', async () => {
     const io = capturingIo();
-    await run(['--json', 'verify'], { io, runner: borrow() });
+    await run(['--json', 'verify'], { io, runner: borrow(() => office.register, '2024-11-05') });
     const parsed = JSON.parse(io.lines.join('\n')) as { ok: boolean; foreignKeyProblems: number };
     expect(parsed.ok).toBe(true);
     expect(parsed.foreignKeyProblems).toBe(0);

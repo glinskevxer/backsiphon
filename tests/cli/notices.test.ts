@@ -1,27 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { closeRegister, openRegister, type Register } from '../../src/service/register';
-import { contextFor, type CommandContext, type GlobalOptions } from '../../src/cli/context';
-import { capturingIo, type CliIo } from '../../src/cli/output';
-import { run, type Runner } from '../../src/cli/program';
-import type { Result } from '../../src/util/result';
+import { cliRunner } from '../support/cli';
 
 let register: Register;
 
-function borrow(): Runner {
-  return <T>(
-    options: GlobalOptions,
-    io: CliIo,
-    work: (context: CommandContext) => Result<T, string>,
-  ): Result<T, string> =>
-    work(contextFor(register, io, options.asOf ?? '2024-09-10', options.json === true));
-}
-
-async function cli(...argv: string[]): Promise<{ code: number; out: string; err: string }> {
-  const io = capturingIo();
-  const code = await run(argv, { io, runner: borrow() });
-  return { code, out: io.lines.join('\n'), err: io.errors.join('\n') };
-}
+const cli = cliRunner(() => register, '2024-09-10');
 
 beforeEach(async () => {
   const opened = openRegister({

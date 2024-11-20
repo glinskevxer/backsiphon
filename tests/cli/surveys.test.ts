@@ -1,27 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { closeRegister, openRegister, type Register } from '../../src/service/register';
-import { contextFor, type CommandContext, type GlobalOptions } from '../../src/cli/context';
-import { capturingIo, type CliIo } from '../../src/cli/output';
-import { run, type Runner } from '../../src/cli/program';
-import type { Result } from '../../src/util/result';
+import { borrow, cliRunner } from '../support/cli';
+import { capturingIo } from '../../src/cli/output';
+import { run } from '../../src/cli/program';
 
 let register: Register;
 
-function borrow(): Runner {
-  return <T>(
-    options: GlobalOptions,
-    io: CliIo,
-    work: (context: CommandContext) => Result<T, string>,
-  ): Result<T, string> =>
-    work(contextFor(register, io, options.asOf ?? '2024-08-11', options.json === true));
-}
-
-async function cli(...argv: string[]): Promise<{ code: number; out: string; err: string }> {
-  const io = capturingIo();
-  const code = await run(argv, { io, runner: borrow() });
-  return { code, out: io.lines.join('\n'), err: io.errors.join('\n') };
-}
+const cli = cliRunner(() => register, '2024-08-11');
 
 beforeEach(async () => {
   const opened = openRegister({
@@ -182,7 +168,7 @@ describe('survey due', () => {
   it('writes json for a script', async () => {
     await cli('survey', 'record', 'SC-00001', '--on', '2023-05-02', '--surveyor', 'r');
     const io = capturingIo();
-    await run(['--json', 'survey', 'due'], { io, runner: borrow() });
+    await run(['--json', 'survey', 'due'], { io, runner: borrow(() => register, '2024-08-11') });
     const parsed = JSON.parse(io.lines.join('\n')) as { due: unknown[]; neverSurveyed: string[] };
     expect(Array.isArray(parsed.due)).toBe(true);
     expect(parsed.neverSurveyed).toEqual([]);

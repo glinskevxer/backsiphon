@@ -1,29 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { closeRegister, openRegister, type Register } from '../../src/service/register';
-import { contextFor, type CommandContext, type GlobalOptions } from '../../src/cli/context';
-import { capturingIo, type CliIo } from '../../src/cli/output';
-import { run, type Runner } from '../../src/cli/program';
-import type { Result } from '../../src/util/result';
+import { borrow, cliRunner } from '../support/cli';
+import { capturingIo } from '../../src/cli/output';
+import { run } from '../../src/cli/program';
 
 let register: Register;
 
+const cli = cliRunner(() => register, '2024-08-05');
+
 /** A runner that hands every command the one store this file holds open. */
-function borrow(): Runner {
-  return <T>(
-    options: GlobalOptions,
-    io: CliIo,
-    work: (context: CommandContext) => Result<T, string>,
-  ): Result<T, string> =>
-    work(contextFor(register, io, options.asOf ?? '2024-08-05', options.json === true));
-}
-
-async function cli(...argv: string[]): Promise<{ code: number; out: string; err: string }> {
-  const io = capturingIo();
-  const code = await run(argv, { io, runner: borrow() });
-  return { code, out: io.lines.join('\n'), err: io.errors.join('\n') };
-}
-
 beforeEach(() => {
   const opened = openRegister({
     file: ':memory:',
@@ -142,7 +128,7 @@ describe('connection list', () => {
 
   it('writes json when it is asked to', async () => {
     const io = capturingIo();
-    const code = await run(['connection', 'list', '--json'], { io, runner: borrow() });
+    const code = await run(['connection', 'list', '--json'], { io, runner: borrow(() => register, '2024-08-05') });
     expect(code).toBe(0);
     const rows = JSON.parse(io.lines.join('\n')) as Array<{ connectionId: string }>;
     expect(rows.map((row) => row.connectionId)).toEqual(['SC-00001', 'SC-00002']);
