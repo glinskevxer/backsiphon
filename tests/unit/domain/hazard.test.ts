@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  backsiphonageOnlyHealthFindings,
   degreeRank,
   findingByCode,
   findingsForScope,
@@ -100,5 +101,42 @@ describe('slicing the catalogue', () => {
     expect(finding('IRRIG_PLAIN').degree).toBe('nonhealth');
     expect(finding('IRRIG_CHEM').modes).toContain('backpressure');
     expect(finding('IRRIG_PLAIN').modes).not.toContain('backpressure');
+  });
+});
+
+describe('the findings added after the second year of the program', () => {
+  it('reads a cooling tower as a health hazard under backpressure', () => {
+    const tower = finding('COOLING_TOWER');
+    expect(tower.degree).toBe('health');
+    expect(tower.modes).toContain('backpressure');
+    expect(tower.scopes).toContain('containment');
+  });
+
+  it('keeps the fire pump test header at a pollutional hazard', () => {
+    const header = finding('FIRE_PUMP_HEADER');
+    expect(header.degree).toBe('nonhealth');
+    expect(header.modes).toEqual(['backsiphonage']);
+  });
+
+  it('will not take an assembly on a bowser fill point', () => {
+    expect(finding('MOBILE_TANK').airGapOnly).toBe(true);
+  });
+
+  it('keeps dialysis inside the premise, where the cart is', () => {
+    expect(finding('DIALYSIS').scopes).toEqual(['isolation']);
+  });
+
+  it('lists the health hazards a vacuum breaker could still answer', () => {
+    const codes = backsiphonageOnlyHealthFindings().map((entry) => entry.code);
+    expect(codes).toContain('DIALYSIS');
+    expect(codes).toContain('PHOTO_LAB');
+    expect(codes).not.toContain('COOLING_TOWER');
+    expect(codes).not.toContain('IRRIG_PLAIN');
+  });
+
+  it('leaves the catalogue with no duplicate codes after all of them', () => {
+    const codes = HAZARD_FINDINGS.map((entry) => entry.code);
+    expect(new Set(codes).size).toBe(codes.length);
+    expect(HAZARD_FINDINGS.length).toBeGreaterThanOrEqual(32);
   });
 });

@@ -274,6 +274,78 @@ export const HAZARD_FINDINGS: readonly HazardFinding[] = [
     airGapOnly: true,
     note: 'the truck side has been in a manhole, break the connection',
   },
+  {
+    code: 'COOLING_TOWER',
+    label: 'cooling tower with biocide dosing',
+    degree: 'health',
+    scopes: ['containment', 'isolation'],
+    modes: ['backpressure'],
+    airGapOnly: false,
+    note: 'the dosing pot is the hazard, and the make up line runs straight off the main',
+  },
+  {
+    code: 'DIALYSIS',
+    label: 'dialysis machine or a portable treatment cart',
+    degree: 'health',
+    scopes: ['isolation'],
+    modes: ['backsiphonage'],
+    airGapOnly: false,
+    note: 'the cart is connected and disconnected by somebody who is not a plumber',
+  },
+  {
+    code: 'DYE_WORKS',
+    label: 'textile dye vats',
+    degree: 'health',
+    scopes: ['containment', 'isolation'],
+    modes: ['backpressure'],
+    airGapOnly: false,
+    note: 'hot liquor under pump pressure a few feet from the service',
+  },
+  {
+    code: 'BREWERY_CIP',
+    label: 'brewery or dairy clean in place set',
+    degree: 'health',
+    scopes: ['containment', 'isolation'],
+    modes: ['backpressure'],
+    airGapOnly: false,
+    note: 'caustic at temperature, and the same line fills the vessels',
+  },
+  {
+    code: 'ICE_RINK',
+    label: 'ice rink brine plant',
+    degree: 'health',
+    scopes: ['containment'],
+    modes: ['backpressure'],
+    airGapOnly: false,
+    note: 'glycol under pressure behind a single wall exchanger',
+  },
+  {
+    code: 'LAUNDRY',
+    label: 'commercial laundry with a chemical dosing rail',
+    degree: 'health',
+    scopes: ['isolation'],
+    modes: ['backpressure'],
+    airGapOnly: false,
+    note: 'the dosing rail is plumbed into the fill line, not into a tank',
+  },
+  {
+    code: 'FIRE_PUMP_HEADER',
+    label: 'fire pump test header discharging to a pond',
+    degree: 'nonhealth',
+    scopes: ['containment'],
+    modes: ['backsiphonage'],
+    airGapOnly: false,
+    note: 'the header is open to whatever it is discharging into during a test',
+  },
+  {
+    code: 'MOBILE_TANK',
+    label: 'fill point for a mobile tank or a bowser',
+    degree: 'health',
+    scopes: ['containment'],
+    modes: ['backsiphonage'],
+    airGapOnly: true,
+    note: 'nobody knows what was in the tank last week',
+  },
 ];
 
 const BY_CODE = new Map(HAZARD_FINDINGS.map((finding) => [finding.code, finding]));
@@ -289,6 +361,13 @@ export function findingsForScope(scope: HazardScope): HazardFinding[] {
 
 export function findingsOfDegree(degree: HazardDegree): HazardFinding[] {
   return HAZARD_FINDINGS.filter((finding) => finding.degree === degree);
+}
+
+/** Findings that are a health hazard and cannot push back under pressure. */
+export function backsiphonageOnlyHealthFindings(): HazardFinding[] {
+  return HAZARD_FINDINGS.filter(
+    (finding) => finding.degree === 'health' && !finding.modes.includes('backpressure'),
+  );
 }
 
 /** True when any of the given findings can push water back under pressure. */
