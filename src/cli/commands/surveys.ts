@@ -6,6 +6,7 @@ import type { Command } from 'commander';
 
 import { err, ok } from '../../util/result';
 import { HAZARD_FINDINGS } from '../../domain/hazard';
+import { PREMISE_USES } from '../../domain/premise';
 import { dueSurveys, neverSurveyed, recordSurvey } from '../../service/surveys';
 import { currentSurvey, surveyHistory, type SurveyRow } from '../../storage/repositories/surveys';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
@@ -185,4 +186,29 @@ export function registerSurveyCommands(program: Command, io: CliIo, runner: Runn
 function describeFinding(code: string): string {
   const finding = HAZARD_FINDINGS.find((candidate) => candidate.code === code);
   return finding === undefined ? code : `${code}, ${finding.label}`;
+}
+
+/** Print the premise use table, which a clerk needs when opening a connection. */
+export function registerPremiseUseCommand(program: Command, io: CliIo, runner: Runner): void {
+  program
+    .command('uses')
+    .description('the premise use codes and what each one carries on its own')
+    .action((_options: unknown, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => ok(context));
+      report(io, outcome, (context) => {
+        if (context.json) {
+          writeJson(io, PREMISE_USES);
+          return;
+        }
+        for (const line of table(PREMISE_USES, [
+          { header: 'code', value: (row) => row.code },
+          { header: 'what it is', value: (row) => row.label },
+          { header: 'carries', value: (row) => row.categoricalDegree },
+          { header: 'survey every', value: (row) => `${row.surveyIntervalMonths} months` },
+          { header: 'walked', value: (row) => (row.surveyRefused ? 'never' : 'yes') },
+        ])) {
+          io.out(line);
+        }
+      });
+    });
 }

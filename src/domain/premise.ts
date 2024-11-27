@@ -158,6 +158,70 @@ export const PREMISE_USES: readonly PremiseUse[] = [
     note: 'a vessel is not a premise the purveyor can survey',
   },
   {
+    code: 'BREWERY',
+    label: 'brewery or distillery',
+    categoricalDegree: 'health',
+    surveyIntervalMonths: 12,
+    surveyRefused: false,
+    note: 'clean in place and carbonation, both of them on the same header',
+  },
+  {
+    code: 'DAIRY',
+    label: 'dairy or creamery',
+    categoricalDegree: 'health',
+    surveyIntervalMonths: 12,
+    surveyRefused: false,
+    note: 'the wash cycle again, and a lot of hot caustic',
+  },
+  {
+    code: 'DRY_CLEANER',
+    label: 'dry cleaner',
+    categoricalDegree: 'health',
+    surveyIntervalMonths: 24,
+    surveyRefused: false,
+    note: 'solvent recovery stills sit next to the water heater',
+  },
+  {
+    code: 'ICE_RINK',
+    label: 'ice rink',
+    categoricalDegree: 'nonhealth',
+    surveyIntervalMonths: 24,
+    surveyRefused: false,
+    note: 'the brine plant raises it, the rink on its own does not',
+  },
+  {
+    code: 'PRISON',
+    label: 'prison or secure unit',
+    categoricalDegree: 'health',
+    surveyIntervalMonths: 12,
+    surveyRefused: false,
+    note: 'a laundry, a kitchen and an infirmary behind one meter',
+  },
+  {
+    code: 'HOTEL',
+    label: 'hotel',
+    categoricalDegree: 'nonhealth',
+    surveyIntervalMonths: 36,
+    surveyRefused: false,
+    note: 'the pool plant and the boiler are what a survey finds',
+  },
+  {
+    code: 'DATA_CENTRE',
+    label: 'data centre',
+    categoricalDegree: 'nonhealth',
+    surveyIntervalMonths: 24,
+    surveyRefused: false,
+    note: 'evaporative cooling with dosing on it, which the survey has to find',
+  },
+  {
+    code: 'FUEL_DEPOT',
+    label: 'fuel depot or tank farm',
+    categoricalDegree: 'health',
+    surveyIntervalMonths: 12,
+    surveyRefused: true,
+    note: 'the purveyor does not walk one of these either',
+  },
+  {
     code: 'MUNICIPAL',
     label: 'municipal yard or depot',
     categoricalDegree: 'nonhealth',
@@ -176,6 +240,11 @@ export function premiseUseByCode(code: string): Result<PremiseUse, string> {
 
 export function usesWithCategoricalDegree(degree: HazardDegree): PremiseUse[] {
   return PREMISE_USES.filter((use) => use.categoricalDegree === degree);
+}
+
+/** Uses surveyed more often than once a year and a half. */
+export function closelyWatchedUses(): PremiseUse[] {
+  return PREMISE_USES.filter((use) => use.surveyIntervalMonths <= 18);
 }
 
 /** Uses the purveyor will not enter, which forces containment on its own. */

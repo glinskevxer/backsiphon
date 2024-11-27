@@ -183,3 +183,18 @@ describe('survey findings', () => {
     expect(result.out.split('\n').length).toBeGreaterThan(20);
   });
 });
+
+describe('uses', () => {
+  it('prints the premise use table', async () => {
+    const result = await cli('uses');
+    expect(result.out).toContain('PLATING');
+    expect(result.out).toContain('BREWERY');
+    expect(result.out).toContain('12 months');
+  });
+
+  it('says which uses are never walked', async () => {
+    const result = await cli('uses');
+    const lines = result.out.split('\n').filter((line) => line.includes('never'));
+    expect(lines.length).toBeGreaterThanOrEqual(3);
+  });
+});

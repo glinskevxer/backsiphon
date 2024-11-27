@@ -13,7 +13,7 @@ import type { Result } from '../util/result';
 import { withContext, type CommandContext, type GlobalOptions } from './context';
 import { capturingIo, type CliIo } from './output';
 import { registerConnectionCommands } from './commands/connections';
-import { registerSurveyCommands } from './commands/surveys';
+import { registerPremiseUseCommand, registerSurveyCommands } from './commands/surveys';
 import { registerAssemblyCommands } from './commands/assemblies';
 import { registerTesterCommands } from './commands/testers';
 import { registerTestCommands } from './commands/tests';
@@ -65,6 +65,7 @@ export function buildProgram(options: ProgramOptions): Command {
 
   registerConnectionCommands(program, io, runner);
   registerSurveyCommands(program, io, runner);
+  registerPremiseUseCommand(program, io, runner);
   registerAssemblyCommands(program, io, runner);
   registerTesterCommands(program, io, runner);
   registerTestCommands(program, io, runner);

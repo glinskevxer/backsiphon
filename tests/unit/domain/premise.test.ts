@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  closelyWatchedUses,
   PREMISE_USES,
   premiseUseByCode,
   surveyRefusedUses,
@@ -53,9 +54,39 @@ describe('premise uses', () => {
 
   it('only refuses a survey where the degree is already health', () => {
     const refused = surveyRefusedUses();
-    expect(refused.map((use) => use.code)).toEqual(['WWTP', 'MARINA']);
+    expect(refused.map((use) => use.code)).toEqual(['WWTP', 'MARINA', 'FUEL_DEPOT']);
     for (const use of refused) {
       expect(use.categoricalDegree).toBe('health');
+    }
+  });
+
+  it('walks every categorical health hazard at least once every two years', () => {
+    for (const use of usesWithCategoricalDegree('health')) {
+      expect(use.surveyIntervalMonths).toBeLessThanOrEqual(24);
+    }
+    // and the ones on the tighter list are all health hazards themselves
+    for (const use of closelyWatchedUses()) {
+      expect(use.surveyIntervalMonths).toBeLessThanOrEqual(18);
+    }
+  });
+
+  it('keeps the trades that only become a hazard once the survey finds something', () => {
+    for (const code of ['ICE_RINK', 'HOTEL', 'DATA_CENTRE']) {
+      const use = premiseUseByCode(code);
+      expect(use.ok).toBe(true);
+      if (use.ok) {
+        expect(use.value.categoricalDegree).toBe('nonhealth');
+      }
+    }
+  });
+
+  it('reads the trades that carry a degree of their own', () => {
+    for (const code of ['BREWERY', 'DAIRY', 'DRY_CLEANER', 'PRISON', 'FUEL_DEPOT']) {
+      const use = premiseUseByCode(code);
+      expect(use.ok).toBe(true);
+      if (use.ok) {
+        expect(use.value.categoricalDegree).toBe('health');
+      }
     }
   });
 });
