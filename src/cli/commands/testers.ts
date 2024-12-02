@@ -23,7 +23,8 @@ import {
   retireGauge,
   suspendTester,
 } from '../../storage/repositories/testers';
-import { table, writeJson, type CliIo } from '../output';
+import { testerRecord, testerRoster, passRate, type TesterRecord } from '../../service/testers';
+import { describe, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, report } from '../shared';
 
@@ -126,6 +127,69 @@ export function registerTesterCommands(program: Command, io: CliIo, runner: Runn
           {
             header: 'endorsed for',
             value: (row: TesterCertification) => row.endorsements.join(' '),
+          },
+        ])) {
+          io.out(line);
+        }
+      });
+    });
+
+  tester
+    .command('record')
+    .description('what one tester has filed and how the paperwork arrives')
+    .argument('<id>', 'the tester id')
+    .action((id: string, _options: unknown, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => {
+        const record = testerRecord(context.register, id, context.asOf);
+        return record.ok ? ok({ context, record: record.value }) : record;
+      });
+      report(io, outcome, ({ context, record }) => {
+        if (context.json) {
+          writeJson(io, { ...record, passRate: passRate(record) ?? null });
+          return;
+        }
+        for (const line of describe([
+          ['tester', `${record.testerId}, ${record.name}`],
+          ['certificate', record.standing],
+          ['reports filed', record.filed],
+          ['accepted', record.accepted],
+          ['refused', record.refused],
+          ['passing', record.passed],
+          ['failing', record.failed],
+          ['repairs on site', record.repairs],
+          ['pass rate', passRate(record) ?? 'nothing accepted yet'],
+          ['mean days to file', record.meanFilingDays],
+          ['worst days to file', record.worstFilingDays],
+          ['refused for', record.refusalCodes.join(', ')],
+        ])) {
+          io.out(line);
+        }
+      });
+    });
+
+  tester
+    .command('roster')
+    .description('every tester with what they have filed, busiest first')
+    .action((_options: unknown, command: Command) => {
+      const outcome = runner(globals(command), io, (context) =>
+        ok({ context, rows: testerRoster(context.register, context.asOf) }),
+      );
+      report(io, outcome, ({ context, rows }) => {
+        if (context.json) {
+          writeJson(io, rows);
+          return;
+        }
+        for (const line of table(rows, [
+          { header: 'tester', value: (row: TesterRecord) => row.testerId },
+          { header: 'name', value: (row: TesterRecord) => row.name },
+          { header: 'standing', value: (row: TesterRecord) => row.standing },
+          { header: 'filed', value: (row: TesterRecord) => row.filed, align: 'right' },
+          { header: 'refused', value: (row: TesterRecord) => row.refused, align: 'right' },
+          { header: 'pass rate', value: (row: TesterRecord) => passRate(row) ?? '', align: 'right' },
+          {
+            header: 'mean days to file',
+            value: (row: TesterRecord) => row.meanFilingDays,
+            align: 'right',
           },
         ])) {
           io.out(line);
