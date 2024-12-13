@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   bullet,
   capturingIo,
+  countingIo,
   describe as describePairs,
   heading,
   pluralise,
@@ -88,5 +89,26 @@ describe('the other shapes', () => {
     expect(pluralise(2, 'letter')).toBe('2 letters');
     expect(pluralise(0, 'letter')).toBe('0 letters');
     expect(pluralise(2, 'premise', 'premises')).toBe('2 premises');
+  });
+});
+
+describe('counting io', () => {
+  it('passes everything through to the io underneath', () => {
+    const inner = capturingIo();
+    const counting = countingIo(inner);
+    counting.out('a line');
+    counting.err('a refusal');
+    expect(inner.lines).toEqual(['a line']);
+    expect(inner.errors).toEqual(['a refusal']);
+  });
+
+  it('counts only what went to the error channel', () => {
+    const counting = countingIo(capturingIo());
+    expect(counting.problems()).toBe(0);
+    counting.out('a line');
+    expect(counting.problems()).toBe(0);
+    counting.err('one');
+    counting.err('two');
+    expect(counting.problems()).toBe(2);
   });
 });

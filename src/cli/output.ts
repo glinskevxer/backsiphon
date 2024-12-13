@@ -23,6 +23,25 @@ export function consoleIo(): CliIo {
   };
 }
 
+/**
+ * Wrap an io and count what went to the error channel. The exit code is worked
+ * out from that count rather than from a return value, because commander gives
+ * an action handler nowhere to hand one back to.
+ */
+export function countingIo(inner: CliIo): CliIo & { readonly problems: () => number } {
+  let problems = 0;
+  return {
+    out: (line: string): void => {
+      inner.out(line);
+    },
+    err: (line: string): void => {
+      problems += 1;
+      inner.err(line);
+    },
+    problems: (): number => problems,
+  };
+}
+
 /** An io that keeps what it was given, for tests and for a dry run. */
 export interface CapturingIo extends CliIo {
   readonly lines: string[];

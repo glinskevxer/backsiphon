@@ -11,7 +11,7 @@ import { Command } from 'commander';
 
 import type { Result } from '../util/result';
 import { withContext, type CommandContext, type GlobalOptions } from './context';
-import { capturingIo, type CliIo } from './output';
+import { capturingIo, countingIo, type CliIo } from './output';
 import { registerConnectionCommands } from './commands/connections';
 import { registerPremiseUseCommand, registerSurveyCommands } from './commands/surveys';
 import { registerAssemblyCommands } from './commands/assemblies';
@@ -93,15 +93,18 @@ export async function run(
   argv: ReadonlyArray<string>,
   options: ProgramOptions,
 ): Promise<number> {
-  const program = buildProgram(options);
+  const io = countingIo(options.io);
+  const program = buildProgram({ ...options, io });
   try {
     await program.parseAsync([...argv], { from: 'user' });
-    return 0;
+    // a command that printed a refusal has not done what it was asked to, so
+    // it exits non zero even though nothing threw
+    return io.problems() === 0 ? 0 : 1;
   } catch (error) {
     if (isCommanderExit(error)) {
       return error.exitCode;
     }
-    options.io.err(error instanceof Error ? error.message : String(error));
+    io.err(error instanceof Error ? error.message : String(error));
     return 1;
   }
 }
