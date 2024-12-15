@@ -7,6 +7,7 @@ import type { Command } from 'commander';
 
 import { ok } from '../../util/result';
 import { complianceFor, noticeRank, type ComplianceStatus, type PointCompliance } from '../../service/compliance';
+import { explainStatus, explanationLines } from '../../service/explain';
 import { listConnections } from '../../storage/repositories/connections';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
@@ -33,14 +34,24 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
     .command('status')
     .description('where one connection stands today')
     .argument('<connection>', 'the connection id')
-    .action((connectionId: string, _options: unknown, command: Command) => {
+    .option('--explain', 'say how every part of the answer was reached')
+    .action((connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
       const outcome = runner(globals(command), io, (context) => {
         const status = complianceFor(context.register, connectionId, context.asOf);
         return status.ok ? ok({ context, status: status.value }) : status;
       });
       report(io, outcome, ({ context, status }) => {
         if (context.json) {
-          writeJson(io, status);
+          writeJson(
+            io,
+            options['explain'] === true ? { ...status, explanation: explainStatus(status) } : status,
+          );
+          return;
+        }
+        if (options['explain'] === true) {
+          for (const line of explanationLines(explainStatus(status))) {
+            io.out(line);
+          }
           return;
         }
         for (const line of heading(`${status.connectionId} as at ${status.asOf}`)) {
