@@ -59,7 +59,7 @@ describe('backup and verify', () => {
     const result = await cli('backup', target);
     expect(existsSync(target)).toBe(true);
     expect(result.out).toContain('written to');
-    expect(result.out).toContain('004_fixture');
+    expect(result.out).toMatch(/schema\s+\d{3}_/);
   });
 
   it('will not write over a copy that is already there', async () => {
