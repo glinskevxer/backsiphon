@@ -123,3 +123,38 @@ describe('reading the letters back', () => {
     expect(shown.out).toContain('2024-03-20');
   });
 });
+
+describe('cancelling a letter', () => {
+  beforeEach(async () => {
+    await cli('--as-of', '2024-03-05', 'notice', 'run');
+  });
+
+  it('takes one back and says the customer still has it', async () => {
+    const cancelled = await cli(
+      'notice', 'cancel', 'N-000001', '--on', '2024-03-08', '--reason', 'wrong address on the file',
+    );
+    expect(cancelled.out).toContain('N-000001 cancelled on 2024-03-08');
+    expect(cancelled.out).toContain('the customer has a copy');
+    const open = await cli('notice', 'open');
+    expect(open.out).not.toContain('N-000001');
+  });
+
+  it('will not cancel one twice or before it went out', async () => {
+    await cli('notice', 'cancel', 'N-000001', '--on', '2024-03-08', '--reason', 'wrong address');
+    const again = await cli('notice', 'cancel', 'N-000001', '--on', '2024-03-09', '--reason', 'again');
+    expect(again.code).toBe(1);
+    const early = await cli('--as-of', '2024-03-05', 'notice', 'run');
+    expect(early.out).toContain('0 letters');
+  });
+
+  it('will not cancel one without a reason', async () => {
+    const empty = await cli('notice', 'cancel', 'N-000001', '--on', '2024-03-08', '--reason', '  ');
+    expect(empty.err).toContain('has to say why');
+  });
+
+  it('leaves the next rung of the ladder to carry on', async () => {
+    await cli('notice', 'cancel', 'N-000001', '--on', '2024-03-08', '--reason', 'wrong address');
+    const later = await cli('--as-of', '2024-03-25', 'notice', 'run');
+    expect(later.out).toContain('second');
+  });
+});

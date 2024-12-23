@@ -9,13 +9,15 @@
  */
 
 import type { CivilDate } from '../util/dates';
-import { ok, type Result } from '../util/result';
+import { err, ok, type Result } from '../util/result';
 import { NOTICE_ID } from '../util/ids';
 import type { NoticeStage } from '../domain/delinquency';
 import { withTransaction } from '../storage/db';
 import { listConnections } from '../storage/repositories/connections';
 import { appendEvent } from '../storage/repositories/events';
 import {
+  clearNotice,
+  findNotice,
   insertNotice,
   noticeAlreadySent,
   type NoticeRecord,
@@ -190,6 +192,48 @@ function nextNoticeSequence(register: Register): number {
     }
   }
   return highest + 1;
+}
+
+/**
+ * Take a letter back. The office does this when it wrote to the wrong address
+ * or when the customer turns out to have filed on time and the paperwork was
+ * sitting in a tray. The letter stays on the file with the day it was
+ * cancelled on it, because the customer has a copy either way.
+ */
+export function cancelNotice(
+  register: Register,
+  noticeId: string,
+  on: CivilDate,
+  reason: string,
+): Result<NoticeRecord, string> {
+  if (reason.trim() === '') {
+    return err('cancelling a letter has to say why');
+  }
+  const notice = findNotice(register.db, noticeId);
+  if (notice === undefined) {
+    return err(`there is no notice with the id ${noticeId}`);
+  }
+  if (notice.clearedOn !== undefined) {
+    return err(`the notice ${noticeId} was already closed on ${notice.clearedOn}`);
+  }
+  if (on < notice.issuedOn) {
+    return err(`the notice ${noticeId} went out on ${notice.issuedOn}, it cannot be cancelled on ${on}`);
+  }
+  return withTransaction(register.db, () => {
+    const cleared = clearNotice(register.db, noticeId, on);
+    if (!cleared.ok) {
+      return cleared;
+    }
+    appendEvent(register.db, {
+      happenedAt: register.now(),
+      actor: register.actor,
+      kind: 'notice_cancelled',
+      subjectKind: 'notice',
+      subjectId: noticeId,
+      detail: `${on}: ${reason}`,
+    });
+    return cleared;
+  });
 }
 
 export function describeRun(run: NoticeRun): string {

@@ -5,7 +5,7 @@
 import type { Command } from 'commander';
 
 import { ok } from '../../util/result';
-import { describeRun, runNotices } from '../../service/notices';
+import { cancelNotice, describeRun, runNotices } from '../../service/notices';
 import {
   noticesForConnection,
   openNotices,
@@ -84,6 +84,22 @@ export function registerNoticeCommands(program: Command, io: CliIo, runner: Runn
         ])) {
           io.out(line);
         }
+      });
+    });
+
+  notice
+    .command('cancel')
+    .description('take a letter back')
+    .argument('<id>', 'the notice id')
+    .requiredOption('--on <date>', 'the day it was cancelled')
+    .requiredOption('--reason <reason>', 'why')
+    .action((id: string, options: Record<string, string>, command: Command) => {
+      const outcome = runner(globals(command), io, (context) =>
+        cancelNotice(context.register, id, String(options['on']), String(options['reason'])),
+      );
+      report(io, outcome, (notice) => {
+        io.out(`${notice.noticeId} cancelled on ${notice.clearedOn ?? 'an unknown day'}`);
+        io.out('the letter stays on the file, the customer has a copy of it');
       });
     });
 

@@ -145,6 +145,23 @@ export function clearNotices(
   return ok(changed);
 }
 
+/** Close one letter rather than the whole ladder. */
+export function clearNotice(
+  db: Database,
+  noticeId: string,
+  on: CivilDate,
+): Result<NoticeRecord, string> {
+  const notice = findNotice(db, noticeId);
+  if (notice === undefined) {
+    return err(`there is no notice with the id ${noticeId}`);
+  }
+  if (notice.clearedOn !== undefined) {
+    return err(`the notice ${noticeId} was closed on ${notice.clearedOn} already`);
+  }
+  execute(db, 'update notices set cleared_on = ? where notice_id = ?', [on, noticeId]);
+  return ok({ ...notice, clearedOn: on });
+}
+
 export function highestStageSent(
   db: Database,
   connectionId: string,
