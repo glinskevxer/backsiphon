@@ -13,6 +13,7 @@ import { m002Assemblies } from './migrations/m002_assemblies';
 import { m003Testing } from './migrations/m003_testing';
 import { m004Fixture } from './migrations/m004_fixture';
 import { m005Indexes } from './migrations/m005_indexes';
+import { m006Shutoff } from './migrations/m006_shutoff';
 
 export const MIGRATIONS: ReadonlyArray<Migration> = [
   m001Connections,
@@ -20,6 +21,7 @@ export const MIGRATIONS: ReadonlyArray<Migration> = [
   m003Testing,
   m004Fixture,
   m005Indexes,
+  m006Shutoff,
 ];
 
 export function migrate(db: Database, now: string): Result<MigrationRun, string> {

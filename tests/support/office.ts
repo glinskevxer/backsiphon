@@ -27,7 +27,20 @@ export interface Office {
   close(): void;
 }
 
+/**
+ * A counter rather than a random number. The random serial numbers this used
+ * to hand out collided about one run in thirty once a test built three hundred
+ * assemblies, and a suite that fails one run in thirty is worse than no suite.
+ */
+let sequence = 0;
+
+function nextSuffix(): string {
+  sequence += 1;
+  return String(sequence).padStart(6, '0');
+}
+
 export function openOffice(now = '2024-01-02T09:00:00Z'): Office {
+  sequence = 0;
   const opened = openRegister({
     file: ':memory:',
     actor: 'clerk.hines',
@@ -79,7 +92,7 @@ export function openOffice(now = '2024-01-02T09:00:00Z'): Office {
 
 export function open(office: Office, overrides: Partial<NewConnection> = {}): string {
   const opened = openConnection(office.register, {
-    accountNumber: `A-${Math.floor(Math.random() * 1_000_000)}`,
+    accountNumber: `A-${nextSuffix()}`,
     premiseName: 'a premise',
     premiseAddress: '14 forge road',
     premiseUseCode: 'INDUSTRIAL',
@@ -119,7 +132,7 @@ export function fit(office: Office, input: Partial<InstallInput> & { connectionI
     scope: 'containment',
     assemblyClass: 'RP',
     modelId: 'WK-375',
-    serialNumber: `S-${Math.floor(Math.random() * 1_000_000)}`,
+    serialNumber: `S-${nextSuffix()}`,
     sizeInches: 2,
     installedOn: '2015-02-01',
     location: 'meter vault',
