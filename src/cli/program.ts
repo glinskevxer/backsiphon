@@ -28,6 +28,7 @@ import { registerReportCommands } from './commands/reports';
 import { registerDoctorCommands } from './commands/doctor';
 import { registerBackupCommands } from './commands/backup';
 import { registerConfigCommands } from './commands/config';
+import { registerShutoffCommands } from './commands/shutoff';
 
 export type Runner = <T>(
   options: GlobalOptions,
@@ -80,6 +81,7 @@ export function buildProgram(options: ProgramOptions): Command {
   registerDoctorCommands(program, io, runner);
   registerBackupCommands(program, io, runner);
   registerConfigCommands(program, io, runner);
+  registerShutoffCommands(program, io, runner);
 
   return program;
 }
