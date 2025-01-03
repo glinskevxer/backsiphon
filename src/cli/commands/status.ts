@@ -8,6 +8,7 @@ import type { Command } from 'commander';
 import { ok } from '../../util/result';
 import { complianceFor, noticeRank, type ComplianceStatus, type PointCompliance } from '../../service/compliance';
 import { explainStatus, explanationLines } from '../../service/explain';
+import { timelineFor, type TimelineEntry } from '../../service/timeline';
 import { listConnections } from '../../storage/repositories/connections';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
@@ -85,6 +86,31 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
           io.out(line);
         }
         for (const line of pointLines(status.isolation)) {
+          io.out(line);
+        }
+      });
+    });
+
+  program
+    .command('history')
+    .description('everything that has happened at one connection, in one column')
+    .argument('<connection>', 'the connection id')
+    .action((connectionId: string, _options: unknown, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => {
+        const timeline = timelineFor(context.register, connectionId);
+        return timeline.ok ? ok({ context, entries: timeline.value }) : timeline;
+      });
+      report(io, outcome, ({ context, entries }) => {
+        if (context.json) {
+          writeJson(io, entries);
+          return;
+        }
+        for (const line of table(entries, [
+          { header: 'when', value: (row: TimelineEntry) => row.on },
+          { header: 'what', value: (row: TimelineEntry) => row.kind },
+          { header: 'reference', value: (row: TimelineEntry) => row.reference },
+          { header: 'summary', value: (row: TimelineEntry) => row.summary },
+        ])) {
           io.out(line);
         }
       });
