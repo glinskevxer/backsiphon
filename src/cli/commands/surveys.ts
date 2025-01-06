@@ -8,6 +8,7 @@ import { err, ok } from '../../util/result';
 import { HAZARD_FINDINGS } from '../../domain/hazard';
 import { PREMISE_USES } from '../../domain/premise';
 import { dueSurveys, neverSurveyed, recordSurvey } from '../../service/surveys';
+import { describeSurveyRun, runSurveyLetters, type SurveyLetter } from '../../service/survey-letters';
 import { currentSurvey, surveyHistory, type SurveyRow } from '../../storage/repositories/surveys';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
@@ -155,6 +156,49 @@ export function registerSurveyCommands(program: Command, io: CliIo, runner: Runn
             io.out(line);
           }
           for (const line of bullet(unwalked)) {
+            io.out(line);
+          }
+        }
+      });
+    });
+
+  survey
+    .command('letters')
+    .description('write to the customers whose premise needs walking')
+    .option('--dry-run', 'work them out without writing anything')
+    .option('--route <route>', 'only this route')
+    .option('--body', 'print the text of the first letter')
+    .action((options: Record<string, string | boolean | undefined>, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => {
+        const run = runSurveyLetters(context.register, {
+          asOf: context.asOf,
+          ...(options['dryRun'] === true ? { dryRun: true } : {}),
+          ...(options['route'] === undefined ? {} : { route: String(options['route']) }),
+        });
+        return run.ok ? ok({ context, run: run.value }) : run;
+      });
+      report(io, outcome, ({ context, run }) => {
+        if (context.json) {
+          writeJson(io, run);
+          return;
+        }
+        io.out(describeSurveyRun(run));
+        if (options['dryRun'] === true) {
+          io.out('this was a dry run, nothing was written');
+        }
+        for (const line of table(run.letters, [
+          { header: 'connection', value: (row: SurveyLetter) => row.connectionId },
+          { header: 'account', value: (row: SurveyLetter) => row.accountNumber },
+          { header: 'premise', value: (row: SurveyLetter) => row.premiseName },
+          { header: 'why', value: (row: SurveyLetter) => row.reason },
+          { header: 'last walked', value: (row: SurveyLetter) => row.lastWalked },
+        ])) {
+          io.out(line);
+        }
+        const first = run.letters[0];
+        if (options['body'] === true && first !== undefined) {
+          io.out('');
+          for (const line of first.body.split('\n')) {
             io.out(line);
           }
         }
