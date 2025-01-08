@@ -4,6 +4,7 @@ import { closeRegister, openRegister, type Register } from '../../../src/service
 import { openConnection } from '../../../src/service/connections';
 import {
   installAssembly,
+  relocateAssembly,
   remedyForAssembly,
   swapAssembly,
   takeAssemblyOut,
@@ -249,5 +250,78 @@ describe('repair or replace', () => {
 
   it('says so when the assembly is not on file', () => {
     expect(remedyForAssembly(register, 'BA-00404', '2024-06-01').ok).toBe(false);
+  });
+});
+
+describe('moving one', () => {
+  beforeEach(() => {
+    installAssembly(register, install());
+    openConnection(register, {
+      accountNumber: 'A-1002',
+      premiseName: 'the other shop',
+      premiseAddress: '16 forge road',
+      premiseUseCode: 'INDUSTRIAL',
+      serviceSizeInches: 2,
+      fireService: false,
+      purveyorMetered: true,
+      connectedOn: '2019-04-02',
+    });
+  });
+
+  function move(overrides: Partial<Parameters<typeof relocateAssembly>[2]> = {}): ReturnType<typeof relocateAssembly> {
+    return relocateAssembly(register, 'BA-00001', {
+      connectionId: 'SC-00002',
+      scope: 'containment',
+      location: 'meter box by the gate',
+      on: '2024-03-04',
+      reason: 'the shop moved next door and took it with them',
+      ...overrides,
+    });
+  }
+
+  it('takes it out of one point and puts it into the other under a new id', () => {
+    const moved = move();
+    expect(moved.ok).toBe(true);
+    if (!moved.ok) {
+      return;
+    }
+    expect(moved.value.from.assemblyId).toBe('BA-00001');
+    expect(moved.value.to.assemblyId).toBe('BA-00002');
+    expect(findAssembly(register.db, 'BA-00001')?.removedOn).toBe('2024-03-04');
+    expect(findAssembly(register.db, 'BA-00002')?.location).toBe('meter box by the gate');
+  });
+
+  it('keeps the serial number, which is what the maker stamped on it', () => {
+    const moved = move();
+    expect(moved.ok && moved.value.to.serialNumber).toBe('4471182');
+  });
+
+  it('will not move a grandfathered assembly anywhere', () => {
+    delistModel(register.db, 'WK-375', '2023-09-30');
+    const moved = move();
+    expect(moved.ok).toBe(false);
+    if (!moved.ok) {
+      expect(moved.error).toContain('cannot be moved');
+    }
+    expect(findAssembly(register.db, 'BA-00001')?.removedOn).toBeUndefined();
+  });
+
+  it('will not move it onto a point that is already occupied', () => {
+    installAssembly(register, install({ connectionId: 'SC-00002', serialNumber: '999' }));
+    const moved = move();
+    expect(moved.ok).toBe(false);
+    expect(findAssembly(register.db, 'BA-00001')?.removedOn).toBeUndefined();
+  });
+
+  it('will not move it to where it already is, or without a reason', () => {
+    expect(move({ connectionId: 'SC-00001' }).ok).toBe(false);
+    expect(move({ reason: '  ' }).ok).toBe(false);
+  });
+
+  it('leaves a line on the trail naming both points', () => {
+    move();
+    const events = eventsFor(register.db, 'assembly', 'BA-00002');
+    expect(events.map((entry) => entry.kind)).toContain('assembly_moved');
+    expect(events[events.length - 1]?.detail).toContain('SC-00001 containment');
   });
 });

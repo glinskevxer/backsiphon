@@ -195,3 +195,25 @@ describe('taking one out', () => {
     expect(removeAssembly(db, 'BA-3', '2019-05-01').ok).toBe(false);
   });
 });
+
+describe('serial numbers', () => {
+  it('lets a body be refitted once the old row is closed', () => {
+    insertAssembly(db, assembly());
+    removeAssembly(db, 'BA-1', '2024-02-01');
+    const again = insertAssembly(db, assembly({ assemblyId: 'BA-2', installedOn: '2024-02-01' }));
+    expect(again.ok).toBe(true);
+  });
+
+  it('still refuses two live rows with the same serial on one model', () => {
+    insertAssembly(db, assembly());
+    expect(insertAssembly(db, assembly({ assemblyId: 'BA-2' })).ok).toBe(false);
+  });
+
+  it('keeps both rows so the history reads', () => {
+    insertAssembly(db, assembly());
+    removeAssembly(db, 'BA-1', '2024-02-01');
+    insertAssembly(db, assembly({ assemblyId: 'BA-2', installedOn: '2024-02-01' }));
+    expect(listAssemblies(db, { connectionId: 'SC-1' })).toHaveLength(2);
+    expect(listAssemblies(db, { connectionId: 'SC-1', activeOn: '2024-03-01' })).toHaveLength(1);
+  });
+});

@@ -6,7 +6,13 @@ import type { Command } from 'commander';
 
 import { ok } from '../../util/result';
 import type { AssemblyClass } from '../../domain/assembly';
-import { installAssembly, remedyForAssembly, swapAssembly, takeAssemblyOut } from '../../service/assemblies';
+import {
+  installAssembly,
+  relocateAssembly,
+  remedyForAssembly,
+  swapAssembly,
+  takeAssemblyOut,
+} from '../../service/assemblies';
 import type { InstalledAssembly, ProtectionScope } from '../../domain/deficiency';
 import {
   delistModel,
@@ -178,6 +184,31 @@ export function registerAssemblyCommands(program: Command, io: CliIo, runner: Ru
       );
       report(io, outcome, (swapped) => {
         io.out(`${swapped.removed.assemblyId} out, ${swapped.installed.assemblyId} in`);
+      });
+    });
+
+  assembly
+    .command('move')
+    .description('move an assembly to another point, under a new id')
+    .argument('<id>', 'the assembly being moved')
+    .requiredOption('--to <connection>', 'the connection it is going to')
+    .requiredOption('--scope <scope>', 'containment or isolation')
+    .requiredOption('--on <date>', 'the day of the work')
+    .requiredOption('--location <where>', 'where it sits now')
+    .requiredOption('--reason <reason>', 'why it moved')
+    .action((id: string, options: Record<string, string>, command: Command) => {
+      const outcome = runner(globals(command), io, (context) =>
+        relocateAssembly(context.register, id, {
+          connectionId: String(options['to']),
+          scope: String(options['scope']) as ProtectionScope,
+          location: String(options['location']),
+          on: String(options['on']),
+          reason: String(options['reason']),
+        }),
+      );
+      report(io, outcome, (moved) => {
+        io.out(`${moved.from.assemblyId} came out and went back in as ${moved.to.assemblyId}`);
+        io.out('the test history stays with the old id, the cycle starts again on the new one');
       });
     });
 

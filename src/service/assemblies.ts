@@ -11,7 +11,7 @@
 import type { CivilDate } from '../util/dates';
 import { ASSEMBLY_ID } from '../util/ids';
 import { err, ok, type Result } from '../util/result';
-import { buildApprovalList, installationAllowed, remedyFor } from '../domain/approvals';
+import { buildApprovalList, installationAllowed, relocationAllowed, remedyFor } from '../domain/approvals';
 import { allowedInScope, type AssemblyClass } from '../domain/assembly';
 import type { InstalledAssembly, ProtectionScope } from '../domain/deficiency';
 import { withTransaction } from '../storage/db';
@@ -178,6 +178,97 @@ export function swapAssembly(
 
 /** Carries a refusal out through the transaction so the rollback can happen. */
 class SwapFailed extends Error {}
+
+export interface RelocationInput {
+  readonly connectionId: string;
+  readonly scope: ProtectionScope;
+  readonly location: string;
+  readonly on: CivilDate;
+  readonly reason: string;
+}
+
+export interface Relocation {
+  readonly from: InstalledAssembly;
+  readonly to: InstalledAssembly;
+}
+
+/**
+ * Move an assembly. It comes out of one point and goes into another on the
+ * same day, under a new id, because the assembly at a point is what a test
+ * report is filed against and a moved one is not the same fitting any more.
+ *
+ * The approval list is read as at the day of the move, which is what stops a
+ * grandfathered assembly being carried round the district: it is legal where
+ * it stands and it cannot be installed anywhere else.
+ */
+export function relocateAssembly(
+  register: Register,
+  assemblyId: string,
+  input: RelocationInput,
+): Result<Relocation, string> {
+  const existing = findAssembly(register.db, assemblyId);
+  if (existing === undefined) {
+    return err(`there is no assembly with the id ${assemblyId}`);
+  }
+  if (existing.removedOn !== undefined) {
+    return err(`the assembly ${assemblyId} came out on ${existing.removedOn}`);
+  }
+  if (input.reason.trim() === '') {
+    return err('moving an assembly has to say why');
+  }
+  if (existing.connectionId === input.connectionId && existing.scope === input.scope) {
+    return err('that is where it already is, use a note rather than a move');
+  }
+
+  const list = buildApprovalList(listModels(register.db));
+  if (!list.ok) {
+    return err(list.error);
+  }
+  const allowed = relocationAllowed(list.value, {
+    modelId: existing.modelId,
+    assemblyClass: existing.assemblyClass,
+    sizeInches: existing.sizeInches,
+    installedOn: input.on,
+  });
+  if (!allowed.ok) {
+    return err(allowed.error);
+  }
+
+  try {
+    return withTransaction(register.db, () => {
+      const removed = takeAssemblyOut(register, assemblyId, input.on, `moved: ${input.reason}`);
+      if (!removed.ok) {
+        throw new SwapFailed(removed.error);
+      }
+      const fitted = installAssembly(register, {
+        connectionId: input.connectionId,
+        scope: input.scope,
+        assemblyClass: existing.assemblyClass,
+        modelId: existing.modelId,
+        serialNumber: existing.serialNumber,
+        sizeInches: existing.sizeInches,
+        installedOn: input.on,
+        location: input.location,
+      });
+      if (!fitted.ok) {
+        throw new SwapFailed(fitted.error);
+      }
+      appendEvent(register.db, {
+        happenedAt: register.now(),
+        actor: register.actor,
+        kind: 'assembly_moved',
+        subjectKind: 'assembly',
+        subjectId: fitted.value.assemblyId,
+        detail:
+          `${assemblyId} moved from ${existing.connectionId} ${existing.scope} ` +
+          `to ${input.connectionId} ${input.scope}: ${input.reason}`,
+      });
+      return ok({ from: removed.value, to: fitted.value });
+    });
+  } catch (error) {
+    return err(error instanceof SwapFailed ? error.message : String(error));
+  }
+}
 
 /**
  * Whether a failing assembly may be put back after a repair, or has to be
