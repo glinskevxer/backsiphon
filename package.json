@@ -18,25 +18,24 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
   },
   "dependencies": {
-    "better-sqlite3": "11.0.0",
-    "commander": "12.1.0",
+    "better-sqlite3": "11.8.1",
+    "commander": "13.1.0",
     "zod": "3.23.8"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "7.6.10",
-    "@types/node": "20.14.2",
-    "@typescript-eslint/eslint-plugin": "7.13.1",
-    "@typescript-eslint/parser": "7.13.1",
+    "@types/better-sqlite3": "7.6.12",
+    "@types/node": "20.17.16",
     "@vitest/coverage-v8": "1.6.0",
-    "eslint": "8.57.0",
-    "eslint-config-prettier": "9.1.0",
-    "prettier": "3.3.2",
-    "tsx": "4.15.6",
-    "typescript": "5.4.5",
+    "eslint": "9.19.0",
+    "eslint-config-prettier": "10.0.1",
+    "prettier": "3.4.2",
+    "tsx": "4.19.2",
+    "typescript": "5.7.3",
+    "typescript-eslint": "8.21.0",
     "vitest": "1.6.0"
   }
 }
