@@ -21,6 +21,7 @@ import {
   listModels,
 } from '../../storage/repositories/assemblies';
 import type { AssemblyModel } from '../../domain/approvals';
+import { firstTimeFailureRate, fleetRecord, type ModelRecord } from '../../service/fleet';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, report } from '../shared';
@@ -103,6 +104,42 @@ export function registerAssemblyCommands(program: Command, io: CliIo, runner: Ru
           { header: 'sizes', value: (row: AssemblyModel) => row.sizes.join(' ') },
           { header: 'listed', value: (row: AssemblyModel) => row.listedOn },
           { header: 'delisted', value: (row: AssemblyModel) => row.delistedOn },
+        ])) {
+          io.out(line);
+        }
+      });
+    });
+
+  model
+    .command('fleet')
+    .description('what the district has learned about each model')
+    .action((_options: unknown, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => {
+        const records = fleetRecord(context.register, context.asOf);
+        return records.ok ? ok({ context, rows: records.value }) : records;
+      });
+      report(io, outcome, ({ context, rows }) => {
+        if (context.json) {
+          writeJson(
+            io,
+            rows.map((row) => ({ ...row, firstTimeFailureRate: firstTimeFailureRate(row) ?? null })),
+          );
+          return;
+        }
+        for (const line of table(rows, [
+          { header: 'model', value: (row: ModelRecord) => row.modelId },
+          { header: 'maker', value: (row: ModelRecord) => row.maker },
+          { header: 'class', value: (row: ModelRecord) => row.assemblyClass },
+          { header: 'listing', value: (row: ModelRecord) => row.listing },
+          { header: 'fitted', value: (row: ModelRecord) => row.fitted, align: 'right' },
+          { header: 'out', value: (row: ModelRecord) => row.removed, align: 'right' },
+          { header: 'mean age', value: (row: ModelRecord) => row.meanAgeYears, align: 'right' },
+          { header: 'tests', value: (row: ModelRecord) => row.testsJudged, align: 'right' },
+          {
+            header: 'failed first time',
+            value: (row: ModelRecord) => firstTimeFailureRate(row) ?? 'too few',
+            align: 'right',
+          },
         ])) {
           io.out(line);
         }
