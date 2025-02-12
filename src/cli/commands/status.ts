@@ -9,6 +9,7 @@ import { ok } from '../../util/result';
 import { complianceFor, noticeRank, type ComplianceStatus, type PointCompliance } from '../../service/compliance';
 import { explainStatus, explanationLines } from '../../service/explain';
 import { timelineFor, type TimelineEntry } from '../../service/timeline';
+import { search, type SearchHit } from '../../service/search';
 import { listConnections } from '../../storage/repositories/connections';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
@@ -86,6 +87,44 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
           io.out(line);
         }
         for (const line of pointLines(status.isolation)) {
+          io.out(line);
+        }
+      });
+    });
+
+  program
+    .command('find')
+    .description('find a connection by an account, a name, an address or a serial number')
+    .argument('<term>', 'whatever the caller has')
+    .option('--limit <count>', 'how many to print', '20')
+    .option('--all', 'include the connections that have been taken off')
+    .action((term: string, options: Record<string, string | boolean | undefined>, command: Command) => {
+      const outcome = runner(globals(command), io, (context) =>
+        ok({
+          context,
+          hits: search(context.register, term, {
+            limit: Number(options['limit'] ?? 20),
+            ...(options['all'] === true ? { includeClosed: true } : {}),
+          }),
+        }),
+      );
+      report(io, outcome, ({ context, hits }) => {
+        if (context.json) {
+          writeJson(io, hits);
+          return;
+        }
+        if (hits.length === 0) {
+          io.out('nothing matched');
+          return;
+        }
+        for (const line of table(hits, [
+          { header: 'connection', value: (row: SearchHit) => row.connectionId },
+          { header: 'account', value: (row: SearchHit) => row.accountNumber },
+          { header: 'premise', value: (row: SearchHit) => row.premiseName },
+          { header: 'address', value: (row: SearchHit) => row.premiseAddress },
+          { header: 'matched', value: (row: SearchHit) => row.matchedOn },
+          { header: 'on', value: (row: SearchHit) => row.matchedValue },
+        ])) {
           io.out(line);
         }
       });
