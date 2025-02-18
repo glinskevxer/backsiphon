@@ -6,6 +6,8 @@ import type { Command } from 'commander';
 
 import { ok } from '../../util/result';
 import { programSummary, workList, type WorkItem } from '../../service/reporting';
+import { annualReturn, returnRows } from '../../service/annual';
+import { writeCsv } from '../../util/csv';
 import { describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, report } from '../shared';
@@ -67,6 +69,41 @@ export function registerReportCommands(program: Command, io: CliIo, runner: Runn
         if (summary.shutoffEligible.length > 0) {
           io.out('');
           io.out(`shutoff eligible: ${summary.shutoffEligible.join(', ')}`);
+        }
+      });
+    });
+
+  program
+    .command('annual')
+    .description('the return the state asks for, for one calendar year')
+    .argument('<year>', 'the reporting year')
+    .option('--csv', 'write it as the state wants it rather than as columns')
+    .action((year: string, options: Record<string, boolean | undefined>, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => {
+        const entry = annualReturn(context.register, Number(year));
+        return entry.ok ? ok({ context, entry: entry.value }) : entry;
+      });
+      report(io, outcome, ({ context, entry }) => {
+        if (context.json) {
+          writeJson(io, entry);
+          return;
+        }
+        const rows = returnRows(entry);
+        if (options['csv'] === true) {
+          const text = writeCsv(
+            ['measure', 'value'],
+            rows.map(([label, value]) => [label, String(value)]),
+          );
+          for (const line of text.split('\n')) {
+            io.out(line);
+          }
+          return;
+        }
+        for (const line of heading(`return for ${entry.year}, as at ${entry.asOf}`)) {
+          io.out(line);
+        }
+        for (const line of describe(rows)) {
+          io.out(line);
         }
       });
     });
