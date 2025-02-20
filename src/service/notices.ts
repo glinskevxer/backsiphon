@@ -162,8 +162,9 @@ export function noticeBody(
   status: ComplianceStatus,
   due: DueLetter,
 ): string {
+  const letter = register.policy.letter;
   const lines = [
-    `${register.policy.purveyorName} cross connection control program`,
+    letter.heading ?? `${register.policy.purveyorName} cross connection control program`,
     `account ${status.connectionId}, ${due.scope} protection`,
     `the test of the assembly at this connection was due on ${due.dueDate}`,
     `it is now ${due.daysPastDue} days past due`,
@@ -173,7 +174,12 @@ export function noticeBody(
   } else if (due.stage === 'final') {
     lines.push('this is the final notice before the service is scheduled for shutoff');
   } else {
-    lines.push('please arrange a test by a certified tester and have the report filed');
+    lines.push(
+      letter.ask ?? 'please arrange a test by a certified tester and have the report filed',
+    );
+  }
+  if (letter.footer !== undefined) {
+    lines.push(letter.footer);
   }
   return lines.join('\n');
 }

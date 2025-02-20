@@ -82,3 +82,27 @@ describe('the survey letter run', () => {
     );
   });
 });
+
+describe('the wording the office has settled on', () => {
+  it('uses the heading and the footer from the policy', () => {
+    const other = openOffice();
+    const settled = {
+      ...other.register,
+      policy: {
+        ...other.register.policy,
+        letter: {
+          heading: 'north valley water, cross connection control',
+          footer: 'telephone the program office on 555 0100',
+        },
+      },
+    };
+    open({ ...other, register: settled }, { accountNumber: 'A-1' });
+    const run = runSurveyLetters(settled, { asOf: '2025-01-06' });
+    expect(run.ok).toBe(true);
+    if (run.ok) {
+      expect(run.value.letters[0]?.body).toContain('north valley water, cross connection control');
+      expect(run.value.letters[0]?.body).toContain('555 0100');
+    }
+    other.close();
+  });
+});

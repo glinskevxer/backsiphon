@@ -15,6 +15,15 @@ import { formatId, parseId, type IdShape } from '../util/ids';
 import { closeDatabase, openDatabase, selectAll, type Database } from '../storage/db';
 import { migrate } from '../storage/schema';
 
+export interface LetterText {
+  /** Put at the top of every letter, above the account line. */
+  readonly heading?: string;
+  /** Put at the bottom, where an office puts a telephone number. */
+  readonly footer?: string;
+  /** Replaces the sentence the first and second notices end with. */
+  readonly ask?: string;
+}
+
 export interface ProgramPolicy {
   readonly cycle: CyclePolicy;
   /** Days after a test the office will still take the paperwork. */
@@ -23,6 +32,8 @@ export interface ProgramPolicy {
   readonly newConnectionSurveyDays: number;
   /** The name the office puts at the bottom of a notice. */
   readonly purveyorName: string;
+  /** Wording the office has settled on, over the wording built in. */
+  readonly letter: LetterText;
 }
 
 export const DEFAULT_PROGRAM_POLICY: ProgramPolicy = {
@@ -30,6 +41,7 @@ export const DEFAULT_PROGRAM_POLICY: ProgramPolicy = {
   filingWindowDays: DEFAULT_FILING_WINDOW_DAYS,
   newConnectionSurveyDays: 30,
   purveyorName: 'the water purveyor',
+  letter: {},
 };
 
 export interface Register {
@@ -81,6 +93,7 @@ export function mergePolicy(overrides: Partial<ProgramPolicy> | undefined): Prog
     ...DEFAULT_PROGRAM_POLICY,
     ...overrides,
     cycle: { ...DEFAULT_PROGRAM_POLICY.cycle, ...(overrides.cycle ?? {}) },
+    letter: { ...DEFAULT_PROGRAM_POLICY.letter, ...(overrides.letter ?? {}) },
   };
 }
 

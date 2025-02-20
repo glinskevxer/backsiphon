@@ -116,3 +116,28 @@ describe('loading it', () => {
     expect(loaded.ok && loaded.value.policy.cycle?.repairWorkdays).toBe(8);
   });
 });
+
+describe('the letter wording', () => {
+  it('takes a heading, a footer and the sentence that asks for a test', () => {
+    const parsed = parseConfig(
+      JSON.stringify({
+        letter: {
+          heading: 'north valley water, cross connection control',
+          footer: 'telephone the program office on 555 0100',
+          ask: 'please book a test with any certified tester on our list',
+        },
+      }),
+    );
+    expect(parsed.ok).toBe(true);
+    if (!parsed.ok) {
+      return;
+    }
+    expect(parsed.value.letter?.footer).toContain('555 0100');
+    expect(toLoaded(parsed.value).policy.letter?.ask).toContain('book a test');
+  });
+
+  it('refuses wording nobody could print', () => {
+    expect(parseConfig(JSON.stringify({ letter: { heading: '' } })).ok).toBe(false);
+    expect(parseConfig(JSON.stringify({ letter: { signature: 'x' } })).ok).toBe(false);
+  });
+});

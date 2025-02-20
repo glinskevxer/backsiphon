@@ -22,6 +22,14 @@ const configSchema = z
     purveyorName: z.string().min(1).optional(),
     filingWindowDays: z.number().int().positive().max(365).optional(),
     newConnectionSurveyDays: z.number().int().positive().max(365).optional(),
+    letter: z
+      .object({
+        heading: z.string().min(1).max(200).optional(),
+        footer: z.string().min(1).max(400).optional(),
+        ask: z.string().min(1).max(400).optional(),
+      })
+      .strict()
+      .optional(),
     cycle: z
       .object({
         intervalMonths: z.number().int().positive().max(120).optional(),
@@ -67,17 +75,15 @@ export function toLoaded(config: FileConfig, file?: string): LoadedConfig {
       ? {}
       : { newConnectionSurveyDays: config.newConnectionSurveyDays }),
   };
-  if (config.cycle !== undefined) {
-    return {
-      ...(file === undefined ? {} : { file }),
-      ...(config.store === undefined ? {} : { store: config.store }),
-      policy: { ...policy, cycle: config.cycle as ProgramPolicy['cycle'] },
-    };
-  }
+  const withLetter: Partial<ProgramPolicy> =
+    config.letter === undefined ? policy : { ...policy, letter: config.letter };
   return {
     ...(file === undefined ? {} : { file }),
     ...(config.store === undefined ? {} : { store: config.store }),
-    policy,
+    policy:
+      config.cycle === undefined
+        ? withLetter
+        : { ...withLetter, cycle: config.cycle as ProgramPolicy['cycle'] },
   };
 }
 

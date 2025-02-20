@@ -117,7 +117,8 @@ function letterBody(
 ): string {
   const use = premiseUseByCode(connection.premiseUseCode);
   const lines = [
-    `${register.policy.purveyorName} cross connection control program`,
+    register.policy.letter.heading ??
+      `${register.policy.purveyorName} cross connection control program`,
     `account ${connection.accountNumber}, ${connection.premiseName}, ${connection.premiseAddress}`,
   ];
   if (reason === 'never_walked') {
@@ -132,6 +133,9 @@ function letterBody(
   }
   lines.push('please telephone the program office to arrange a time for a surveyor to attend');
   lines.push('there is no charge for the survey and it takes about half an hour');
+  if (register.policy.letter.footer !== undefined) {
+    lines.push(register.policy.letter.footer);
+  }
   return lines.join('\n');
 }
 
