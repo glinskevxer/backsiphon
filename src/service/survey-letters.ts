@@ -14,6 +14,7 @@ import { listConnections, type ConnectionRecord } from '../storage/repositories/
 import { currentSurvey } from '../storage/repositories/surveys';
 import { appendEvent, eventsFor } from '../storage/repositories/events';
 import { premiseUseByCode } from '../domain/premise';
+import { describeLetterRun, summarise } from './letters';
 import type { Register } from './register';
 
 export type SurveyReason = 'never_walked' | 'interval_expired' | 'use_changed';
@@ -140,10 +141,11 @@ function letterBody(
 }
 
 export function describeSurveyRun(run: SurveyLetterRun): string {
-  const byReason = new Map<string, number>();
-  for (const letter of run.letters) {
-    byReason.set(letter.reason, (byReason.get(letter.reason) ?? 0) + 1);
-  }
-  const parts = [...byReason.entries()].map(([reason, count]) => `${count} ${reason}`);
-  return `${run.considered} connections, ${run.letters.length} letters (${parts.join(', ') || 'none'}), ${run.skipped.length} skipped`;
+  return describeLetterRun(
+    summarise(
+      run.considered,
+      run.letters.map((letter) => letter.reason),
+      run.skipped.length,
+    ),
+  );
 }

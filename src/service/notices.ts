@@ -23,6 +23,7 @@ import {
   type NoticeRecord,
 } from '../storage/repositories/notices';
 import { complianceFor, type ComplianceStatus, type PointCompliance } from './compliance';
+import { describeLetterRun, summarise } from './letters';
 import { formatId, parseId } from '../util/ids';
 import { selectAll } from '../storage/db';
 import type { Register } from './register';
@@ -243,10 +244,11 @@ export function cancelNotice(
 }
 
 export function describeRun(run: NoticeRun): string {
-  const byStage = new Map<string, number>();
-  for (const notice of run.issued) {
-    byStage.set(notice.stage, (byStage.get(notice.stage) ?? 0) + 1);
-  }
-  const parts = [...byStage.entries()].map(([stage, count]) => `${count} ${stage}`);
-  return `${run.considered} connections, ${run.issued.length} letters (${parts.join(', ') || 'none'}), ${run.skipped.length} skipped`;
+  return describeLetterRun(
+    summarise(
+      run.considered,
+      run.issued.map((notice) => notice.stage),
+      run.skipped.length,
+    ),
+  );
 }
