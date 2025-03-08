@@ -8,8 +8,12 @@ export default defineConfig({
     // better-sqlite3 is a native addon and it does not survive being torn down
     // on a worker thread, so every file gets a forked process of its own. It
     // costs a few seconds and it stops the run dying with a segfault half way
-    // through. This is the vitest 1 spelling of what used to be threads: false.
+    // through.
     pool: 'forks',
+    // the suite is now long enough that a hung file is worth catching rather
+    // than waiting out on a runner
+    testTimeout: 30_000,
+    hookTimeout: 30_000,
     coverage: {
       provider: 'v8',
       reporter: ['text-summary'],
