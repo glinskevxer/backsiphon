@@ -7,11 +7,51 @@ import type { Command } from 'commander';
 import { ok } from '../../util/result';
 import { CONFIG_FILENAME } from '../../service/config';
 import { loadDemoDistrict } from '../../service/demo';
-import { describe, heading, writeJson, type CliIo } from '../output';
+import { manualSections } from '../../service/manual';
+import { writeCsv } from '../../util/csv';
+import { describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, report } from '../shared';
 
 export function registerConfigCommands(program: Command, io: CliIo, runner: Runner): void {
+  program
+    .command('manual')
+    .description('print the reference tables the rules are read from')
+    .option('--section <title>', 'only the section whose title starts with this')
+    .option('--csv', 'write each section as a comma separated table')
+    .action((options: Record<string, string | boolean | undefined>, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => ok(context));
+      report(io, outcome, (context) => {
+        const wanted = options['section'];
+        const sections = manualSections().filter(
+          (section) => wanted === undefined || section.title.startsWith(String(wanted)),
+        );
+        if (context.json) {
+          writeJson(io, sections);
+          return;
+        }
+        for (const section of sections) {
+          for (const line of heading(section.title)) {
+            io.out(line);
+          }
+          if (options['csv'] === true) {
+            for (const line of writeCsv(section.headers, section.rows).split('\n')) {
+              io.out(line);
+            }
+          } else {
+            const columns = section.headers.map((header, index) => ({
+              header,
+              value: (row: ReadonlyArray<string>): string => row[index] ?? '',
+            }));
+            for (const line of table(section.rows, columns)) {
+              io.out(line);
+            }
+          }
+          io.out('');
+        }
+      });
+    });
+
   program
     .command('demo')
     .description('fill an empty register with a small district to train on')
