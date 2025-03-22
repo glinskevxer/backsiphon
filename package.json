@@ -19,7 +19,9 @@
     "test:watch": "vitest",
     "coverage": "vitest run --coverage",
     "lint": "eslint .",
-    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\""
+    "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
+    "handbook": "tsx scripts/build-handbook.ts",
+    "handbook:check": "tsx scripts/build-handbook.ts --check"
   },
   "dependencies": {
     "better-sqlite3": "11.8.1",
