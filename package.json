@@ -21,7 +21,8 @@
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "handbook": "tsx scripts/build-handbook.ts",
-    "handbook:check": "tsx scripts/build-handbook.ts --check"
+    "handbook:check": "tsx scripts/build-handbook.ts --check",
+    "export-check": "bash scripts/export-check.sh"
   },
   "dependencies": {
     "better-sqlite3": "11.8.1",
@@ -39,5 +40,9 @@
     "typescript": "5.7.3",
     "typescript-eslint": "8.26.0",
     "vitest": "3.0.8"
-  }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ]
 }
