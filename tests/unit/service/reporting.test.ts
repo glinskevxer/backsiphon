@@ -75,7 +75,11 @@ function test(assemblyId: string, testedOn: string): void {
 }
 
 beforeEach(() => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-10-01T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-10-01T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }

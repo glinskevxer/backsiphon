@@ -122,7 +122,10 @@ export function registerAssemblyCommands(program: Command, io: CliIo, runner: Ru
         if (context.json) {
           writeJson(
             io,
-            rows.map((row) => ({ ...row, firstTimeFailureRate: firstTimeFailureRate(row) ?? null })),
+            rows.map((row) => ({
+              ...row,
+              firstTimeFailureRate: firstTimeFailureRate(row) ?? null,
+            })),
           );
           return;
         }

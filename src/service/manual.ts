@@ -52,7 +52,15 @@ export function premiseSection(): ManualSection {
 export function assemblySection(): ManualSection {
   return {
     title: 'assembly classes',
-    headers: ['code', 'what it is', 'health', 'backpressure', 'detector', 'field tested', 'stands in for'],
+    headers: [
+      'code',
+      'what it is',
+      'health',
+      'backpressure',
+      'detector',
+      'field tested',
+      'stands in for',
+    ],
     rows: ASSEMBLY_CLASSES.map((spec) => [
       spec.code,
       spec.label,
@@ -91,7 +99,11 @@ export function procedureSection(): ManualSection {
       ]);
     }
   }
-  return { title: 'field procedures', headers: ['class', 'reading', 'what it is', 'passes at'], rows };
+  return {
+    title: 'field procedures',
+    headers: ['class', 'reading', 'what it is', 'passes at'],
+    rows,
+  };
 }
 
 export function ladderSection(): ManualSection {

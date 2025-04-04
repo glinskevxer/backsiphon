@@ -8,14 +8,30 @@ let register: Register;
 const cli = cliRunner(() => register, '2024-12-13');
 
 beforeEach(async () => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-12-13T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-12-13T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
   register = opened.value;
   await cli(
-    'connection', 'open', '--account', 'A-1001', '--name', 'kerrigan plating',
-    '--address', '14 forge road', '--use', 'PLATING', '--size', '2', '--on', '2019-04-02',
+    'connection',
+    'open',
+    '--account',
+    'A-1001',
+    '--name',
+    'kerrigan plating',
+    '--address',
+    '14 forge road',
+    '--use',
+    'PLATING',
+    '--size',
+    '2',
+    '--on',
+    '2019-04-02',
   );
 });
 

@@ -24,7 +24,13 @@ afterEach(() => {
 describe('the shutoff commands', () => {
   it('refuses to raise one on a connection that is in order', async () => {
     const early = await cli(
-      'shutoff', 'raise', connectionId, '--on', '2023-06-01', '--reason', 'no test',
+      'shutoff',
+      'raise',
+      connectionId,
+      '--on',
+      '2023-06-01',
+      '--reason',
+      'no test',
     );
     expect(early.code).toBe(1);
     expect(early.err).toContain('not eligible');
@@ -32,7 +38,13 @@ describe('the shutoff commands', () => {
 
   it('raises one and says what it is about', async () => {
     const raised = await cli(
-      'shutoff', 'raise', connectionId, '--on', '2024-04-01', '--reason', 'no test since 2023',
+      'shutoff',
+      'raise',
+      connectionId,
+      '--on',
+      '2024-04-01',
+      '--reason',
+      'no test since 2023',
     );
     expect(raised.out).toContain('SO-0001 raised against');
     expect(raised.out).toContain('was due 2024-02-05');
@@ -43,15 +55,39 @@ describe('the shutoff commands', () => {
     const open1 = await cli('shutoff', 'list');
     expect(open1.out).toContain('SO-0001');
 
-    const done = await cli('shutoff', 'execute', 'SO-0001', '--on', '2024-04-08', '--crew', 'crew 3');
+    const done = await cli(
+      'shutoff',
+      'execute',
+      'SO-0001',
+      '--on',
+      '2024-04-08',
+      '--crew',
+      'crew 3',
+    );
     expect(done.out).toContain('carried out on 2024-04-08');
 
-    const early = await cli('shutoff', 'restore', 'SO-0001', '--on', '2024-04-09', '--crew', 'crew 3');
+    const early = await cli(
+      'shutoff',
+      'restore',
+      'SO-0001',
+      '--on',
+      '2024-04-09',
+      '--crew',
+      'crew 3',
+    );
     expect(early.err).toContain('the water stays off');
 
     fileTest(office, { assemblyId, testedOn: '2024-04-10' });
     const restored = await cli(
-      'shutoff', 'restore', 'SO-0001', '--on', '2024-04-11', '--crew', 'crew 3', '--note', 'meter reseated',
+      'shutoff',
+      'restore',
+      'SO-0001',
+      '--on',
+      '2024-04-11',
+      '--crew',
+      'crew 3',
+      '--note',
+      'meter reseated',
     );
     expect(restored.out).toContain('restored on 2024-04-11');
 
@@ -64,10 +100,24 @@ describe('the shutoff commands', () => {
   it('calls one off before the crew goes', async () => {
     await cli('shutoff', 'raise', connectionId, '--on', '2024-04-01', '--reason', 'no test');
     const cancelled = await cli(
-      'shutoff', 'cancel', 'SO-0001', '--on', '2024-04-05', '--reason', 'the report was in a tray',
+      'shutoff',
+      'cancel',
+      'SO-0001',
+      '--on',
+      '2024-04-05',
+      '--reason',
+      'the report was in a tray',
     );
     expect(cancelled.out).toContain('called off on 2024-04-05');
-    const done = await cli('shutoff', 'execute', 'SO-0001', '--on', '2024-04-08', '--crew', 'crew 3');
+    const done = await cli(
+      'shutoff',
+      'execute',
+      'SO-0001',
+      '--on',
+      '2024-04-08',
+      '--crew',
+      'crew 3',
+    );
     expect(done.code).toBe(1);
   });
 });

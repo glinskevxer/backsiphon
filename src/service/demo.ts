@@ -38,7 +38,12 @@ const MODELS = [
   { id: 'WK-375', maker: 'watkin', model: '375 series', assemblyClass: 'RP' as const },
   { id: 'WK-350', maker: 'watkin', model: '350 series', assemblyClass: 'DC' as const },
   { id: 'HN-900DA', maker: 'hanmore', model: '900 detector', assemblyClass: 'DCDA' as const },
-  { id: 'HN-900RA', maker: 'hanmore', model: '900 relief detector', assemblyClass: 'RPDA' as const },
+  {
+    id: 'HN-900RA',
+    maker: 'hanmore',
+    model: '900 relief detector',
+    assemblyClass: 'RPDA' as const,
+  },
   { id: 'CB-40P', maker: 'cobern', model: '40 breaker', assemblyClass: 'PVB' as const },
   { id: 'CB-40S', maker: 'cobern', model: '40 spill resistant', assemblyClass: 'SVB' as const },
 ];
@@ -284,7 +289,10 @@ export function loadDemoDistrict(register: Register, asOf: CivilDate): Result<De
   });
 }
 
-function readingsFor(assemblyClass: AssemblyClass, passing: boolean): Record<string, number | boolean> {
+function readingsFor(
+  assemblyClass: AssemblyClass,
+  passing: boolean,
+): Record<string, number | boolean> {
   if (assemblyClass === 'RP' || assemblyClass === 'RPDA') {
     const base = passing
       ? { check1Differential: 8.4, reliefOpening: 3.2 }

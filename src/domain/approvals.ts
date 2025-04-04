@@ -30,7 +30,9 @@ export interface ApprovalList {
   readonly models: ReadonlyMap<string, AssemblyModel>;
 }
 
-export function buildApprovalList(models: ReadonlyArray<AssemblyModel>): Result<ApprovalList, string> {
+export function buildApprovalList(
+  models: ReadonlyArray<AssemblyModel>,
+): Result<ApprovalList, string> {
   const byId = new Map<string, AssemblyModel>();
   for (const model of models) {
     if (byId.has(model.modelId)) {

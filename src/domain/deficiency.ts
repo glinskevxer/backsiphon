@@ -33,12 +33,7 @@ export interface InstalledAssembly {
   readonly removedOn?: CivilDate;
 }
 
-export type DeficiencyKind =
-  | 'none'
-  | 'missing'
-  | 'wrong_class'
-  | 'wrong_scope'
-  | 'not_required';
+export type DeficiencyKind = 'none' | 'missing' | 'wrong_class' | 'wrong_scope' | 'not_required';
 
 /**
  * How soon the customer has to act. A deficiency that leaves a contaminant
@@ -120,7 +115,9 @@ export function compareToRequirement(
       requiredClass,
       installedClass: installed.assemblyClass,
       missing: [],
-      reasons: [`the fitted ${installed.assemblyClass} answers the requirement for a ${requiredClass}`],
+      reasons: [
+        `the fitted ${installed.assemblyClass} answers the requirement for a ${requiredClass}`,
+      ],
     };
   }
 

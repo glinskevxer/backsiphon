@@ -32,10 +32,13 @@ export function backupTo(register: Register, file: string): Result<BackupOutcome
   try {
     register.db.prepare(`vacuum into ?`).run(file);
   } catch (error) {
-    return err(`the backup could not be written: ${error instanceof Error ? error.message : String(error)}`);
+    return err(
+      `the backup could not be written: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 
-  const pages = selectOne<{ page_count: number }>(register.db, 'pragma page_count')?.page_count ?? 0;
+  const pages =
+    selectOne<{ page_count: number }>(register.db, 'pragma page_count')?.page_count ?? 0;
   const outcome: BackupOutcome = {
     file,
     bytes: statSync(file).size,

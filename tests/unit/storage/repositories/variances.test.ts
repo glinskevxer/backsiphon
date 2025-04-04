@@ -123,7 +123,11 @@ describe('granting', () => {
   });
 
   it('refuses a second decision', () => {
-    grantVariance(db, 'V-1', { decidedOn: '2024-03-20', effectiveFrom: '2024-04-01', conditions: [] });
+    grantVariance(db, 'V-1', {
+      decidedOn: '2024-03-20',
+      effectiveFrom: '2024-04-01',
+      conditions: [],
+    });
     const again = grantVariance(db, 'V-1', {
       decidedOn: '2024-04-20',
       effectiveFrom: '2024-05-01',
@@ -135,8 +139,11 @@ describe('granting', () => {
 
   it('refuses a decision before the application and a span that runs backwards', () => {
     expect(
-      grantVariance(db, 'V-1', { decidedOn: '2024-01-01', effectiveFrom: '2024-04-01', conditions: [] })
-        .ok,
+      grantVariance(db, 'V-1', {
+        decidedOn: '2024-01-01',
+        effectiveFrom: '2024-04-01',
+        conditions: [],
+      }).ok,
     ).toBe(false);
     expect(
       grantVariance(db, 'V-1', {
@@ -155,7 +162,9 @@ describe('denying and revoking', () => {
   });
 
   it('denies with a reason', () => {
-    expect(denyVariance(db, 'V-1', '2024-03-20', 'the injector is still on the line').ok).toBe(true);
+    expect(denyVariance(db, 'V-1', '2024-03-20', 'the injector is still on the line').ok).toBe(
+      true,
+    );
     const found = findVariance(db, 'V-1');
     expect(found?.decision).toBe('denied');
     expect(found?.note).toContain('injector');
@@ -166,14 +175,22 @@ describe('denying and revoking', () => {
   });
 
   it('revokes a granted one', () => {
-    grantVariance(db, 'V-1', { decidedOn: '2024-03-20', effectiveFrom: '2024-04-01', conditions: [] });
+    grantVariance(db, 'V-1', {
+      decidedOn: '2024-03-20',
+      effectiveFrom: '2024-04-01',
+      conditions: [],
+    });
     expect(revokeVariance(db, 'V-1', '2024-09-01', 'condition two was breached').ok).toBe(true);
     expect(findVariance(db, 'V-1')?.revokedOn).toBe('2024-09-01');
   });
 
   it('will not revoke one that was never granted or was revoked already', () => {
     expect(revokeVariance(db, 'V-1', '2024-09-01', 'x').ok).toBe(false);
-    grantVariance(db, 'V-1', { decidedOn: '2024-03-20', effectiveFrom: '2024-04-01', conditions: [] });
+    grantVariance(db, 'V-1', {
+      decidedOn: '2024-03-20',
+      effectiveFrom: '2024-04-01',
+      conditions: [],
+    });
     revokeVariance(db, 'V-1', '2024-09-01', 'x');
     expect(revokeVariance(db, 'V-1', '2024-10-01', 'x').ok).toBe(false);
     expect(revokeVariance(db, 'V-404', '2024-10-01', 'x').ok).toBe(false);

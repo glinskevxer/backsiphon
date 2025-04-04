@@ -47,7 +47,10 @@ export interface NoticeRun {
   readonly considered: number;
 }
 
-export function runNotices(register: Register, options: NoticeRunOptions): Result<NoticeRun, string> {
+export function runNotices(
+  register: Register,
+  options: NoticeRunOptions,
+): Result<NoticeRun, string> {
   const connections = listConnections(register.db, {
     activeOn: options.asOf,
     ...(options.route === undefined ? {} : { route: options.route }),
@@ -67,9 +70,7 @@ export function runNotices(register: Register, options: NoticeRunOptions): Resul
     if (due === undefined) {
       continue;
     }
-    if (
-      noticeAlreadySent(register.db, connection.connectionId, due.dueDate, due.stage)
-    ) {
+    if (noticeAlreadySent(register.db, connection.connectionId, due.dueDate, due.stage)) {
       skipped.push({
         connectionId: connection.connectionId,
         reason: `the ${due.stage} notice for ${due.dueDate} has already gone out`,
@@ -158,11 +159,7 @@ function letterFor(point: PointCompliance): DueLetter | undefined {
   };
 }
 
-export function noticeBody(
-  register: Register,
-  status: ComplianceStatus,
-  due: DueLetter,
-): string {
+export function noticeBody(register: Register, status: ComplianceStatus, due: DueLetter): string {
   const letter = register.policy.letter;
   const lines = [
     letter.heading ?? `${register.policy.purveyorName} cross connection control program`,
@@ -224,7 +221,9 @@ export function cancelNotice(
     return err(`the notice ${noticeId} was already closed on ${notice.clearedOn}`);
   }
   if (on < notice.issuedOn) {
-    return err(`the notice ${noticeId} went out on ${notice.issuedOn}, it cannot be cancelled on ${on}`);
+    return err(
+      `the notice ${noticeId} went out on ${notice.issuedOn}, it cannot be cancelled on ${on}`,
+    );
   }
   return withTransaction(register.db, () => {
     const cleared = clearNotice(register.db, noticeId, on);

@@ -29,7 +29,12 @@ export const FEE_BANDS: readonly FeeBand[] = [
   { code: 'B2', label: 'over one up to two inches', maxSizeInches: 2, annualCents: 7800 },
   { code: 'B3', label: 'over two up to four inches', maxSizeInches: 4, annualCents: 14500 },
   { code: 'B4', label: 'over four up to eight inches', maxSizeInches: 8, annualCents: 26000 },
-  { code: 'B5', label: 'over eight inches', maxSizeInches: Number.POSITIVE_INFINITY, annualCents: 41000 },
+  {
+    code: 'B5',
+    label: 'over eight inches',
+    maxSizeInches: Number.POSITIVE_INFINITY,
+    annualCents: 41000,
+  },
 ];
 
 /**
@@ -94,7 +99,11 @@ export function penaltyLines(input: PenaltyInput): FeeLine[] {
     });
   }
   if (input.stage === 'final' || input.stage === 'shutoff') {
-    lines.push({ code: 'LATE2', description: 'test not filed after the final notice', cents: 9000 });
+    lines.push({
+      code: 'LATE2',
+      description: 'test not filed after the final notice',
+      cents: 9000,
+    });
   }
   if (input.stage === 'shutoff') {
     lines.push({

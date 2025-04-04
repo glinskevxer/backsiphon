@@ -84,7 +84,11 @@ export function structuralProblems(report: TestReport): string[] {
   if (!isCivilDate(report.filedOn)) {
     problems.push(`filedOn: "${report.filedOn}" is not a date of the form YYYY-MM-DD`);
   }
-  if (isCivilDate(report.testedOn) && isCivilDate(report.filedOn) && report.filedOn < report.testedOn) {
+  if (
+    isCivilDate(report.testedOn) &&
+    isCivilDate(report.filedOn) &&
+    report.filedOn < report.testedOn
+  ) {
     problems.push('filedOn: a report cannot be filed before the test it reports');
   }
   if (!hasProcedure(report.assemblyClassTested)) {

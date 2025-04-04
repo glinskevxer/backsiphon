@@ -101,7 +101,11 @@ describe('a variance application', () => {
   });
 
   it('does not hold it on a health hazard', () => {
-    const result = state({ degree: 'health', asOf: '2024-08-30', varianceApplicationPending: true });
+    const result = state({
+      degree: 'health',
+      asOf: '2024-08-30',
+      varianceApplicationPending: true,
+    });
     expect(result.held).toBe(false);
     expect(result.stage).toBe('shutoff');
     expect(result.reasons[0]).toContain('does not hold the ladder');

@@ -89,7 +89,9 @@ export function runSurveyLetters(
       premiseName: connection.premiseName,
       address: connection.premiseAddress,
       reason,
-      ...(survey === undefined ? {} : { lastWalked: survey.surveyedOn, dueOn: survey.nextSurveyDue }),
+      ...(survey === undefined
+        ? {}
+        : { lastWalked: survey.surveyedOn, dueOn: survey.nextSurveyDue }),
       body: letterBody(register, connection, reason, survey?.surveyedOn),
     };
     letters.push(letter);

@@ -17,41 +17,129 @@ let scratch: string;
 
 beforeEach(async () => {
   scratch = mkdtempSync(join(tmpdir(), 'backsiphon-'));
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-10-20T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-10-20T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
   register = opened.value;
   await cli(
-    'model', 'add', '--id', 'WK-375', '--maker', 'watkin', '--model', '375',
-    '--class', 'RP', '--sizes', '2', '--listed', '2016-04-01',
+    'model',
+    'add',
+    '--id',
+    'WK-375',
+    '--maker',
+    'watkin',
+    '--model',
+    '375',
+    '--class',
+    'RP',
+    '--sizes',
+    '2',
+    '--listed',
+    '2016-04-01',
   );
   await cli(
-    'tester', 'add', '--id', 'T-118', '--name', 'p. adeyemi', '--agency', 'board',
-    '--certificate', 'BF-4471', '--issued', '2019-05-01', '--expires', '2029-04-30',
-    '--endorsements', 'RP',
+    'tester',
+    'add',
+    '--id',
+    'T-118',
+    '--name',
+    'p. adeyemi',
+    '--agency',
+    'board',
+    '--certificate',
+    'BF-4471',
+    '--issued',
+    '2019-05-01',
+    '--expires',
+    '2029-04-30',
+    '--endorsements',
+    'RP',
   );
   await cli(
-    'gauge', 'add', '--id', 'G-77', '--tester', 'T-118', '--maker', 'midwest',
-    '--serial', '845-C', '--calibrated', '2019-05-01', '--accuracy', '0.2', '--interval', '240',
+    'gauge',
+    'add',
+    '--id',
+    'G-77',
+    '--tester',
+    'T-118',
+    '--maker',
+    'midwest',
+    '--serial',
+    '845-C',
+    '--calibrated',
+    '2019-05-01',
+    '--accuracy',
+    '0.2',
+    '--interval',
+    '240',
   );
   await cli(
-    'connection', 'open', '--account', 'A-1001', '--name', 'kerrigan plating',
-    '--address', '14 forge road, vault', '--use', 'INDUSTRIAL', '--size', '2', '--on', '2018-01-01',
+    'connection',
+    'open',
+    '--account',
+    'A-1001',
+    '--name',
+    'kerrigan plating',
+    '--address',
+    '14 forge road, vault',
+    '--use',
+    'INDUSTRIAL',
+    '--size',
+    '2',
+    '--on',
+    '2018-01-01',
   );
   await cli(
-    'survey', 'record', 'SC-00001', '--on', '2023-01-10', '--surveyor', 'r. okafor',
-    '--findings', 'AUX_WELL',
+    'survey',
+    'record',
+    'SC-00001',
+    '--on',
+    '2023-01-10',
+    '--surveyor',
+    'r. okafor',
+    '--findings',
+    'AUX_WELL',
   );
   await cli(
-    'assembly', 'install', 'SC-00001', '--scope', 'containment', '--class', 'RP',
-    '--model', 'WK-375', '--serial', '1', '--size', '2', '--on', '2023-02-01',
-    '--location', 'meter vault, north side',
+    'assembly',
+    'install',
+    'SC-00001',
+    '--scope',
+    'containment',
+    '--class',
+    'RP',
+    '--model',
+    'WK-375',
+    '--serial',
+    '1',
+    '--size',
+    '2',
+    '--on',
+    '2023-02-01',
+    '--location',
+    'meter vault, north side',
   );
   await cli(
-    'test', 'file', 'BA-00001', '--tester', 'T-118', '--gauge', 'G-77',
-    '--on', '2024-03-01', '--filed', '2024-03-01',
-    '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+    'test',
+    'file',
+    'BA-00001',
+    '--tester',
+    'T-118',
+    '--gauge',
+    'G-77',
+    '--on',
+    '2024-03-01',
+    '--filed',
+    '2024-03-01',
+    '--reading',
+    'check1Differential=8.2',
+    '--reading',
+    'reliefOpening=3.1',
   );
 });
 
@@ -108,8 +196,20 @@ describe('export', () => {
 
   it('names a connection it could not work out rather than dropping it', async () => {
     await cli(
-      'connection', 'open', '--account', 'A-1002', '--name', 'unwalked',
-      '--address', 'somewhere', '--use', 'OFFICE', '--size', '1', '--on', '2020-01-01',
+      'connection',
+      'open',
+      '--account',
+      'A-1002',
+      '--name',
+      'unwalked',
+      '--address',
+      'somewhere',
+      '--use',
+      'OFFICE',
+      '--size',
+      '1',
+      '--on',
+      '2020-01-01',
     );
     const result = await cli('export', 'standing');
     expect(result.out).toContain('SC-00002');
@@ -118,7 +218,10 @@ describe('export', () => {
 
   it('writes json when it is asked to', async () => {
     const io = capturingIo();
-    await run(['--json', 'export', 'connections'], { io, runner: borrow(() => register, '2024-10-20') });
+    await run(['--json', 'export', 'connections'], {
+      io,
+      runner: borrow(() => register, '2024-10-20'),
+    });
     const rows = JSON.parse(io.lines.join('\n')) as Array<Record<string, string>>;
     expect(rows[0]?.['connection']).toBe('SC-00001');
   });

@@ -4,7 +4,12 @@ import { closeRegister, openRegister, type Register } from '../../../src/service
 import { openConnection } from '../../../src/service/connections';
 import { recordSurvey } from '../../../src/service/surveys';
 import { installAssembly } from '../../../src/service/assemblies';
-import { applyForVariance, decideGrant, decideRefusal, revoke } from '../../../src/service/variances';
+import {
+  applyForVariance,
+  decideGrant,
+  decideRefusal,
+  revoke,
+} from '../../../src/service/variances';
 import { protectionStatus } from '../../../src/service/protection';
 import { insertModel } from '../../../src/storage/repositories/assemblies';
 import { findVariance } from '../../../src/storage/repositories/variances';
@@ -79,7 +84,9 @@ describe('applying', () => {
     }
     expect(applied.value.varianceId).toBe('V-0001');
     expect(applied.value.grantedAgainstDegree).toBe('health');
-    expect(eventsFor(register.db, 'variance', 'V-0001')[0]?.detail).toContain('where a RP is required');
+    expect(eventsFor(register.db, 'variance', 'V-0001')[0]?.detail).toContain(
+      'where a RP is required',
+    );
   });
 
   it('refuses one that asks for something already accepted', () => {

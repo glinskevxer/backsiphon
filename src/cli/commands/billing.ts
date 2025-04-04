@@ -6,7 +6,12 @@ import type { Command } from 'commander';
 
 import { ok } from '../../util/result';
 import { formatCents } from '../../domain/fees';
-import { billingRun, describeInvoice, invoiceFor, type ConnectionInvoice } from '../../service/billing';
+import {
+  billingRun,
+  describeInvoice,
+  invoiceFor,
+  type ConnectionInvoice,
+} from '../../service/billing';
 import { heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, report } from '../shared';

@@ -8,7 +8,11 @@ import { err, ok } from '../../util/result';
 import { HAZARD_FINDINGS } from '../../domain/hazard';
 import { PREMISE_USES } from '../../domain/premise';
 import { dueSurveys, neverSurveyed, recordSurvey } from '../../service/surveys';
-import { describeSurveyRun, runSurveyLetters, type SurveyLetter } from '../../service/survey-letters';
+import {
+  describeSurveyRun,
+  runSurveyLetters,
+  type SurveyLetter,
+} from '../../service/survey-letters';
 import { currentSurvey, surveyHistory, type SurveyRow } from '../../storage/repositories/surveys';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
@@ -36,92 +40,100 @@ export function registerSurveyCommands(program: Command, io: CliIo, runner: Runn
     .option('--findings <codes>', 'finding codes, separated by commas')
     .option('--refused', 'the surveyor was kept out')
     .option('--note <note>', 'anything worth keeping')
-    .action((connectionId: string, options: Record<string, string | boolean | undefined>, command: Command) => {
-      const outcome = runner(globals(command), io, (context) =>
-        recordSurvey(context.register, {
-          connectionId,
-          surveyedOn: String(options['on']),
-          surveyor: String(options['surveyor']),
-          findingCodes: splitCodes(options['findings'] as string | undefined),
-          accessGranted: options['refused'] !== true,
-          ...(options['note'] === undefined ? {} : { note: String(options['note']) }),
-        }),
-      );
-      report(io, outcome, (recorded) => {
-        io.out(
-          `${recorded.survey.surveyId} recorded, containment ${recorded.survey.containmentDegree}` +
-            `, isolation ${recorded.survey.isolationDegree}`,
+    .action(
+      (
+        connectionId: string,
+        options: Record<string, string | boolean | undefined>,
+        command: Command,
+      ) => {
+        const outcome = runner(globals(command), io, (context) =>
+          recordSurvey(context.register, {
+            connectionId,
+            surveyedOn: String(options['on']),
+            surveyor: String(options['surveyor']),
+            findingCodes: splitCodes(options['findings'] as string | undefined),
+            accessGranted: options['refused'] !== true,
+            ...(options['note'] === undefined ? {} : { note: String(options['note']) }),
+          }),
         );
-        if (recorded.degreeChange !== undefined) {
-          io.out(`the containment degree moved ${recorded.degreeChange}`);
-        }
-        if (recorded.supersededByLater) {
-          io.out('a later survey is already on file, so this one changes nothing today');
-        }
-        io.out(`the next survey is due ${recorded.survey.nextSurveyDue}`);
-      });
-    });
+        report(io, outcome, (recorded) => {
+          io.out(
+            `${recorded.survey.surveyId} recorded, containment ${recorded.survey.containmentDegree}` +
+              `, isolation ${recorded.survey.isolationDegree}`,
+          );
+          if (recorded.degreeChange !== undefined) {
+            io.out(`the containment degree moved ${recorded.degreeChange}`);
+          }
+          if (recorded.supersededByLater) {
+            io.out('a later survey is already on file, so this one changes nothing today');
+          }
+          io.out(`the next survey is due ${recorded.survey.nextSurveyDue}`);
+        });
+      },
+    );
 
   survey
     .command('show')
     .description('show the survey the register is working from')
     .argument('<connection>', 'the connection id')
     .option('--history', 'show every survey rather than the current one')
-    .action((connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
-      const outcome = runner(globals(command), io, (context) => {
-        if (options['history'] === true) {
-          return ok({ context, rows: surveyHistory(context.register.db, connectionId) });
-        }
-        const current = currentSurvey(context.register.db, connectionId, context.asOf);
-        return current === undefined
-          ? err(`the connection ${connectionId} has never been surveyed`)
-          : ok({ context, rows: [current] });
-      });
-      report(io, outcome, ({ context, rows }) => {
-        if (context.json) {
-          writeJson(io, rows);
-          return;
-        }
-        if (options['history'] === true) {
-          for (const line of table(rows, [
-            { header: 'survey', value: (row: SurveyRow) => row.surveyId },
-            { header: 'walked', value: (row: SurveyRow) => row.surveyedOn },
-            { header: 'surveyor', value: (row: SurveyRow) => row.surveyor },
-            { header: 'containment', value: (row: SurveyRow) => row.containmentDegree },
-            { header: 'isolation', value: (row: SurveyRow) => row.isolationDegree },
-            { header: 'next due', value: (row: SurveyRow) => row.nextSurveyDue },
+    .action(
+      (connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
+        const outcome = runner(globals(command), io, (context) => {
+          if (options['history'] === true) {
+            return ok({ context, rows: surveyHistory(context.register.db, connectionId) });
+          }
+          const current = currentSurvey(context.register.db, connectionId, context.asOf);
+          return current === undefined
+            ? err(`the connection ${connectionId} has never been surveyed`)
+            : ok({ context, rows: [current] });
+        });
+        report(io, outcome, ({ context, rows }) => {
+          if (context.json) {
+            writeJson(io, rows);
+            return;
+          }
+          if (options['history'] === true) {
+            for (const line of table(rows, [
+              { header: 'survey', value: (row: SurveyRow) => row.surveyId },
+              { header: 'walked', value: (row: SurveyRow) => row.surveyedOn },
+              { header: 'surveyor', value: (row: SurveyRow) => row.surveyor },
+              { header: 'containment', value: (row: SurveyRow) => row.containmentDegree },
+              { header: 'isolation', value: (row: SurveyRow) => row.isolationDegree },
+              { header: 'next due', value: (row: SurveyRow) => row.nextSurveyDue },
+            ])) {
+              io.out(line);
+            }
+            return;
+          }
+          const row = rows[0];
+          if (row === undefined) {
+            return;
+          }
+          for (const line of describe([
+            ['survey', row.surveyId],
+            ['walked', row.surveyedOn],
+            ['surveyor', row.surveyor],
+            ['access granted', row.accessGranted],
+            ['premise use', row.premiseUseCode],
+            ['containment', row.containmentDegree],
+            ['isolation', row.isolationDegree],
+            ['air gap required', row.airGapRequired],
+            ['backpressure', row.backpressure],
+            ['basis', row.basis],
+            ['next survey due', row.nextSurveyDue],
           ])) {
             io.out(line);
           }
-          return;
-        }
-        const row = rows[0];
-        if (row === undefined) {
-          return;
-        }
-        for (const line of describe([
-          ['survey', row.surveyId],
-          ['walked', row.surveyedOn],
-          ['surveyor', row.surveyor],
-          ['access granted', row.accessGranted],
-          ['premise use', row.premiseUseCode],
-          ['containment', row.containmentDegree],
-          ['isolation', row.isolationDegree],
-          ['air gap required', row.airGapRequired],
-          ['backpressure', row.backpressure],
-          ['basis', row.basis],
-          ['next survey due', row.nextSurveyDue],
-        ])) {
-          io.out(line);
-        }
-        if (row.findingCodes.length > 0) {
-          io.out('findings');
-          for (const line of bullet(row.findingCodes.map(describeFinding))) {
-            io.out(line);
+          if (row.findingCodes.length > 0) {
+            io.out('findings');
+            for (const line of bullet(row.findingCodes.map(describeFinding))) {
+              io.out(line);
+            }
           }
-        }
-      });
-    });
+        });
+      },
+    );
 
   survey
     .command('due')

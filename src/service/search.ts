@@ -42,11 +42,7 @@ export const DEFAULT_SEARCH_LIMIT = 20;
  * fragment could be. It is not clever and it does not need to be: a program
  * office register is a few thousand rows and the clerk is on the telephone.
  */
-export function search(
-  register: Register,
-  term: string,
-  options: SearchOptions = {},
-): SearchHit[] {
+export function search(register: Register, term: string, options: SearchOptions = {}): SearchHit[] {
   const trimmed = term.trim();
   if (trimmed === '') {
     return [];

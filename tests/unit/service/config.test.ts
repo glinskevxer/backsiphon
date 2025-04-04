@@ -4,7 +4,13 @@ import { join, resolve } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { CONFIG_FILENAME, findConfigFile, loadConfig, parseConfig, toLoaded } from '../../../src/service/config';
+import {
+  CONFIG_FILENAME,
+  findConfigFile,
+  loadConfig,
+  parseConfig,
+  toLoaded,
+} from '../../../src/service/config';
 
 let scratch: string;
 
@@ -86,7 +92,10 @@ describe('finding the file', () => {
 
 describe('loading it', () => {
   it('reads the store path relative to the file rather than to the caller', () => {
-    writeFileSync(join(scratch, CONFIG_FILENAME), JSON.stringify({ store: 'data/register.sqlite' }));
+    writeFileSync(
+      join(scratch, CONFIG_FILENAME),
+      JSON.stringify({ store: 'data/register.sqlite' }),
+    );
     const deep = join(scratch, 'one');
     mkdirSync(deep, { recursive: true });
     const loaded = loadConfig(deep);

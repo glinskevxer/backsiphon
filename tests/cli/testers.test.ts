@@ -9,19 +9,31 @@ const cli = cliRunner(() => register, '2024-08-20');
 
 async function addTester(id = 'T-118'): Promise<void> {
   await cli(
-    'tester', 'add',
-    '--id', id,
-    '--name', 'p. adeyemi',
-    '--agency', 'state waterworks board',
-    '--certificate', `BF-${id}`,
-    '--issued', '2023-05-01',
-    '--expires', '2026-04-30',
-    '--endorsements', 'rp, dc, rpda',
+    'tester',
+    'add',
+    '--id',
+    id,
+    '--name',
+    'p. adeyemi',
+    '--agency',
+    'state waterworks board',
+    '--certificate',
+    `BF-${id}`,
+    '--issued',
+    '2023-05-01',
+    '--expires',
+    '2026-04-30',
+    '--endorsements',
+    'rp, dc, rpda',
   );
 }
 
 beforeEach(() => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-08-20T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-08-20T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
@@ -52,10 +64,15 @@ describe('testers', () => {
   it('renews a certificate', async () => {
     await addTester();
     const renewed = await cli(
-      'tester', 'renew', 'T-118',
-      '--issued', '2026-05-01',
-      '--expires', '2029-04-30',
-      '--endorsements', 'RP,PVB',
+      'tester',
+      'renew',
+      'T-118',
+      '--issued',
+      '2026-05-01',
+      '--expires',
+      '2029-04-30',
+      '--endorsements',
+      'RP,PVB',
     );
     expect(renewed.out).toContain('renewed to 2029-04-30, RP, PVB');
   });
@@ -63,9 +80,13 @@ describe('testers', () => {
   it('suspends one and says the old reports stand', async () => {
     await addTester();
     const suspended = await cli(
-      'tester', 'suspend', 'T-118',
-      '--on', '2024-06-01',
-      '--reason', 'falsified three reports',
+      'tester',
+      'suspend',
+      'T-118',
+      '--on',
+      '2024-06-01',
+      '--reason',
+      'falsified three reports',
     );
     expect(suspended.out).toContain('suspended from 2024-06-01');
     expect(suspended.out).toContain('reports they filed before that day stand');
@@ -76,10 +97,15 @@ describe('testers', () => {
   it('refuses a renewal that covers nothing', async () => {
     await addTester();
     const renewed = await cli(
-      'tester', 'renew', 'T-118',
-      '--issued', '2026-05-01',
-      '--expires', '2029-04-30',
-      '--endorsements', ' ',
+      'tester',
+      'renew',
+      'T-118',
+      '--issued',
+      '2026-05-01',
+      '--expires',
+      '2029-04-30',
+      '--endorsements',
+      ' ',
     );
     expect(renewed.err).toContain('covers nothing');
   });
@@ -92,13 +118,20 @@ describe('gauges', () => {
 
   async function addGauge(): Promise<{ out: string; err: string }> {
     return cli(
-      'gauge', 'add',
-      '--id', 'G-77',
-      '--tester', 'T-118',
-      '--maker', 'midwest',
-      '--serial', '845-C',
-      '--calibrated', '2024-02-15',
-      '--accuracy', '0.2',
+      'gauge',
+      'add',
+      '--id',
+      'G-77',
+      '--tester',
+      'T-118',
+      '--maker',
+      'midwest',
+      '--serial',
+      '845-C',
+      '--calibrated',
+      '2024-02-15',
+      '--accuracy',
+      '0.2',
     );
   }
 
@@ -132,13 +165,20 @@ describe('gauges', () => {
 
   it('refuses one belonging to a tester nobody has', async () => {
     const orphan = await cli(
-      'gauge', 'add',
-      '--id', 'G-9',
-      '--tester', 'T-404',
-      '--maker', 'midwest',
-      '--serial', '1',
-      '--calibrated', '2024-01-01',
-      '--accuracy', '0.2',
+      'gauge',
+      'add',
+      '--id',
+      'G-9',
+      '--tester',
+      'T-404',
+      '--maker',
+      'midwest',
+      '--serial',
+      '1',
+      '--calibrated',
+      '2024-01-01',
+      '--accuracy',
+      '0.2',
     );
     expect(orphan.err).toContain('not on file');
   });

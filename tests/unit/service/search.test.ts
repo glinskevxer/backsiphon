@@ -71,7 +71,9 @@ describe('finding a connection', () => {
 
   it('leaves a closed connection out unless it is asked for', () => {
     closeConnection(office.register, 'SC-00002', '2025-01-01', 'demolished');
-    expect(search(office.register, 'forge road').map((hit) => hit.connectionId)).toEqual(['SC-00001']);
+    expect(search(office.register, 'forge road').map((hit) => hit.connectionId)).toEqual([
+      'SC-00001',
+    ]);
     const all = search(office.register, 'forge road', { includeClosed: true });
     expect(new Set(all.map((hit) => hit.connectionId)).size).toBe(2);
   });

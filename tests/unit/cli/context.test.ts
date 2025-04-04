@@ -97,7 +97,11 @@ describe('the config file', () => {
     const previous = process.cwd();
     writeFileSync(
       join(scratch, CONFIG_FILENAME),
-      JSON.stringify({ store: ':memory:', purveyorName: 'north valley water', filingWindowDays: 20 }),
+      JSON.stringify({
+        store: ':memory:',
+        purveyorName: 'north valley water',
+        filingWindowDays: 20,
+      }),
     );
     process.chdir(scratch);
     try {
@@ -122,10 +126,14 @@ describe('the config file', () => {
     );
     process.chdir(scratch);
     try {
-      withContext({ store: ':memory:', purveyor: 'coast district water' }, capturingIo(), (context) => {
-        expect(context.register.policy.purveyorName).toBe('coast district water');
-        return ok(true);
-      });
+      withContext(
+        { store: ':memory:', purveyor: 'coast district water' },
+        capturingIo(),
+        (context) => {
+          expect(context.register.policy.purveyorName).toBe('coast district water');
+          return ok(true);
+        },
+      );
     } finally {
       process.chdir(previous);
       rmSync(scratch, { recursive: true, force: true });

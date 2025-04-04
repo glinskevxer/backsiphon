@@ -105,9 +105,15 @@ describe('writing one', () => {
 
 describe('which survey the register works from', () => {
   beforeEach(() => {
-    insertSurvey(db, survey({ surveyId: 'SV-1', surveyedOn: '2021-03-01', containmentDegree: 'nonhealth' }));
+    insertSurvey(
+      db,
+      survey({ surveyId: 'SV-1', surveyedOn: '2021-03-01', containmentDegree: 'nonhealth' }),
+    );
     insertSurvey(db, survey({ surveyId: 'SV-2', surveyedOn: '2023-06-14' }));
-    insertSurvey(db, survey({ surveyId: 'SV-3', surveyedOn: '2022-09-09', containmentDegree: 'none' }));
+    insertSurvey(
+      db,
+      survey({ surveyId: 'SV-3', surveyedOn: '2022-09-09', containmentDegree: 'none' }),
+    );
   });
 
   it('is the most recent one', () => {

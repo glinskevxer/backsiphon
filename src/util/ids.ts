@@ -71,7 +71,9 @@ export function nextIds(shape: IdShape, existing: ReadonlyArray<string>, count: 
 /** Tidy something a clerk typed into the shape the register stores. */
 export function normaliseId(shape: IdShape, typed: string): Result<string, string> {
   const trimmed = typed.trim().toUpperCase();
-  const withPrefix = trimmed.startsWith(`${shape.prefix}-`) ? trimmed : `${shape.prefix}-${trimmed}`;
+  const withPrefix = trimmed.startsWith(`${shape.prefix}-`)
+    ? trimmed
+    : `${shape.prefix}-${trimmed}`;
   const parsed = parseId(shape, withPrefix);
   return parsed.ok ? ok(formatId(shape, parsed.value)) : err(parsed.error);
 }

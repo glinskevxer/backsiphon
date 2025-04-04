@@ -10,14 +10,30 @@ let register: Register;
 const cli = cliRunner(() => register, '2024-10-01');
 
 beforeEach(async () => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-10-01T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-10-01T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
   register = opened.value;
   await cli(
-    'connection', 'open', '--account', 'A-1001', '--name', 'kerrigan plating',
-    '--address', '14 forge road', '--use', 'PLATING', '--size', '2', '--on', '2019-04-02',
+    'connection',
+    'open',
+    '--account',
+    'A-1001',
+    '--name',
+    'kerrigan plating',
+    '--address',
+    '14 forge road',
+    '--use',
+    'PLATING',
+    '--size',
+    '2',
+    '--on',
+    '2019-04-02',
   );
   await cli('survey', 'record', 'SC-00001', '--on', '2023-01-10', '--surveyor', 'r. okafor');
 });
@@ -72,7 +88,12 @@ describe('audit trail', () => {
 describe('reinspection', () => {
   it('records a visit and says it will be billed', async () => {
     const visit = await cli(
-      'reinspection', 'SC-00001', '--on', '2024-05-01', '--note', 'gate locked, nobody on site',
+      'reinspection',
+      'SC-00001',
+      '--on',
+      '2024-05-01',
+      '--note',
+      'gate locked, nobody on site',
     );
     expect(visit.out).toContain('visit recorded against SC-00001 on 2024-05-01');
     expect(visit.out).toContain('next invoice');

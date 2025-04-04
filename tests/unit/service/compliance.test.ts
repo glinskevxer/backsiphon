@@ -278,7 +278,10 @@ describe('sorting a work list', () => {
     const second = setUp([]);
     const firstAssembly = fitRp(first, '11');
     test(firstAssembly, '2024-03-01');
-    const statuses = [complianceFor(register, first, '2024-07-15'), complianceFor(register, second, '2024-07-15')]
+    const statuses = [
+      complianceFor(register, first, '2024-07-15'),
+      complianceFor(register, second, '2024-07-15'),
+    ]
       .filter((entry): entry is Extract<typeof entry, { ok: true }> => entry.ok)
       .map((entry) => entry.value);
     expect(statuses).toHaveLength(2);

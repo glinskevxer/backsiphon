@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { closeDatabase, execute, openDatabase, selectAll, tableNames, type Database } from '../../../src/storage/db';
+import {
+  closeDatabase,
+  execute,
+  openDatabase,
+  selectAll,
+  tableNames,
+  type Database,
+} from '../../../src/storage/db';
 import { migrate } from '../../../src/storage/schema';
 
 const NOW = '2024-03-25T08:00:00Z';
@@ -31,7 +38,15 @@ function migrated(): Database {
     db,
     `insert into testers (tester_id, name, agency, certificate_number, issued_on, expires_on, endorsements)
      values (?, ?, ?, ?, ?, ?, ?)`,
-    ['T-118', 'p. adeyemi', 'state waterworks board', 'BF-4471', '2023-05-01', '2026-04-30', 'RP,DC'],
+    [
+      'T-118',
+      'p. adeyemi',
+      'state waterworks board',
+      'BF-4471',
+      '2023-05-01',
+      '2026-04-30',
+      'RP,DC',
+    ],
   );
   return db;
 }
@@ -124,7 +139,18 @@ describe('assemblies', () => {
            assembly_id, connection_id, scope, assembly_class, model_id, serial_number,
            size_inches, installed_on, removed_on, location
          ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        ['BA-5', 'SC-1', 'containment', 'RP', 'WK-375', '2', 2, '2019-05-01', '2018-01-01', 'vault'],
+        [
+          'BA-5',
+          'SC-1',
+          'containment',
+          'RP',
+          'WK-375',
+          '2',
+          2,
+          '2019-05-01',
+          '2018-01-01',
+          'vault',
+        ],
       ),
     ).toThrow();
   });

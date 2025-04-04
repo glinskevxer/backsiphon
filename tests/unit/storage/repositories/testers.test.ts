@@ -111,9 +111,9 @@ describe('gauges', () => {
   });
 
   it('refuses one belonging to nobody', () => {
-    expect(insertGauge(db, { ...gauge, gaugeId: 'G-2', testerId: 'T-404', serialNumber: '2' }).ok).toBe(
-      false,
-    );
+    expect(
+      insertGauge(db, { ...gauge, gaugeId: 'G-2', testerId: 'T-404', serialNumber: '2' }).ok,
+    ).toBe(false);
   });
 
   it('refuses the same maker and serial twice', () => {

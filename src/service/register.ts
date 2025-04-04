@@ -107,12 +107,7 @@ export function asActor(register: Register, actor: string): Register {
  * cheap at the size a program office runs at and it survives a store that was
  * loaded from somebody else's export.
  */
-export function mintId(
-  register: Register,
-  shape: IdShape,
-  table: string,
-  column: string,
-): string {
+export function mintId(register: Register, shape: IdShape, table: string, column: string): string {
   const rows = selectAll<Record<string, string>>(
     register.db,
     `select ${column} from ${table} where ${column} like ?`,

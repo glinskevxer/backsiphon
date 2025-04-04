@@ -68,12 +68,24 @@ describe('the due date', () => {
   });
 
   it('clamps an anniversary onto the end of a short month', () => {
-    const due = nextTestDue(input({ lastPassingTestOn: '2024-08-31', containmentDegree: 'health', premiseUseCode: 'WWTP' }));
+    const due = nextTestDue(
+      input({
+        lastPassingTestOn: '2024-08-31',
+        containmentDegree: 'health',
+        premiseUseCode: 'WWTP',
+      }),
+    );
     expect(due.due).toBe('2025-02-28');
   });
 
   it('reports the interval even for a first test', () => {
-    const due = nextTestDue(input({ lastPassingTestOn: undefined, containmentDegree: 'health', premiseUseCode: 'MARINA' }));
+    const due = nextTestDue(
+      input({
+        lastPassingTestOn: undefined,
+        containmentDegree: 'health',
+        premiseUseCode: 'MARINA',
+      }),
+    );
     expect(due.intervalMonths).toBe(6);
     expect(due.basis).toBe('first_test');
   });

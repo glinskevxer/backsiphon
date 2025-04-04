@@ -83,9 +83,7 @@ export interface CsvTable {
 
 export function parseCsv(text: string): Result<CsvTable, string> {
   const cleaned = text.startsWith(BOM) ? text.slice(BOM.length) : text;
-  const lines = cleaned
-    .split(/\r?\n/)
-    .filter((line, index) => line.trim() !== '' || index === 0);
+  const lines = cleaned.split(/\r?\n/).filter((line, index) => line.trim() !== '' || index === 0);
   const first = lines[0];
   if (first === undefined || first.trim() === '') {
     return err('the file has no header row on it');

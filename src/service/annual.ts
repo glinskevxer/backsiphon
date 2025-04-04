@@ -125,8 +125,9 @@ export function annualReturn(register: Register, year: number): Result<AnnualRet
     failedInYear: failed,
     refusedInYear: refused,
     noticesIssued,
-    noticesOpenAtYearEnd: openNotices(register.db, to).filter((notice) => notice.issuedOn < afterYear)
-      .length,
+    noticesOpenAtYearEnd: openNotices(register.db, to).filter(
+      (notice) => notice.issuedOn < afterYear,
+    ).length,
     shutoffsOrdered,
     shutoffsCarriedOut,
     neverSurveyed,

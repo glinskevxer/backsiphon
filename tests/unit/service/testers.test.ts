@@ -1,8 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { passRate, testerRecord, testerRoster } from '../../../src/service/testers';
-import { insertGauge, insertTester, suspendTester } from '../../../src/storage/repositories/testers';
-import { fileTest, fit, open, openOffice, walk, FAILING_RP, type Office } from '../../support/office';
+import {
+  insertGauge,
+  insertTester,
+  suspendTester,
+} from '../../../src/storage/repositories/testers';
+import {
+  fileTest,
+  fit,
+  open,
+  openOffice,
+  walk,
+  FAILING_RP,
+  type Office,
+} from '../../support/office';
 
 let office: Office;
 
@@ -35,7 +47,12 @@ describe('one tester', () => {
     walk(office, connectionId, '2024-01-10', ['AUX_WELL']);
     const assemblyId = fit(office, { connectionId, installedOn: '2024-02-01' });
     fileTest(office, { assemblyId, testedOn: '2024-02-05', filedOn: '2024-02-08' });
-    fileTest(office, { assemblyId, testedOn: '2024-06-05', filedOn: '2024-06-06', asFound: FAILING_RP });
+    fileTest(office, {
+      assemblyId,
+      testedOn: '2024-06-05',
+      filedOn: '2024-06-06',
+      asFound: FAILING_RP,
+    });
 
     const filed = record();
     expect(filed.ok).toBe(true);

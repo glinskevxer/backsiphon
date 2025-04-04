@@ -66,7 +66,9 @@ export function insertContact(db: Database, contact: Contact): Result<Contact, s
     return err('a contact has to have a name on it');
   }
   if (contact.telephone === undefined && contact.email === undefined) {
-    return err(`there is no way to reach ${contact.name}, put a telephone number or an email on it`);
+    return err(
+      `there is no way to reach ${contact.name}, put a telephone number or an email on it`,
+    );
   }
   try {
     execute(db, `insert into contacts (${COLUMNS}) values (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [

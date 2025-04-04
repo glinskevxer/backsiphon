@@ -18,36 +18,106 @@ function fileWith(text: string): string {
   return path;
 }
 
-const HEADER = 'assembly,tester,gauge,tested,filed,repair,found.check1Differential,found.reliefOpening';
+const HEADER =
+  'assembly,tester,gauge,tested,filed,repair,found.check1Differential,found.reliefOpening';
 
 beforeEach(async () => {
   scratch = mkdtempSync(join(tmpdir(), 'backsiphon-import-'));
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-10-25T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-10-25T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
   register = opened.value;
   await cli(
-    'model', 'add', '--id', 'WK-375', '--maker', 'watkin', '--model', '375',
-    '--class', 'RP', '--sizes', '2', '--listed', '2016-04-01',
+    'model',
+    'add',
+    '--id',
+    'WK-375',
+    '--maker',
+    'watkin',
+    '--model',
+    '375',
+    '--class',
+    'RP',
+    '--sizes',
+    '2',
+    '--listed',
+    '2016-04-01',
   );
   await cli(
-    'tester', 'add', '--id', 'T-118', '--name', 'p. adeyemi', '--agency', 'board',
-    '--certificate', 'BF-4471', '--issued', '2019-05-01', '--expires', '2029-04-30',
-    '--endorsements', 'RP',
+    'tester',
+    'add',
+    '--id',
+    'T-118',
+    '--name',
+    'p. adeyemi',
+    '--agency',
+    'board',
+    '--certificate',
+    'BF-4471',
+    '--issued',
+    '2019-05-01',
+    '--expires',
+    '2029-04-30',
+    '--endorsements',
+    'RP',
   );
   await cli(
-    'gauge', 'add', '--id', 'G-77', '--tester', 'T-118', '--maker', 'midwest',
-    '--serial', '845-C', '--calibrated', '2019-05-01', '--accuracy', '0.2', '--interval', '240',
+    'gauge',
+    'add',
+    '--id',
+    'G-77',
+    '--tester',
+    'T-118',
+    '--maker',
+    'midwest',
+    '--serial',
+    '845-C',
+    '--calibrated',
+    '2019-05-01',
+    '--accuracy',
+    '0.2',
+    '--interval',
+    '240',
   );
   await cli(
-    'connection', 'open', '--account', 'A-1001', '--name', 'kerrigan plating',
-    '--address', '14 forge road', '--use', 'INDUSTRIAL', '--size', '2', '--on', '2018-01-01',
+    'connection',
+    'open',
+    '--account',
+    'A-1001',
+    '--name',
+    'kerrigan plating',
+    '--address',
+    '14 forge road',
+    '--use',
+    'INDUSTRIAL',
+    '--size',
+    '2',
+    '--on',
+    '2018-01-01',
   );
   await cli(
-    'assembly', 'install', 'SC-00001', '--scope', 'containment', '--class', 'RP',
-    '--model', 'WK-375', '--serial', '1', '--size', '2', '--on', '2019-01-01',
-    '--location', 'vault',
+    'assembly',
+    'install',
+    'SC-00001',
+    '--scope',
+    'containment',
+    '--class',
+    'RP',
+    '--model',
+    'WK-375',
+    '--serial',
+    '1',
+    '--size',
+    '2',
+    '--on',
+    '2019-01-01',
+    '--location',
+    'vault',
   );
 });
 

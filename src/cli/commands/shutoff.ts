@@ -30,7 +30,12 @@ export function registerShutoffCommands(program: Command, io: CliIo, runner: Run
     .requiredOption('--reason <reason>', 'what it is for')
     .action((connectionId: string, options: Record<string, string>, command: Command) => {
       const outcome = runner(globals(command), io, (context) =>
-        raiseOrder(context.register, connectionId, String(options['on']), String(options['reason'])),
+        raiseOrder(
+          context.register,
+          connectionId,
+          String(options['on']),
+          String(options['reason']),
+        ),
       );
       report(io, outcome, (order) => {
         io.out(`${order.orderId} raised against ${order.connectionId} by ${order.raisedBy}`);

@@ -267,7 +267,9 @@ export function disconnect(
     return err(`the connection ${connectionId} came out on ${existing.disconnectedOn} already`);
   }
   if (on < existing.connectedOn) {
-    return err(`a connection cannot come out on ${on}, before it went in on ${existing.connectedOn}`);
+    return err(
+      `a connection cannot come out on ${on}, before it went in on ${existing.connectedOn}`,
+    );
   }
   execute(db, 'update service_connections set disconnected_on = ? where connection_id = ?', [
     on,

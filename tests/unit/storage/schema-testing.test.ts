@@ -1,6 +1,14 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { closeDatabase, execute, openDatabase, selectAll, selectOne, tableNames, type Database } from '../../../src/storage/db';
+import {
+  closeDatabase,
+  execute,
+  openDatabase,
+  selectAll,
+  selectOne,
+  tableNames,
+  type Database,
+} from '../../../src/storage/db';
 import { migrate } from '../../../src/storage/schema';
 
 const NOW = '2024-04-02T08:00:00Z';

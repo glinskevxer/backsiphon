@@ -51,13 +51,20 @@ describe('connection open', () => {
 
   it('reads the fire and unmetered flags', async () => {
     await cli(
-      'connection', 'open',
-      '--account', 'A-1002',
-      '--name', 'warehouse loop',
-      '--address', '9 dock road',
-      '--use', 'WAREHOUSE',
-      '--size', '6',
-      '--on', '2020-01-01',
+      'connection',
+      'open',
+      '--account',
+      'A-1002',
+      '--name',
+      'warehouse loop',
+      '--address',
+      '9 dock road',
+      '--use',
+      'WAREHOUSE',
+      '--size',
+      '6',
+      '--on',
+      '2020-01-01',
       '--fire',
       '--unmetered',
     );
@@ -68,13 +75,20 @@ describe('connection open', () => {
 
   it('prints the refusal on the error channel', async () => {
     const result = await cli(
-      'connection', 'open',
-      '--account', 'A-1003',
-      '--name', 'somewhere',
-      '--address', 'nowhere',
-      '--use', 'SPACEPORT',
-      '--size', '2',
-      '--on', '2020-01-01',
+      'connection',
+      'open',
+      '--account',
+      'A-1003',
+      '--name',
+      'somewhere',
+      '--address',
+      'nowhere',
+      '--use',
+      'SPACEPORT',
+      '--size',
+      '2',
+      '--on',
+      '2020-01-01',
     );
     expect(result.err).toContain('SPACEPORT');
     expect(result.out).toBe('');
@@ -89,24 +103,40 @@ describe('connection open', () => {
 describe('connection list', () => {
   beforeEach(async () => {
     await cli(
-      'connection', 'open',
-      '--account', 'A-1001',
-      '--name', 'kerrigan plating',
-      '--address', '14 forge road',
-      '--use', 'PLATING',
-      '--size', '2',
-      '--on', '2019-04-02',
-      '--route', 'north',
+      'connection',
+      'open',
+      '--account',
+      'A-1001',
+      '--name',
+      'kerrigan plating',
+      '--address',
+      '14 forge road',
+      '--use',
+      'PLATING',
+      '--size',
+      '2',
+      '--on',
+      '2019-04-02',
+      '--route',
+      'north',
     );
     await cli(
-      'connection', 'open',
-      '--account', 'A-1002',
-      '--name', 'harbour cannery',
-      '--address', '2 quay street',
-      '--use', 'FOOD_PROC',
-      '--size', '4',
-      '--on', '2021-06-01',
-      '--route', 'south',
+      'connection',
+      'open',
+      '--account',
+      'A-1002',
+      '--name',
+      'harbour cannery',
+      '--address',
+      '2 quay street',
+      '--use',
+      'FOOD_PROC',
+      '--size',
+      '4',
+      '--on',
+      '2021-06-01',
+      '--route',
+      'south',
     );
   });
 
@@ -128,7 +158,10 @@ describe('connection list', () => {
 
   it('writes json when it is asked to', async () => {
     const io = capturingIo();
-    const code = await run(['connection', 'list', '--json'], { io, runner: borrow(() => register, '2024-08-05') });
+    const code = await run(['connection', 'list', '--json'], {
+      io,
+      runner: borrow(() => register, '2024-08-05'),
+    });
     expect(code).toBe(0);
     const rows = JSON.parse(io.lines.join('\n')) as Array<{ connectionId: string }>;
     expect(rows.map((row) => row.connectionId)).toEqual(['SC-00001', 'SC-00002']);
@@ -146,13 +179,20 @@ describe('connection list', () => {
 describe('the other connection commands', () => {
   beforeEach(async () => {
     await cli(
-      'connection', 'open',
-      '--account', 'A-1001',
-      '--name', 'kerrigan plating',
-      '--address', '14 forge road',
-      '--use', 'PLATING',
-      '--size', '2',
-      '--on', '2019-04-02',
+      'connection',
+      'open',
+      '--account',
+      'A-1001',
+      '--name',
+      'kerrigan plating',
+      '--address',
+      '14 forge road',
+      '--use',
+      'PLATING',
+      '--size',
+      '2',
+      '--on',
+      '2019-04-02',
     );
   });
 
@@ -169,10 +209,15 @@ describe('the other connection commands', () => {
 
   it('records a change of tenant and asks for a fresh survey', async () => {
     const result = await cli(
-      'connection', 'retenant', 'SC-00001',
-      '--use', 'WAREHOUSE',
-      '--on', '2024-06-01',
-      '--name', 'forge road storage',
+      'connection',
+      'retenant',
+      'SC-00001',
+      '--use',
+      'WAREHOUSE',
+      '--on',
+      '2024-06-01',
+      '--name',
+      'forge road storage',
     );
     expect(result.out).toContain('was PLATING and is now WAREHOUSE');
     expect(result.out).toContain('walk it again');
@@ -180,16 +225,28 @@ describe('the other connection commands', () => {
 
   it('closes one with a reason', async () => {
     const result = await cli(
-      'connection', 'close', 'SC-00001',
-      '--on', '2024-07-01',
-      '--reason', 'premise demolished',
+      'connection',
+      'close',
+      'SC-00001',
+      '--on',
+      '2024-07-01',
+      '--reason',
+      'premise demolished',
     );
     expect(result.out).toContain('closed SC-00001 on 2024-07-01');
   });
 
   it('refuses to close one twice', async () => {
     await cli('connection', 'close', 'SC-00001', '--on', '2024-07-01', '--reason', 'demolished');
-    const again = await cli('connection', 'close', 'SC-00001', '--on', '2024-08-01', '--reason', 'again');
+    const again = await cli(
+      'connection',
+      'close',
+      'SC-00001',
+      '--on',
+      '2024-08-01',
+      '--reason',
+      'again',
+    );
     expect(again.err).toContain('came out on 2024-07-01');
   });
 });

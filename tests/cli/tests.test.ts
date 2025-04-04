@@ -9,32 +9,99 @@ let register: Register;
 const cli = cliRunner(() => register, '2024-08-25');
 
 beforeEach(async () => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-08-25T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-08-25T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
   register = opened.value;
   await cli(
-    'connection', 'open', '--account', 'A-1001', '--name', 'kerrigan plating',
-    '--address', '14 forge road', '--use', 'PLATING', '--size', '2', '--on', '2019-04-02',
+    'connection',
+    'open',
+    '--account',
+    'A-1001',
+    '--name',
+    'kerrigan plating',
+    '--address',
+    '14 forge road',
+    '--use',
+    'PLATING',
+    '--size',
+    '2',
+    '--on',
+    '2019-04-02',
   );
   await cli(
-    'model', 'add', '--id', 'WK-375', '--maker', 'watkin', '--model', '375',
-    '--class', 'RP', '--sizes', '2', '--listed', '2016-04-01',
+    'model',
+    'add',
+    '--id',
+    'WK-375',
+    '--maker',
+    'watkin',
+    '--model',
+    '375',
+    '--class',
+    'RP',
+    '--sizes',
+    '2',
+    '--listed',
+    '2016-04-01',
   );
   await cli(
-    'tester', 'add', '--id', 'T-118', '--name', 'p. adeyemi', '--agency', 'board',
-    '--certificate', 'BF-4471', '--issued', '2019-05-01', '--expires', '2029-04-30',
-    '--endorsements', 'RP,DC',
+    'tester',
+    'add',
+    '--id',
+    'T-118',
+    '--name',
+    'p. adeyemi',
+    '--agency',
+    'board',
+    '--certificate',
+    'BF-4471',
+    '--issued',
+    '2019-05-01',
+    '--expires',
+    '2029-04-30',
+    '--endorsements',
+    'RP,DC',
   );
   await cli(
-    'gauge', 'add', '--id', 'G-77', '--tester', 'T-118', '--maker', 'midwest',
-    '--serial', '845-C', '--calibrated', '2024-02-15', '--accuracy', '0.2',
+    'gauge',
+    'add',
+    '--id',
+    'G-77',
+    '--tester',
+    'T-118',
+    '--maker',
+    'midwest',
+    '--serial',
+    '845-C',
+    '--calibrated',
+    '2024-02-15',
+    '--accuracy',
+    '0.2',
   );
   await cli(
-    'assembly', 'install', 'SC-00001', '--scope', 'containment', '--class', 'RP',
-    '--model', 'WK-375', '--serial', '4471182', '--size', '2', '--on', '2021-06-01',
-    '--location', 'vault',
+    'assembly',
+    'install',
+    'SC-00001',
+    '--scope',
+    'containment',
+    '--class',
+    'RP',
+    '--model',
+    'WK-375',
+    '--serial',
+    '4471182',
+    '--size',
+    '2',
+    '--on',
+    '2021-06-01',
+    '--location',
+    'vault',
   );
 });
 
@@ -75,9 +142,21 @@ describe('reading the readings off the command line', () => {
 describe('test file', () => {
   it('files a passing report and says what it read', async () => {
     const filed = await cli(
-      'test', 'file', 'BA-00001',
-      '--tester', 'T-118', '--gauge', 'G-77', '--on', '2024-05-14', '--filed', '2024-05-16',
-      '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-05-14',
+      '--filed',
+      '2024-05-16',
+      '--reading',
+      'check1Differential=8.2',
+      '--reading',
+      'reliefOpening=3.1',
     );
     expect(filed.out).toContain('TR-000001 filed');
     expect(filed.out).toContain('pass on the as_found set');
@@ -87,9 +166,21 @@ describe('test file', () => {
   it('says the assembly is still untested when the report is refused', async () => {
     await cli('tester', 'suspend', 'T-118', '--on', '2024-01-01', '--reason', 'falsified reports');
     const filed = await cli(
-      'test', 'file', 'BA-00001',
-      '--tester', 'T-118', '--gauge', 'G-77', '--on', '2024-05-14', '--filed', '2024-05-16',
-      '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-05-14',
+      '--filed',
+      '2024-05-16',
+      '--reading',
+      'check1Differential=8.2',
+      '--reading',
+      'reliefOpening=3.1',
     );
     expect(filed.out).toContain('still untested');
     expect(filed.out).toContain('suspended');
@@ -97,30 +188,69 @@ describe('test file', () => {
 
   it('files a repair with its as left readings', async () => {
     const filed = await cli(
-      'test', 'file', 'BA-00001',
-      '--tester', 'T-118', '--gauge', 'G-77', '--on', '2024-05-14', '--filed', '2024-05-16',
-      '--reading', 'check1Differential=0.4', '--reading', 'reliefOpening=3.1',
-      '--as-left', 'check1Differential=8.8', '--as-left', 'reliefOpening=3.1',
-      '--repair', 'new first check rubber',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-05-14',
+      '--filed',
+      '2024-05-16',
+      '--reading',
+      'check1Differential=0.4',
+      '--reading',
+      'reliefOpening=3.1',
+      '--as-left',
+      'check1Differential=8.8',
+      '--as-left',
+      'reliefOpening=3.1',
+      '--repair',
+      'new first check rubber',
     );
     expect(filed.out).toContain('pass on the as_left set');
   });
 
   it('refuses a repair with no as left readings', async () => {
     const filed = await cli(
-      'test', 'file', 'BA-00001',
-      '--tester', 'T-118', '--gauge', 'G-77', '--on', '2024-05-14', '--filed', '2024-05-16',
-      '--reading', 'check1Differential=0.4', '--reading', 'reliefOpening=3.1',
-      '--repair', 'reground the check',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-05-14',
+      '--filed',
+      '2024-05-16',
+      '--reading',
+      'check1Differential=0.4',
+      '--reading',
+      'reliefOpening=3.1',
+      '--repair',
+      'reground the check',
     );
     expect(filed.err).toContain('as left');
   });
 
   it('files against today when nobody says when the paperwork arrived', async () => {
     const filed = await cli(
-      'test', 'file', 'BA-00001',
-      '--tester', 'T-118', '--gauge', 'G-77', '--on', '2024-08-20',
-      '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-08-20',
+      '--reading',
+      'check1Differential=8.2',
+      '--reading',
+      'reliefOpening=3.1',
     );
     expect(filed.out).toContain('TR-000001 filed');
     const history = await cli('test', 'history', 'BA-00001');
@@ -129,9 +259,17 @@ describe('test file', () => {
 
   it('refuses a malformed reading before it opens anything', async () => {
     const filed = await cli(
-      'test', 'file', 'BA-00001',
-      '--tester', 'T-118', '--gauge', 'G-77', '--on', '2024-05-14',
-      '--reading', 'check1Differential',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-05-14',
+      '--reading',
+      'check1Differential',
     );
     expect(filed.err).toContain('write it as key=value');
   });
@@ -140,14 +278,38 @@ describe('test file', () => {
 describe('the other test commands', () => {
   it('lists the history with the refusals in it', async () => {
     await cli(
-      'test', 'file', 'BA-00001',
-      '--tester', 'T-118', '--gauge', 'G-77', '--on', '2023-05-14', '--filed', '2023-05-16',
-      '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2023-05-14',
+      '--filed',
+      '2023-05-16',
+      '--reading',
+      'check1Differential=8.2',
+      '--reading',
+      'reliefOpening=3.1',
     );
     await cli(
-      'test', 'file', 'BA-00001',
-      '--tester', 'T-118', '--gauge', 'G-77', '--on', '2024-05-14', '--filed', '2024-07-30',
-      '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-05-14',
+      '--filed',
+      '2024-07-30',
+      '--reading',
+      'check1Differential=8.2',
+      '--reading',
+      'reliefOpening=3.1',
     );
     const history = await cli('test', 'history', 'BA-00001');
     expect(history.out).toContain('TR-000002');

@@ -32,7 +32,11 @@ const unmeteredFire: ServiceFacts = {
   purveyorMetered: false,
   serviceSizeInches: 6,
 };
-const meteredFire: ServiceFacts = { fireService: true, purveyorMetered: true, serviceSizeInches: 6 };
+const meteredFire: ServiceFacts = {
+  fireService: true,
+  purveyorMetered: true,
+  serviceSizeInches: 6,
+};
 
 describe('the pieces the rule is built from', () => {
   it('maps a degree onto a mechanical class', () => {
@@ -97,7 +101,10 @@ describe('the detector axis', () => {
   });
 
   it('leaves the class alone once the purveyor meters the line', () => {
-    const required = containmentRequirement(assessment({ findingCodes: ['FIRE_PLAIN'] }), meteredFire);
+    const required = containmentRequirement(
+      assessment({ findingCodes: ['FIRE_PLAIN'] }),
+      meteredFire,
+    );
     expect(requiredClassOf(required)).toBe('DC');
     expect(required.reasons).toHaveLength(1);
   });

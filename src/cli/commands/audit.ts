@@ -107,7 +107,11 @@ export function registerAuditCommands(program: Command, io: CliIo, runner: Runne
     .description('what the trail is made of')
     .action((_options: unknown, command: Command) => {
       const outcome = runner(globals(command), io, (context) =>
-        ok({ context, kinds: eventKinds(context.register.db), total: countEvents(context.register.db) }),
+        ok({
+          context,
+          kinds: eventKinds(context.register.db),
+          total: countEvents(context.register.db),
+        }),
       );
       report(io, outcome, ({ context, kinds, total }) => {
         if (context.json) {

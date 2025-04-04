@@ -108,30 +108,32 @@ export function registerNoticeCommands(program: Command, io: CliIo, runner: Runn
     .description('the letters on one connection, and what they said')
     .argument('<connection>', 'the connection id')
     .option('--body', 'print the text of the most recent one')
-    .action((connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
-      const outcome = runner(globals(command), io, (context) =>
-        ok({ context, rows: noticesForConnection(context.register.db, connectionId) }),
-      );
-      report(io, outcome, ({ context, rows }) => {
-        if (context.json) {
-          writeJson(io, rows);
-          return;
-        }
-        for (const line of table(rows, [
-          { header: 'notice', value: (row: NoticeRecord) => row.noticeId },
-          { header: 'stage', value: (row: NoticeRecord) => row.stage },
-          { header: 'issued', value: (row: NoticeRecord) => row.issuedOn },
-          { header: 'cleared', value: (row: NoticeRecord) => row.clearedOn },
-        ])) {
-          io.out(line);
-        }
-        const latest = rows[0];
-        if (options['body'] === true && latest !== undefined) {
-          io.out('');
-          for (const line of latest.body.split('\n')) {
+    .action(
+      (connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
+        const outcome = runner(globals(command), io, (context) =>
+          ok({ context, rows: noticesForConnection(context.register.db, connectionId) }),
+        );
+        report(io, outcome, ({ context, rows }) => {
+          if (context.json) {
+            writeJson(io, rows);
+            return;
+          }
+          for (const line of table(rows, [
+            { header: 'notice', value: (row: NoticeRecord) => row.noticeId },
+            { header: 'stage', value: (row: NoticeRecord) => row.stage },
+            { header: 'issued', value: (row: NoticeRecord) => row.issuedOn },
+            { header: 'cleared', value: (row: NoticeRecord) => row.clearedOn },
+          ])) {
             io.out(line);
           }
-        }
-      });
-    });
+          const latest = rows[0];
+          if (options['body'] === true && latest !== undefined) {
+            io.out('');
+            for (const line of latest.body.split('\n')) {
+              io.out(line);
+            }
+          }
+        });
+      },
+    );
 }

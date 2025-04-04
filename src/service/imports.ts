@@ -192,7 +192,11 @@ function readReadings(record: Record<string, string>, prefix: string): Result<Re
   const readings: Record<string, number | boolean> = {};
   for (const [column, raw] of Object.entries(record)) {
     if (!column.startsWith(prefix)) {
-      if (!FIXED_COLUMNS.includes(column) && !column.startsWith(FOUND_PREFIX) && !column.startsWith(LEFT_PREFIX)) {
+      if (
+        !FIXED_COLUMNS.includes(column) &&
+        !column.startsWith(FOUND_PREFIX) &&
+        !column.startsWith(LEFT_PREFIX)
+      ) {
         return err(`the column ${column} is not one this file may carry`);
       }
       continue;

@@ -91,9 +91,11 @@ export function insertTester(
 }
 
 export function findTester(db: Database, testerId: string): TesterCertification | undefined {
-  const row = selectOne<TesterRow>(db, `select ${TESTER_COLUMNS} from testers where tester_id = ?`, [
-    testerId,
-  ]);
+  const row = selectOne<TesterRow>(
+    db,
+    `select ${TESTER_COLUMNS} from testers where tester_id = ?`,
+    [testerId],
+  );
   return row === undefined ? undefined : toTester(row);
 }
 

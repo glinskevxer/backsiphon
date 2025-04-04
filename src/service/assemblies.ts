@@ -11,7 +11,12 @@
 import type { CivilDate } from '../util/dates';
 import { ASSEMBLY_ID } from '../util/ids';
 import { err, ok, type Result } from '../util/result';
-import { buildApprovalList, installationAllowed, relocationAllowed, remedyFor } from '../domain/approvals';
+import {
+  buildApprovalList,
+  installationAllowed,
+  relocationAllowed,
+  remedyFor,
+} from '../domain/approvals';
 import { allowedInScope, type AssemblyClass } from '../domain/assembly';
 import type { InstalledAssembly, ProtectionScope } from '../domain/deficiency';
 import { withTransaction } from '../storage/db';

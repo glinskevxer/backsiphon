@@ -3,7 +3,15 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { annualReturn, returnRows, type AnnualReturn } from '../../../src/service/annual';
 import { runNotices } from '../../../src/service/notices';
 import { executeOrder, raiseOrder } from '../../../src/service/shutoff';
-import { fileTest, fit, open, openOffice, walk, FAILING_RP, type Office } from '../../support/office';
+import {
+  fileTest,
+  fit,
+  open,
+  openOffice,
+  walk,
+  FAILING_RP,
+  type Office,
+} from '../../support/office';
 
 let office: Office;
 

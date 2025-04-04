@@ -8,28 +8,46 @@ let register: Register;
 const cli = cliRunner(() => register, '2024-08-15');
 
 beforeEach(async () => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-08-15T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-08-15T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
   register = opened.value;
   await cli(
-    'connection', 'open',
-    '--account', 'A-1001',
-    '--name', 'kerrigan plating',
-    '--address', '14 forge road',
-    '--use', 'PLATING',
-    '--size', '2',
-    '--on', '2019-04-02',
+    'connection',
+    'open',
+    '--account',
+    'A-1001',
+    '--name',
+    'kerrigan plating',
+    '--address',
+    '14 forge road',
+    '--use',
+    'PLATING',
+    '--size',
+    '2',
+    '--on',
+    '2019-04-02',
   );
   await cli(
-    'model', 'add',
-    '--id', 'WK-375',
-    '--maker', 'watkin',
-    '--model', '375 series',
-    '--class', 'RP',
-    '--sizes', '1,1.5,2',
-    '--listed', '2016-04-01',
+    'model',
+    'add',
+    '--id',
+    'WK-375',
+    '--maker',
+    'watkin',
+    '--model',
+    '375 series',
+    '--class',
+    'RP',
+    '--sizes',
+    '1,1.5,2',
+    '--listed',
+    '2016-04-01',
   );
 });
 
@@ -40,13 +58,20 @@ afterEach(() => {
 describe('the approval list', () => {
   it('adds a model and lists it', async () => {
     const added = await cli(
-      'model', 'add',
-      '--id', 'WK-350',
-      '--maker', 'watkin',
-      '--model', '350 series',
-      '--class', 'DC',
-      '--sizes', '2, 3 ,4',
-      '--listed', '2014-01-15',
+      'model',
+      'add',
+      '--id',
+      'WK-350',
+      '--maker',
+      'watkin',
+      '--model',
+      '350 series',
+      '--class',
+      'DC',
+      '--sizes',
+      '2, 3 ,4',
+      '--listed',
+      '2014-01-15',
     );
     expect(added.out).toContain('WK-350 is on the list from 2014-01-15');
     const listed = await cli('model', 'list');
@@ -67,13 +92,20 @@ describe('the approval list', () => {
 
   it('refuses a duplicate model', async () => {
     const again = await cli(
-      'model', 'add',
-      '--id', 'WK-375',
-      '--maker', 'watkin',
-      '--model', '375 series',
-      '--class', 'RP',
-      '--sizes', '2',
-      '--listed', '2016-04-01',
+      'model',
+      'add',
+      '--id',
+      'WK-375',
+      '--maker',
+      'watkin',
+      '--model',
+      '375 series',
+      '--class',
+      'RP',
+      '--sizes',
+      '2',
+      '--listed',
+      '2016-04-01',
     );
     expect(again.err).toContain('already on file');
   });
@@ -82,14 +114,23 @@ describe('the approval list', () => {
 describe('assemblies', () => {
   async function install(serial = '4471182'): Promise<{ out: string; err: string }> {
     return cli(
-      'assembly', 'install', 'SC-00001',
-      '--scope', 'containment',
-      '--class', 'RP',
-      '--model', 'WK-375',
-      '--serial', serial,
-      '--size', '2',
-      '--on', '2021-06-01',
-      '--location', 'meter vault, north side',
+      'assembly',
+      'install',
+      'SC-00001',
+      '--scope',
+      'containment',
+      '--class',
+      'RP',
+      '--model',
+      'WK-375',
+      '--serial',
+      serial,
+      '--size',
+      '2',
+      '--on',
+      '2021-06-01',
+      '--location',
+      'meter vault, north side',
     );
   }
 
@@ -109,7 +150,15 @@ describe('assemblies', () => {
 
   it('takes one out and leaves it off the live list', async () => {
     await install();
-    const removed = await cli('assembly', 'remove', 'BA-00001', '--on', '2024-02-01', '--reason', 'cracked');
+    const removed = await cli(
+      'assembly',
+      'remove',
+      'BA-00001',
+      '--on',
+      '2024-02-01',
+      '--reason',
+      'cracked',
+    );
     expect(removed.out).toContain('came out on 2024-02-01');
     const live = await cli('assembly', 'list');
     expect(live.out).not.toContain('BA-00001');
@@ -120,14 +169,23 @@ describe('assemblies', () => {
   it('swaps one for another in a single command', async () => {
     await install();
     const swapped = await cli(
-      'assembly', 'swap', 'BA-00001',
-      '--class', 'RP',
-      '--model', 'WK-375',
-      '--serial', '5582001',
-      '--size', '2',
-      '--on', '2024-03-04',
-      '--location', 'meter vault, north side',
-      '--reason', 'body cracked by frost',
+      'assembly',
+      'swap',
+      'BA-00001',
+      '--class',
+      'RP',
+      '--model',
+      'WK-375',
+      '--serial',
+      '5582001',
+      '--size',
+      '2',
+      '--on',
+      '2024-03-04',
+      '--location',
+      'meter vault, north side',
+      '--reason',
+      'body cracked by frost',
     );
     expect(swapped.out).toContain('BA-00001 out, BA-00002 in');
   });

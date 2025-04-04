@@ -134,9 +134,15 @@ describe('a change of tenant', () => {
   });
 
   it('refuses a change to the same use, an unknown use, or a missing connection', () => {
-    expect(changePremiseUse(register, 'SC-00001', { premiseUseCode: 'PLATING', on: '2024-06-01' }).ok).toBe(false);
-    expect(changePremiseUse(register, 'SC-00001', { premiseUseCode: 'SPACEPORT', on: '2024-06-01' }).ok).toBe(false);
-    expect(changePremiseUse(register, 'SC-00404', { premiseUseCode: 'OFFICE', on: '2024-06-01' }).ok).toBe(false);
+    expect(
+      changePremiseUse(register, 'SC-00001', { premiseUseCode: 'PLATING', on: '2024-06-01' }).ok,
+    ).toBe(false);
+    expect(
+      changePremiseUse(register, 'SC-00001', { premiseUseCode: 'SPACEPORT', on: '2024-06-01' }).ok,
+    ).toBe(false);
+    expect(
+      changePremiseUse(register, 'SC-00404', { premiseUseCode: 'OFFICE', on: '2024-06-01' }).ok,
+    ).toBe(false);
   });
 });
 
@@ -208,8 +214,12 @@ describe('the fixture geometry', () => {
 
   it('refuses geometry that cannot be true', () => {
     openConnection(register, input());
-    expect(updateFixtureFacts(register.db, 'SC-00001', { outletElevationInches: -2 }).ok).toBe(false);
-    expect(updateFixtureFacts(register.db, 'SC-00001', { continuousPressureHours: 30 }).ok).toBe(false);
+    expect(updateFixtureFacts(register.db, 'SC-00001', { outletElevationInches: -2 }).ok).toBe(
+      false,
+    );
+    expect(updateFixtureFacts(register.db, 'SC-00001', { continuousPressureHours: 30 }).ok).toBe(
+      false,
+    );
     expect(updateFixtureFacts(register.db, 'SC-00404', { indoorRiser: true }).ok).toBe(false);
   });
 });

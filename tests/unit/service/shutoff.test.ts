@@ -46,9 +46,9 @@ describe('raising one', () => {
     expect(raised.value.orderId).toBe('SO-0001');
     expect(raised.value.raisedBy).toBe('clerk.hines');
     expect(raised.value.dueDate).toBe('2024-02-05');
-    expect(eventsFor(office.register.db, 'connection', connectionId).map((entry) => entry.kind)).toContain(
-      'shutoff_ordered',
-    );
+    expect(
+      eventsFor(office.register.db, 'connection', connectionId).map((entry) => entry.kind),
+    ).toContain('shutoff_ordered');
   });
 
   it('refuses a second order while one is open', () => {
@@ -81,7 +81,9 @@ describe('carrying one out', () => {
   });
 
   it('can be cancelled before the crew goes and not after', () => {
-    expect(cancelOrder(office.register, 'SO-0001', '2024-04-05', 'customer filed on time').ok).toBe(true);
+    expect(cancelOrder(office.register, 'SO-0001', '2024-04-05', 'customer filed on time').ok).toBe(
+      true,
+    );
     expect(findOrder(office.register, 'SO-0001')?.cancelledOn).toBe('2024-04-05');
     expect(executeOrder(office.register, 'SO-0001', '2024-04-08', 'crew 3').ok).toBe(false);
   });
@@ -112,7 +114,13 @@ describe('putting the water back', () => {
 
   it('goes through once a passing test lands', () => {
     fileTest(office, { assemblyId, testedOn: '2024-04-10' });
-    const restored = restoreOrder(office.register, 'SO-0001', '2024-04-11', 'crew 3', 'meter reseated');
+    const restored = restoreOrder(
+      office.register,
+      'SO-0001',
+      '2024-04-11',
+      'crew 3',
+      'meter reseated',
+    );
     expect(restored.ok).toBe(true);
     expect(findOrder(office.register, 'SO-0001')?.restoredOn).toBe('2024-04-11');
     expect(openOrders(office.register)).toEqual([]);
@@ -139,7 +147,9 @@ describe('putting the water back', () => {
     const orders = ordersFor(office.register, connectionId);
     expect(orders).toHaveLength(1);
     expect(orders[0]?.restoredBy).toBe('crew 3');
-    const kinds = eventsFor(office.register.db, 'connection', connectionId).map((entry) => entry.kind);
+    const kinds = eventsFor(office.register.db, 'connection', connectionId).map(
+      (entry) => entry.kind,
+    );
     expect(kinds).toContain('shutoff_executed');
     expect(kinds).toContain('service_restored');
   });

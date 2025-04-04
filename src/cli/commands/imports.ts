@@ -8,10 +8,7 @@ import type { Command } from 'commander';
 
 import { err, ok } from '../../util/result';
 import { describeImport, importReportsCsv } from '../../service/imports';
-import {
-  describeConnectionImport,
-  importConnectionsCsv,
-} from '../../service/connection-import';
+import { describeConnectionImport, importConnectionsCsv } from '../../service/connection-import';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, report } from '../shared';
@@ -28,7 +25,9 @@ export function registerImportCommands(program: Command, io: CliIo, runner: Runn
         try {
           text = readFileSync(file, 'utf8');
         } catch (error) {
-          return err(`${file} could not be read: ${error instanceof Error ? error.message : String(error)}`);
+          return err(
+            `${file} could not be read: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
         const summary = importConnectionsCsv(context.register, text, {
           ...(options['update'] === true ? { update: true } : {}),
@@ -64,7 +63,9 @@ export function registerImportCommands(program: Command, io: CliIo, runner: Runn
         try {
           text = readFileSync(file, 'utf8');
         } catch (error) {
-          return err(`${file} could not be read: ${error instanceof Error ? error.message : String(error)}`);
+          return err(
+            `${file} could not be read: ${error instanceof Error ? error.message : String(error)}`,
+          );
         }
         const summary = importReportsCsv(context.register, text, {
           ...(options['dryRun'] === true ? { dryRun: true } : {}),

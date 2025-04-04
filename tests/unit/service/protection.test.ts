@@ -184,7 +184,11 @@ describe('the containment point', () => {
 
 describe('the isolation point', () => {
   it('reads the riser geometry off the connection', () => {
-    const id = connection({ outletElevationInches: 20, indoorRiser: false, downstreamShutoff: true });
+    const id = connection({
+      outletElevationInches: 20,
+      indoorRiser: false,
+      downstreamShutoff: true,
+    });
     survey(id, ['LAB_BENCH']);
     const result = status(id);
     expect(result.ok && result.value.isolation.requiredClass).toBe('PVB');
@@ -222,7 +226,11 @@ describe('the isolation point', () => {
 });
 
 describe('a variance in the middle of it', () => {
-  function grant(connectionId: string, acceptedClass: 'DC' | 'PVB', degree: 'health' | 'nonhealth'): void {
+  function grant(
+    connectionId: string,
+    acceptedClass: 'DC' | 'PVB',
+    degree: 'health' | 'nonhealth',
+  ): void {
     insertVariance(register.db, {
       varianceId: 'V-0001',
       connectionId,

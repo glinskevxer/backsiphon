@@ -10,7 +10,11 @@ import { openConnection } from '../../../src/service/connections';
 let register: Register;
 
 beforeEach(() => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-11-04T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-11-04T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }

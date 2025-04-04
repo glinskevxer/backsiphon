@@ -127,7 +127,10 @@ export function walk(
   }
 }
 
-export function fit(office: Office, input: Partial<InstallInput> & { connectionId: string }): string {
+export function fit(
+  office: Office,
+  input: Partial<InstallInput> & { connectionId: string },
+): string {
   const fitted = installAssembly(office.register, {
     scope: 'containment',
     assemblyClass: 'RP',

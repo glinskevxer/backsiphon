@@ -6,11 +6,7 @@ import type { Command } from 'commander';
 
 import { err, ok } from '../../util/result';
 import { PREMISE_USES } from '../../domain/premise';
-import {
-  changePremiseUse,
-  closeConnection,
-  openConnection,
-} from '../../service/connections';
+import { changePremiseUse, closeConnection, openConnection } from '../../service/connections';
 import {
   findConnection,
   listConnections,
@@ -31,7 +27,10 @@ export function registerConnectionCommands(program: Command, io: CliIo, runner: 
     .requiredOption('--account <number>', 'the account number the office says out loud')
     .requiredOption('--name <name>', 'what the premise is called')
     .requiredOption('--address <address>', 'where it is')
-    .requiredOption('--use <code>', `premise use, one of ${PREMISE_USES.map((use) => use.code).join(', ')}`)
+    .requiredOption(
+      '--use <code>',
+      `premise use, one of ${PREMISE_USES.map((use) => use.code).join(', ')}`,
+    )
     .requiredOption('--size <inches>', 'service size in inches')
     .requiredOption('--on <date>', 'the day the service went in')
     .option('--route <route>', 'the reading route it sits on')
@@ -85,7 +84,11 @@ export function registerConnectionCommands(program: Command, io: CliIo, runner: 
           { header: 'account', value: (row: ConnectionRecord) => row.accountNumber },
           { header: 'premise', value: (row: ConnectionRecord) => row.premiseName },
           { header: 'use', value: (row: ConnectionRecord) => row.premiseUseCode },
-          { header: 'size', value: (row: ConnectionRecord) => row.serviceSizeInches, align: 'right' },
+          {
+            header: 'size',
+            value: (row: ConnectionRecord) => row.serviceSizeInches,
+            align: 'right',
+          },
           { header: 'route', value: (row: ConnectionRecord) => row.route },
         ])) {
           io.out(line);

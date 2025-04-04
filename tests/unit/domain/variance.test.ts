@@ -131,8 +131,12 @@ describe('applying one to a requirement', () => {
   });
 
   it('leaves the requirement alone before it takes effect and after it expires', () => {
-    expect(requiredClassOf(applyVariance(requireRp, variance(), '2024-03-01', 'health').protection)).toBe('RP');
-    expect(requiredClassOf(applyVariance(requireRp, variance(), '2025-06-01', 'health').protection)).toBe('RP');
+    expect(
+      requiredClassOf(applyVariance(requireRp, variance(), '2024-03-01', 'health').protection),
+    ).toBe('RP');
+    expect(
+      requiredClassOf(applyVariance(requireRp, variance(), '2025-06-01', 'health').protection),
+    ).toBe('RP');
   });
 
   it('leaves the requirement alone once a survey has raised the degree', () => {

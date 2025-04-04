@@ -30,7 +30,10 @@ export function parseReadings(pairs: ReadonlyArray<string>): Result<Readings, st
       return err(`"${pair}" is not a reading, write it as key=value`);
     }
     const key = pair.slice(0, index).trim();
-    const raw = pair.slice(index + 1).trim().toLowerCase();
+    const raw = pair
+      .slice(index + 1)
+      .trim()
+      .toLowerCase();
     if (key === '') {
       return err(`"${pair}" has no reading name on it`);
     }
@@ -111,7 +114,9 @@ export function registerTestCommands(program: Command, io: CliIo, runner: Runner
           }
           return;
         }
-        io.out(`the readings come to ${filed.evaluation.outcome} on the ${filed.evaluation.phase} set`);
+        io.out(
+          `the readings come to ${filed.evaluation.outcome} on the ${filed.evaluation.phase} set`,
+        );
         for (const line of bullet(filed.evaluation.judgements.map((judgement) => judgement.note))) {
           io.out(line);
         }
@@ -161,7 +166,9 @@ export function registerTestCommands(program: Command, io: CliIo, runner: Runner
     .argument('<class>', 'the assembly class')
     .action((assemblyClass: string, _options: unknown, command: Command) => {
       const outcome = runner(globals(command), io, () => {
-        const keys = requiredReadingKeys(assemblyClass as Parameters<typeof requiredReadingKeys>[0]);
+        const keys = requiredReadingKeys(
+          assemblyClass as Parameters<typeof requiredReadingKeys>[0],
+        );
         return keys.length === 0
           ? err(`there is no field procedure for a ${assemblyClass}`)
           : ok(keys);

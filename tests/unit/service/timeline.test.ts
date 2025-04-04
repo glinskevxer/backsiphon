@@ -5,7 +5,15 @@ import { applyForVariance, decideGrant } from '../../../src/service/variances';
 import { runNotices } from '../../../src/service/notices';
 import { executeOrder, raiseOrder } from '../../../src/service/shutoff';
 import { takeAssemblyOut } from '../../../src/service/assemblies';
-import { fileTest, fit, open, openOffice, walk, FAILING_RP, type Office } from '../../support/office';
+import {
+  fileTest,
+  fit,
+  open,
+  openOffice,
+  walk,
+  FAILING_RP,
+  type Office,
+} from '../../support/office';
 
 let office: Office;
 

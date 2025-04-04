@@ -5,19 +5,28 @@ import { openConnection } from '../../../src/service/connections';
 import { installAssembly } from '../../../src/service/assemblies';
 import { describeImport, importReportsCsv } from '../../../src/service/imports';
 import { insertModel } from '../../../src/storage/repositories/assemblies';
-import { insertGauge, insertTester, suspendTester } from '../../../src/storage/repositories/testers';
+import {
+  insertGauge,
+  insertTester,
+  suspendTester,
+} from '../../../src/storage/repositories/testers';
 import { lastPassingTest, reportsForAssembly } from '../../../src/storage/repositories/reports';
 
 let register: Register;
 
-const HEADER = 'assembly,tester,gauge,tested,filed,repair,found.check1Differential,found.reliefOpening,left.check1Differential,left.reliefOpening';
+const HEADER =
+  'assembly,tester,gauge,tested,filed,repair,found.check1Differential,found.reliefOpening,left.check1Differential,left.reliefOpening';
 
 function csv(...rows: string[]): string {
   return [HEADER, ...rows].join('\n');
 }
 
 beforeEach(() => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-10-21T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-10-21T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
@@ -119,7 +128,10 @@ describe('a batch that goes in', () => {
 
   it('keeps a refused row on the register and says so', () => {
     suspendTester(register.db, 'T-118', '2024-01-01', 'falsified reports');
-    const summary = importReportsCsv(register, csv('BA-00001,T-118,G-77,2024-03-01,2024-03-05,,8.2,3.1,,'));
+    const summary = importReportsCsv(
+      register,
+      csv('BA-00001,T-118,G-77,2024-03-01,2024-03-05,,8.2,3.1,,'),
+    );
     expect(summary.ok).toBe(true);
     if (!summary.ok) {
       return;
@@ -135,7 +147,10 @@ describe('rows the office cannot read', () => {
   it('rejects one with no assembly on it and keeps the others', () => {
     const summary = importReportsCsv(
       register,
-      csv(',T-118,G-77,2024-03-01,2024-03-05,,8.2,3.1,,', 'BA-00002,T-118,G-77,2024-03-02,2024-03-05,,7.9,2.8,,'),
+      csv(
+        ',T-118,G-77,2024-03-01,2024-03-05,,8.2,3.1,,',
+        'BA-00002,T-118,G-77,2024-03-02,2024-03-05,,7.9,2.8,,',
+      ),
     );
     expect(summary.ok).toBe(true);
     if (!summary.ok) {
@@ -149,12 +164,18 @@ describe('rows the office cannot read', () => {
   it('rejects a bad date and a reading that is not a number', () => {
     const bad = importReportsCsv(register, csv('BA-00001,T-118,G-77,march,2024-03-05,,8.2,3.1,,'));
     expect(bad.ok && bad.value.rejected[0]?.reason).toContain('not a test date');
-    const worse = importReportsCsv(register, csv('BA-00001,T-118,G-77,2024-03-01,2024-03-05,,lovely,3.1,,'));
+    const worse = importReportsCsv(
+      register,
+      csv('BA-00001,T-118,G-77,2024-03-01,2024-03-05,,lovely,3.1,,'),
+    );
     expect(worse.ok && worse.value.rejected[0]?.reason).toContain('neither a reading');
   });
 
   it('rejects a row with no readings at all', () => {
-    const summary = importReportsCsv(register, csv('BA-00001,T-118,G-77,2024-03-01,2024-03-05,,,,,'));
+    const summary = importReportsCsv(
+      register,
+      csv('BA-00001,T-118,G-77,2024-03-01,2024-03-05,,,,,'),
+    );
     expect(summary.ok && summary.value.rejected[0]?.reason).toContain('no as found readings');
   });
 
@@ -167,12 +188,18 @@ describe('rows the office cannot read', () => {
   });
 
   it('rejects a row against an assembly nobody has', () => {
-    const summary = importReportsCsv(register, csv('BA-00404,T-118,G-77,2024-03-01,2024-03-05,,8.2,3.1,,'));
+    const summary = importReportsCsv(
+      register,
+      csv('BA-00404,T-118,G-77,2024-03-01,2024-03-05,,8.2,3.1,,'),
+    );
     expect(summary.ok && summary.value.rejected[0]?.reason).toContain('BA-00404');
   });
 
   it('refuses the whole file when a column does not belong', () => {
-    const summary = importReportsCsv(register, 'assembly,tester,gauge,tested,weather\nBA-1,T,G,2024-01-01,fine');
+    const summary = importReportsCsv(
+      register,
+      'assembly,tester,gauge,tested,weather\nBA-1,T,G,2024-01-01,fine',
+    );
     expect(summary.ok).toBe(true);
     if (!summary.ok) {
       return;

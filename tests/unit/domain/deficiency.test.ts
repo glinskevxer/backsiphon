@@ -8,7 +8,10 @@ import {
 import type { AssemblyClass } from '../../../src/domain/assembly';
 import type { RequiredProtection } from '../../../src/domain/requirement';
 
-function fitted(assemblyClass: AssemblyClass, overrides: Partial<InstalledAssembly> = {}): InstalledAssembly {
+function fitted(
+  assemblyClass: AssemblyClass,
+  overrides: Partial<InstalledAssembly> = {},
+): InstalledAssembly {
   return {
     assemblyId: 'BA-9001',
     connectionId: 'SC-2200',
@@ -118,7 +121,9 @@ describe('comparing against the requirement', () => {
   });
 
   it('treats an air gap requirement as immediate whatever is fitted', () => {
-    expect(compareToRequirement(required('AG'), undefined, 'containment').urgency).toBe('immediate');
+    expect(compareToRequirement(required('AG'), undefined, 'containment').urgency).toBe(
+      'immediate',
+    );
     const wrong = compareToRequirement(required('AG'), fitted('RP'), 'containment');
     expect(wrong.missing).toEqual(['physicalSeparation', 'spillResistant', 'detector']);
     expect(wrong.urgency).toBe('immediate');

@@ -5,7 +5,11 @@ import { openConnection } from '../../../src/service/connections';
 import { installAssembly, takeAssemblyOut } from '../../../src/service/assemblies';
 import { fileReport, type FilingInput } from '../../../src/service/filing';
 import { insertModel } from '../../../src/storage/repositories/assemblies';
-import { insertGauge, insertTester, suspendTester } from '../../../src/storage/repositories/testers';
+import {
+  insertGauge,
+  insertTester,
+  suspendTester,
+} from '../../../src/storage/repositories/testers';
 import { insertNotice, openNotices } from '../../../src/storage/repositories/notices';
 import { lastPassingTest, reportsForAssembly } from '../../../src/storage/repositories/reports';
 import { eventsFor } from '../../../src/storage/repositories/events';

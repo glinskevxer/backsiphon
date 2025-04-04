@@ -74,7 +74,14 @@ export function appendEvent(db: Database, event: NewEvent): Result<EventRecord, 
     db,
     `insert into events (happened_at, actor, kind, subject_kind, subject_id, detail)
      values (?, ?, ?, ?, ?, ?)`,
-    [event.happenedAt, event.actor, event.kind, event.subjectKind, event.subjectId, event.detail ?? ''],
+    [
+      event.happenedAt,
+      event.actor,
+      event.kind,
+      event.subjectKind,
+      event.subjectId,
+      event.detail ?? '',
+    ],
   );
   const row = selectOne<EventRow>(
     db,
@@ -83,7 +90,11 @@ export function appendEvent(db: Database, event: NewEvent): Result<EventRecord, 
   return row === undefined ? err('the event did not land') : ok(toRecord(row));
 }
 
-export function eventsFor(db: Database, subjectKind: SubjectKind, subjectId: string): EventRecord[] {
+export function eventsFor(
+  db: Database,
+  subjectKind: SubjectKind,
+  subjectId: string,
+): EventRecord[] {
   return selectAll<EventRow>(
     db,
     `select ${COLUMNS} from events where subject_kind = ? and subject_id = ? order by event_id`,

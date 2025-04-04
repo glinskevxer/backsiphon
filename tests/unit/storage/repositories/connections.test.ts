@@ -145,10 +145,9 @@ describe('finding them', () => {
   });
 
   it('filters to the ones in service on a day', () => {
-    expect(listConnections(db, { activeOn: '2024-01-01' }).map((entry) => entry.connectionId)).toEqual([
-      'SC-1',
-      'SC-2',
-    ]);
+    expect(
+      listConnections(db, { activeOn: '2024-01-01' }).map((entry) => entry.connectionId),
+    ).toEqual(['SC-1', 'SC-2']);
     expect(listConnections(db, { activeOn: '2021-01-01' })).toHaveLength(3);
     expect(listConnections(db, { activeOn: '2014-01-01' })).toHaveLength(0);
   });
@@ -179,7 +178,10 @@ describe('changing one', () => {
   });
 
   it('takes a new use code, which is what a change of tenant means', () => {
-    updateConnection(db, 'SC-1', { premiseUseCode: 'WAREHOUSE', premiseName: 'forge road storage' });
+    updateConnection(db, 'SC-1', {
+      premiseUseCode: 'WAREHOUSE',
+      premiseName: 'forge road storage',
+    });
     const found = findConnection(db, 'SC-1');
     expect(found?.premiseUseCode).toBe('WAREHOUSE');
     expect(found?.premiseName).toBe('forge road storage');

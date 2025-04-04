@@ -100,7 +100,9 @@ describe('reading it back', () => {
     expect(recentEvents(db, { kind: 'survey_recorded' })).toHaveLength(2);
     expect(recentEvents(db, { actor: 'clerk.owusu' })).toHaveLength(1);
     expect(recentEvents(db, { since: '2024-03-01T00:00:00Z' })).toHaveLength(2);
-    expect(recentEvents(db, { kind: 'survey_recorded', since: '2024-03-01T00:00:00Z' })).toHaveLength(1);
+    expect(
+      recentEvents(db, { kind: 'survey_recorded', since: '2024-03-01T00:00:00Z' }),
+    ).toHaveLength(1);
   });
 
   it('takes a limit', () => {

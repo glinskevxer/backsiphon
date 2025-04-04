@@ -13,7 +13,11 @@ import { complianceFor } from '../../src/service/compliance';
 import { runNotices } from '../../src/service/notices';
 import { importReportsCsv } from '../../src/service/imports';
 import { lastPassingTest, reportsForAssembly } from '../../src/storage/repositories/reports';
-import { recalibrate, renewCertificate, suspendTester } from '../../src/storage/repositories/testers';
+import {
+  recalibrate,
+  renewCertificate,
+  suspendTester,
+} from '../../src/storage/repositories/testers';
 import { fileTest, fit, open, openOffice, walk, PASSING_RP, type Office } from '../support/office';
 
 let office: Office;

@@ -42,7 +42,9 @@ const report: TestReport = {
   repairMade: false,
 };
 
-function ruling(overrides: Partial<AdmissibilityInput> = {}): ReturnType<typeof ruleOnAdmissibility> {
+function ruling(
+  overrides: Partial<AdmissibilityInput> = {},
+): ReturnType<typeof ruleOnAdmissibility> {
   return ruleOnAdmissibility({
     report,
     tester,
@@ -77,7 +79,11 @@ describe('the tester', () => {
   });
 
   it('reads a suspension over an otherwise valid certificate', () => {
-    const suspended = { ...tester, suspendedOn: '2024-01-01', suspendedReason: 'falsified reports' };
+    const suspended = {
+      ...tester,
+      suspendedOn: '2024-01-01',
+      suspendedReason: 'falsified reports',
+    };
     expect(reasonCodes(ruling({ tester: suspended }))).toEqual(['tester_suspended']);
   });
 

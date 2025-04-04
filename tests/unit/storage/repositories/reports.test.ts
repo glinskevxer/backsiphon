@@ -18,7 +18,10 @@ import {
 
 let db: Database;
 
-function stored(overrides: Partial<StoredReport> = {}, report: Partial<StoredReport['report']> = {}): StoredReport {
+function stored(
+  overrides: Partial<StoredReport> = {},
+  report: Partial<StoredReport['report']> = {},
+): StoredReport {
   return {
     report: {
       reportId: 'TR-1',
@@ -119,7 +122,10 @@ describe('writing one', () => {
   it('reads a flag reading back as a boolean', () => {
     insertReport(
       db,
-      stored({}, { assemblyClassTested: 'DCDA', asFound: { check1Differential: 2, bypassTight: true } }),
+      stored(
+        {},
+        { assemblyClassTested: 'DCDA', asFound: { check1Differential: 2, bypassTight: true } },
+      ),
     );
     expect(findReport(db, 'TR-1')?.report.asFound['bypassTight']).toBe(true);
   });
@@ -151,7 +157,11 @@ describe('writing one', () => {
   it('keeps the readings of a report the office refused', () => {
     insertReport(
       db,
-      stored({ admissible: false, inadmissibleCodes: ['gauge_out_of_calibration'], outcome: 'pass' }),
+      stored({
+        admissible: false,
+        inadmissibleCodes: ['gauge_out_of_calibration'],
+        outcome: 'pass',
+      }),
     );
     const found = findReport(db, 'TR-1');
     expect(found?.admissible).toBe(false);
@@ -178,7 +188,10 @@ describe('looking them up', () => {
     insertReport(db, stored({}, { reportId: 'TR-1', testedOn: '2022-01-10' }));
     insertReport(
       db,
-      stored({ outcome: 'fail', asFoundOutcome: 'fail' }, { reportId: 'TR-2', testedOn: '2023-01-12' }),
+      stored(
+        { outcome: 'fail', asFoundOutcome: 'fail' },
+        { reportId: 'TR-2', testedOn: '2023-01-12' },
+      ),
     );
     insertReport(db, stored({}, { reportId: 'TR-3', testedOn: '2023-02-02' }));
     insertReport(

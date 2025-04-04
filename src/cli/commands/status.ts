@@ -6,7 +6,12 @@
 import type { Command } from 'commander';
 
 import { ok } from '../../util/result';
-import { complianceFor, noticeRank, type ComplianceStatus, type PointCompliance } from '../../service/compliance';
+import {
+  complianceFor,
+  noticeRank,
+  type ComplianceStatus,
+  type PointCompliance,
+} from '../../service/compliance';
 import { explainStatus, explanationLines } from '../../service/explain';
 import { timelineFor, type TimelineEntry } from '../../service/timeline';
 import { search, type SearchHit } from '../../service/search';
@@ -37,60 +42,64 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
     .description('where one connection stands today')
     .argument('<connection>', 'the connection id')
     .option('--explain', 'say how every part of the answer was reached')
-    .action((connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
-      const outcome = runner(globals(command), io, (context) => {
-        const status = complianceFor(context.register, connectionId, context.asOf);
-        return status.ok ? ok({ context, status: status.value }) : status;
-      });
-      report(io, outcome, ({ context, status }) => {
-        if (context.json) {
-          writeJson(
-            io,
-            options['explain'] === true ? { ...status, explanation: explainStatus(status) } : status,
-          );
-          return;
-        }
-        if (options['explain'] === true) {
-          for (const line of explanationLines(explainStatus(status))) {
+    .action(
+      (connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
+        const outcome = runner(globals(command), io, (context) => {
+          const status = complianceFor(context.register, connectionId, context.asOf);
+          return status.ok ? ok({ context, status: status.value }) : status;
+        });
+        report(io, outcome, ({ context, status }) => {
+          if (context.json) {
+            writeJson(
+              io,
+              options['explain'] === true
+                ? { ...status, explanation: explainStatus(status) }
+                : status,
+            );
+            return;
+          }
+          if (options['explain'] === true) {
+            for (const line of explanationLines(explainStatus(status))) {
+              io.out(line);
+            }
+            return;
+          }
+          for (const line of heading(`${status.connectionId} as at ${status.asOf}`)) {
             io.out(line);
           }
-          return;
-        }
-        for (const line of heading(`${status.connectionId} as at ${status.asOf}`)) {
-          io.out(line);
-        }
-        for (const line of describe([
-          ['standing', status.standing],
-          ['urgency', status.urgency],
-          ['shutoff eligible', status.shutoffEligible],
-          [
-            'survey',
-            `${status.protection.survey.surveyId} walked ${status.protection.survey.surveyedOn}`,
-          ],
-          ['containment hazard', status.protection.survey.containmentDegree],
-          ['isolation hazard', status.protection.survey.isolationDegree],
-        ])) {
-          io.out(line);
-        }
-        for (const line of bullet(status.reasons.map((reason) => reason))) {
-          io.out(line);
-        }
-        io.out('');
-        for (const line of heading('containment')) {
-          io.out(line);
-        }
-        for (const line of pointLines(status.containment)) {
-          io.out(line);
-        }
-        io.out('');
-        for (const line of heading('isolation')) {
-          io.out(line);
-        }
-        for (const line of pointLines(status.isolation)) {
-          io.out(line);
-        }
-      });
-    });
+          for (const line of describe([
+            ['standing', status.standing],
+            ['urgency', status.urgency],
+            ['shutoff eligible', status.shutoffEligible],
+            [
+              'survey',
+              `${status.protection.survey.surveyId} walked ${status.protection.survey.surveyedOn}`,
+            ],
+            ['containment hazard', status.protection.survey.containmentDegree],
+            ['isolation hazard', status.protection.survey.isolationDegree],
+          ])) {
+            io.out(line);
+          }
+          for (const line of bullet(status.reasons.map((reason) => reason))) {
+            io.out(line);
+          }
+          io.out('');
+          for (const line of heading('containment')) {
+            io.out(line);
+          }
+          for (const line of pointLines(status.containment)) {
+            io.out(line);
+          }
+          io.out('');
+          for (const line of heading('isolation')) {
+            io.out(line);
+          }
+          for (const line of pointLines(status.isolation)) {
+            io.out(line);
+          }
+        });
+      },
+    );
 
   program
     .command('find')
@@ -98,37 +107,39 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
     .argument('<term>', 'whatever the caller has')
     .option('--limit <count>', 'how many to print', '20')
     .option('--all', 'include the connections that have been taken off')
-    .action((term: string, options: Record<string, string | boolean | undefined>, command: Command) => {
-      const outcome = runner(globals(command), io, (context) =>
-        ok({
-          context,
-          hits: search(context.register, term, {
-            limit: Number(options['limit'] ?? 20),
-            ...(options['all'] === true ? { includeClosed: true } : {}),
+    .action(
+      (term: string, options: Record<string, string | boolean | undefined>, command: Command) => {
+        const outcome = runner(globals(command), io, (context) =>
+          ok({
+            context,
+            hits: search(context.register, term, {
+              limit: Number(options['limit'] ?? 20),
+              ...(options['all'] === true ? { includeClosed: true } : {}),
+            }),
           }),
-        }),
-      );
-      report(io, outcome, ({ context, hits }) => {
-        if (context.json) {
-          writeJson(io, hits);
-          return;
-        }
-        if (hits.length === 0) {
-          io.out('nothing matched');
-          return;
-        }
-        for (const line of table(hits, [
-          { header: 'connection', value: (row: SearchHit) => row.connectionId },
-          { header: 'account', value: (row: SearchHit) => row.accountNumber },
-          { header: 'premise', value: (row: SearchHit) => row.premiseName },
-          { header: 'address', value: (row: SearchHit) => row.premiseAddress },
-          { header: 'matched', value: (row: SearchHit) => row.matchedOn },
-          { header: 'on', value: (row: SearchHit) => row.matchedValue },
-        ])) {
-          io.out(line);
-        }
-      });
-    });
+        );
+        report(io, outcome, ({ context, hits }) => {
+          if (context.json) {
+            writeJson(io, hits);
+            return;
+          }
+          if (hits.length === 0) {
+            io.out('nothing matched');
+            return;
+          }
+          for (const line of table(hits, [
+            { header: 'connection', value: (row: SearchHit) => row.connectionId },
+            { header: 'account', value: (row: SearchHit) => row.accountNumber },
+            { header: 'premise', value: (row: SearchHit) => row.premiseName },
+            { header: 'address', value: (row: SearchHit) => row.premiseAddress },
+            { header: 'matched', value: (row: SearchHit) => row.matchedOn },
+            { header: 'on', value: (row: SearchHit) => row.matchedValue },
+          ])) {
+            io.out(line);
+          }
+        });
+      },
+    );
 
   program
     .command('history')

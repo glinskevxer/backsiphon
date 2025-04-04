@@ -61,9 +61,9 @@ describe('reading', () => {
   it('reads one row or nothing', () => {
     const store = open();
     execute(store, 'insert into parent values (1, ?)', ['meter vault']);
-    expect(selectOne<{ label: string }>(store, 'select label from parent where id = 1')?.label).toBe(
-      'meter vault',
-    );
+    expect(
+      selectOne<{ label: string }>(store, 'select label from parent where id = 1')?.label,
+    ).toBe('meter vault');
     expect(selectOne(store, 'select label from parent where id = 2')).toBeUndefined();
   });
 

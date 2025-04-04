@@ -20,13 +20,20 @@ beforeEach(async () => {
   }
   register = opened.value;
   await cli(
-    'connection', 'open',
-    '--account', 'A-1001',
-    '--name', 'kerrigan plating',
-    '--address', '14 forge road',
-    '--use', 'INDUSTRIAL',
-    '--size', '2',
-    '--on', '2019-04-02',
+    'connection',
+    'open',
+    '--account',
+    'A-1001',
+    '--name',
+    'kerrigan plating',
+    '--address',
+    '14 forge road',
+    '--use',
+    'INDUSTRIAL',
+    '--size',
+    '2',
+    '--on',
+    '2019-04-02',
   );
 });
 
@@ -37,10 +44,15 @@ afterEach(() => {
 describe('survey record', () => {
   it('records one and reports both degrees', async () => {
     const result = await cli(
-      'survey', 'record', 'SC-00001',
-      '--on', '2023-05-02',
-      '--surveyor', 'r. okafor',
-      '--findings', 'AUX_WELL,DOCK_HYDRANT',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-05-02',
+      '--surveyor',
+      'r. okafor',
+      '--findings',
+      'AUX_WELL,DOCK_HYDRANT',
     );
     expect(result.code).toBe(0);
     expect(result.out).toContain('SV-00001 recorded, containment health, isolation nonhealth');
@@ -49,28 +61,41 @@ describe('survey record', () => {
 
   it('takes the codes in any case with spaces round them', async () => {
     const result = await cli(
-      'survey', 'record', 'SC-00001',
-      '--on', '2023-05-02',
-      '--surveyor', 'r. okafor',
-      '--findings', ' aux_well , dock_hydrant ',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-05-02',
+      '--surveyor',
+      'r. okafor',
+      '--findings',
+      ' aux_well , dock_hydrant ',
     );
     expect(result.out).toContain('containment health');
   });
 
   it('records a survey with nothing on it', async () => {
     const result = await cli(
-      'survey', 'record', 'SC-00001',
-      '--on', '2023-05-02',
-      '--surveyor', 'r. okafor',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-05-02',
+      '--surveyor',
+      'r. okafor',
     );
     expect(result.out).toContain('containment nonhealth');
   });
 
   it('records a refused survey as the worst case at the meter', async () => {
     const result = await cli(
-      'survey', 'record', 'SC-00001',
-      '--on', '2023-05-02',
-      '--surveyor', 'r. okafor',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-05-02',
+      '--surveyor',
+      'r. okafor',
       '--refused',
     );
     expect(result.out).toContain('containment health');
@@ -79,20 +104,30 @@ describe('survey record', () => {
   it('reports a degree that moved', async () => {
     await cli('survey', 'record', 'SC-00001', '--on', '2021-05-02', '--surveyor', 'r');
     const second = await cli(
-      'survey', 'record', 'SC-00001',
-      '--on', '2023-05-02',
-      '--surveyor', 'r',
-      '--findings', 'AUX_WELL',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-05-02',
+      '--surveyor',
+      'r',
+      '--findings',
+      'AUX_WELL',
     );
     expect(second.out).toContain('the containment degree moved nonhealth to health');
   });
 
   it('says so when a code is not one of ours', async () => {
     const result = await cli(
-      'survey', 'record', 'SC-00001',
-      '--on', '2023-05-02',
-      '--surveyor', 'r',
-      '--findings', 'GHOSTS',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-05-02',
+      '--surveyor',
+      'r',
+      '--findings',
+      'GHOSTS',
     );
     expect(result.err).toContain('GHOSTS');
   });
@@ -102,10 +137,15 @@ describe('survey show', () => {
   beforeEach(async () => {
     await cli('survey', 'record', 'SC-00001', '--on', '2021-05-02', '--surveyor', 'r. okafor');
     await cli(
-      'survey', 'record', 'SC-00001',
-      '--on', '2023-05-02',
-      '--surveyor', 'j. mbeki',
-      '--findings', 'AUX_WELL',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-05-02',
+      '--surveyor',
+      'j. mbeki',
+      '--findings',
+      'AUX_WELL',
     );
   });
 
@@ -129,13 +169,20 @@ describe('survey show', () => {
 
   it('says so when nobody has walked it', async () => {
     await cli(
-      'connection', 'open',
-      '--account', 'A-1002',
-      '--name', 'unwalked',
-      '--address', 'somewhere',
-      '--use', 'OFFICE',
-      '--size', '1',
-      '--on', '2020-01-01',
+      'connection',
+      'open',
+      '--account',
+      'A-1002',
+      '--name',
+      'unwalked',
+      '--address',
+      'somewhere',
+      '--use',
+      'OFFICE',
+      '--size',
+      '1',
+      '--on',
+      '2020-01-01',
     );
     const result = await cli('survey', 'show', 'SC-00002');
     expect(result.err).toContain('never been surveyed');
@@ -145,19 +192,31 @@ describe('survey show', () => {
 describe('survey due', () => {
   it('lists the ones past their date and the ones nobody has walked', async () => {
     await cli(
-      'connection', 'open',
-      '--account', 'A-1002',
-      '--name', 'unwalked',
-      '--address', 'somewhere',
-      '--use', 'OFFICE',
-      '--size', '1',
-      '--on', '2020-01-01',
+      'connection',
+      'open',
+      '--account',
+      'A-1002',
+      '--name',
+      'unwalked',
+      '--address',
+      'somewhere',
+      '--use',
+      'OFFICE',
+      '--size',
+      '1',
+      '--on',
+      '2020-01-01',
     );
     await cli(
-      'survey', 'record', 'SC-00001',
-      '--on', '2023-05-02',
-      '--surveyor', 'r',
-      '--findings', 'AUX_WELL',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-05-02',
+      '--surveyor',
+      'r',
+      '--findings',
+      'AUX_WELL',
     );
     const result = await cli('--as-of', '2024-08-11', 'survey', 'due');
     expect(result.out).toContain('SC-00001');

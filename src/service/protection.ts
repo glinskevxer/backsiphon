@@ -20,7 +20,13 @@ import {
   requiredClassOf,
   type RequiredProtection,
 } from '../domain/requirement';
-import { compareToRequirement, type Deficiency, type InstalledAssembly, type ProtectionScope, type Urgency } from '../domain/deficiency';
+import {
+  compareToRequirement,
+  type Deficiency,
+  type InstalledAssembly,
+  type ProtectionScope,
+  type Urgency,
+} from '../domain/deficiency';
 import { applyVariance, varianceStatus, type VarianceStatus } from '../domain/variance';
 import type { AssemblyClass } from '../domain/assembly';
 import { findConnection, type ConnectionRecord } from '../storage/repositories/connections';
@@ -158,7 +164,9 @@ function pointFor(
     scope,
     required,
     effective: varied.protection,
-    ...(requiredClassOf(required) === undefined ? {} : { requiredClass: requiredClassOf(required) }),
+    ...(requiredClassOf(required) === undefined
+      ? {}
+      : { requiredClass: requiredClassOf(required) }),
     ...(requiredClassOf(varied.protection) === undefined
       ? {}
       : { effectiveClass: requiredClassOf(varied.protection) }),
@@ -184,7 +192,12 @@ function varianceInEffect(
     (variance) => variance.connectionId === connectionId,
   );
   if (scope === 'containment') {
-    return granted.find((variance) => variance.acceptedClass !== 'PVB' && variance.acceptedClass !== 'SVB' && variance.acceptedClass !== 'AVB');
+    return granted.find(
+      (variance) =>
+        variance.acceptedClass !== 'PVB' &&
+        variance.acceptedClass !== 'SVB' &&
+        variance.acceptedClass !== 'AVB',
+    );
   }
   return granted[0];
 }

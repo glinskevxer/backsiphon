@@ -85,7 +85,9 @@ describe('the shape of the form', () => {
   });
 
   it('wants as left readings once a repair is reported', () => {
-    const problems = structuralProblems(report({ repairMade: true, repairNote: 'new first check' }));
+    const problems = structuralProblems(
+      report({ repairMade: true, repairNote: 'new first check' }),
+    );
     expect(problems).toEqual(['asLeft: a repair was made and no as left readings were filed']);
   });
 

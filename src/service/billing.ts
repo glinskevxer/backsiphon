@@ -28,7 +28,11 @@ export interface ConnectionInvoice {
 }
 
 /** Visits the office had to make, counted off the trail rather than guessed. */
-export function reinspectionCount(register: Register, connectionId: string, since: CivilDate): number {
+export function reinspectionCount(
+  register: Register,
+  connectionId: string,
+  since: CivilDate,
+): number {
   return recentEvents(register.db, { kind: 'reinspection_visit', limit: 500 }).filter(
     (event) => event.subjectId === connectionId && event.happenedAt.slice(0, 10) >= since,
   ).length;

@@ -169,9 +169,9 @@ describe('spans', () => {
     expect(rangesOverlap({ from: '2024-01-01', to: '2024-06-30' }, { from: '2024-06-30' })).toBe(
       true,
     );
-    expect(
-      rangesOverlap({ from: '2024-01-01', to: '2024-06-29' }, { from: '2024-06-30' }),
-    ).toBe(false);
+    expect(rangesOverlap({ from: '2024-01-01', to: '2024-06-29' }, { from: '2024-06-30' })).toBe(
+      false,
+    );
     expect(rangesOverlap({ from: '2024-01-01' }, { from: '2020-01-01', to: '2021-01-01' })).toBe(
       false,
     );

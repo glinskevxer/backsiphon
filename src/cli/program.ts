@@ -93,10 +93,7 @@ export function buildProgram(options: ProgramOptions): Command {
  * The whole program is one function call, which is what makes the command
  * tests readable.
  */
-export async function run(
-  argv: ReadonlyArray<string>,
-  options: ProgramOptions,
-): Promise<number> {
+export async function run(argv: ReadonlyArray<string>, options: ProgramOptions): Promise<number> {
   const io = countingIo(options.io);
   const program = buildProgram({ ...options, io });
   try {

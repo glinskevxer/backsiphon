@@ -4,7 +4,10 @@ import {
   describeConnectionImport,
   importConnectionsCsv,
 } from '../../../src/service/connection-import';
-import { findConnectionByAccount, listConnections } from '../../../src/storage/repositories/connections';
+import {
+  findConnectionByAccount,
+  listConnections,
+} from '../../../src/storage/repositories/connections';
 import { openOffice, type Office } from '../../support/office';
 
 let office: Office;
@@ -52,7 +55,9 @@ describe('taking the district in', () => {
       csv('A-1001,kerrigan plating limited,14 forge road,PLATING,2,2016-04-01,north,no,yes'),
     );
     expect(again.ok && again.value.rows[0]?.action).toBe('unchanged');
-    expect(findConnectionByAccount(office.register.db, 'A-1001')?.premiseName).toBe('kerrigan plating');
+    expect(findConnectionByAccount(office.register.db, 'A-1001')?.premiseName).toBe(
+      'kerrigan plating',
+    );
   });
 
   it('writes a rename onto it when it is asked to', () => {
@@ -114,7 +119,10 @@ describe('taking the district in', () => {
   });
 
   it('refuses a file with a column it does not know', () => {
-    const summary = importConnectionsCsv(office.register, 'account,premise,address,use,size,connected,colour\nA,B,C,OFFICE,1,2020-01-01,blue');
+    const summary = importConnectionsCsv(
+      office.register,
+      'account,premise,address,use,size,connected,colour\nA,B,C,OFFICE,1,2020-01-01,blue',
+    );
     expect(summary.ok).toBe(false);
     if (!summary.ok) {
       expect(summary.error).toContain('colour');

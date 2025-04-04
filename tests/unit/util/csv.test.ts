@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { parseCsv, parseRow, quoteCell, toRecords, writeCsv, writeRow } from '../../../src/util/csv';
+import {
+  parseCsv,
+  parseRow,
+  quoteCell,
+  toRecords,
+  writeCsv,
+  writeRow,
+} from '../../../src/util/csv';
 
 describe('writing', () => {
   it('leaves a plain value alone', () => {
@@ -16,9 +23,15 @@ describe('writing', () => {
 
   it('writes a row and a whole table', () => {
     expect(writeRow(['a', 'b, c'])).toBe('a,"b, c"');
-    expect(writeCsv(['id', 'note'], [['BA-1', 'vault'], ['BA-2', 'a, b']])).toBe(
-      'id,note\nBA-1,vault\nBA-2,"a, b"',
-    );
+    expect(
+      writeCsv(
+        ['id', 'note'],
+        [
+          ['BA-1', 'vault'],
+          ['BA-2', 'a, b'],
+        ],
+      ),
+    ).toBe('id,note\nBA-1,vault\nBA-2,"a, b"');
   });
 });
 
@@ -100,7 +113,13 @@ describe('reading a table', () => {
   });
 
   it('round trips what it wrote', () => {
-    const text = writeCsv(['id', 'note'], [['BA-1', 'vault, north'], ['BA-2', 'the "back" room']]);
+    const text = writeCsv(
+      ['id', 'note'],
+      [
+        ['BA-1', 'vault, north'],
+        ['BA-2', 'the "back" room'],
+      ],
+    );
     const parsed = parseCsv(text);
     expect(parsed.ok && parsed.value.rows[1]?.[1]).toBe('the "back" room');
   });

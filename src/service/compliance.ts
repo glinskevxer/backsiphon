@@ -14,10 +14,19 @@ import { isTestable } from '../domain/assembly';
 import { nextTestDue, retestDue, type DueDate } from '../domain/cycle';
 import { delinquencyState, stageRank, type DelinquencyState } from '../domain/delinquency';
 import type { InstalledAssembly, ProtectionScope, Urgency } from '../domain/deficiency';
-import { lastFailingTest, lastPassingTest, type StoredReport } from '../storage/repositories/reports';
+import {
+  lastFailingTest,
+  lastPassingTest,
+  type StoredReport,
+} from '../storage/repositories/reports';
 import { pendingVariance } from '../storage/repositories/variances';
 import { findConnection } from '../storage/repositories/connections';
-import { protectionStatus, worseUrgency, type ProtectionPoint, type ProtectionStatus } from './protection';
+import {
+  protectionStatus,
+  worseUrgency,
+  type ProtectionPoint,
+  type ProtectionStatus,
+} from './protection';
 import type { Register } from './register';
 
 export type Standing =
@@ -166,11 +175,10 @@ function standingOf(
   }
 
   const deficient = points.filter(
-    (point) => point.point.deficiency.kind !== 'none' && point.point.deficiency.kind !== 'not_required',
+    (point) =>
+      point.point.deficiency.kind !== 'none' && point.point.deficiency.kind !== 'not_required',
   );
-  const overdue = points.filter(
-    (point) => point.due !== undefined && asOf > point.due.due,
-  );
+  const overdue = points.filter((point) => point.due !== undefined && asOf > point.due.due);
 
   if (deficient.length > 0 && protection.urgency === 'immediate') {
     for (const point of deficient) {

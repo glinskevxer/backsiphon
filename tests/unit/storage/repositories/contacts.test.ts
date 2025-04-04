@@ -86,9 +86,9 @@ describe('adding one', () => {
 
   it('takes another role on the same connection', () => {
     insertContact(db, contact());
-    expect(insertContact(db, contact({ contactId: 'C-2', role: 'account', name: 'head office' })).ok).toBe(
-      true,
-    );
+    expect(
+      insertContact(db, contact({ contactId: 'C-2', role: 'account', name: 'head office' })).ok,
+    ).toBe(true);
     expect(contactsFor(db, 'SC-1')).toHaveLength(2);
   });
 });

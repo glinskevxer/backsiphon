@@ -144,8 +144,7 @@ function filingReasons(input: AdmissibilityInput): AdmissibilityReason[] {
   return [
     {
       code: 'filed_too_late',
-      detail:
-        `filed ${late} days after the test, past the ${input.filingWindowDays} day window`,
+      detail: `filed ${late} days after the test, past the ${input.filingWindowDays} day window`,
     },
   ];
 }

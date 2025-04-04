@@ -3,7 +3,15 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { firstTimeFailureRate, fleetRecord, type ModelRecord } from '../../../src/service/fleet';
 import { delistModel } from '../../../src/storage/repositories/assemblies';
 import { takeAssemblyOut } from '../../../src/service/assemblies';
-import { fileTest, fit, open, openOffice, walk, FAILING_RP, type Office } from '../../support/office';
+import {
+  fileTest,
+  fit,
+  open,
+  openOffice,
+  walk,
+  FAILING_RP,
+  type Office,
+} from '../../support/office';
 
 let office: Office;
 

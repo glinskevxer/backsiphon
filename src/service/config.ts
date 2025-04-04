@@ -56,12 +56,16 @@ export function parseConfig(text: string): Result<FileConfig, string> {
   try {
     value = JSON.parse(text);
   } catch (error) {
-    return err(`the config file is not json: ${error instanceof Error ? error.message : String(error)}`);
+    return err(
+      `the config file is not json: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
   const parsed = configSchema.safeParse(value);
   if (!parsed.success) {
     return err(
-      parsed.error.issues.map((issue) => `${issue.path.join('.') || 'config'}: ${issue.message}`).join('; '),
+      parsed.error.issues
+        .map((issue) => `${issue.path.join('.') || 'config'}: ${issue.message}`)
+        .join('; '),
     );
   }
   return ok(parsed.data);

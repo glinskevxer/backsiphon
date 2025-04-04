@@ -12,12 +12,7 @@ import type { AssemblyClass } from '../../domain/assembly';
 import type { AssemblyModel } from '../../domain/approvals';
 import type { InstalledAssembly, ProtectionScope } from '../../domain/deficiency';
 import { execute, selectAll, selectOne, type Database } from '../db';
-import {
-  describeConstraintError,
-  fromNumberList,
-  toNullable,
-  toNumberList,
-} from '../rows';
+import { describeConstraintError, fromNumberList, toNullable, toNumberList } from '../rows';
 
 interface ModelRow {
   model_id: string;

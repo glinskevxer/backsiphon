@@ -63,9 +63,9 @@ describe('holiday dates', () => {
     expect(nthWeekday(2023, { name: 'memorial', month: 5, weekday: 1, occurrence: -1 })).toBe(
       '2023-05-29',
     );
-    expect(nthWeekday(2024, { name: 'last friday feb', month: 2, weekday: 5, occurrence: -1 })).toBe(
-      '2024-02-23',
-    );
+    expect(
+      nthWeekday(2024, { name: 'last friday feb', month: 2, weekday: 5, occurrence: -1 }),
+    ).toBe('2024-02-23');
   });
 });
 

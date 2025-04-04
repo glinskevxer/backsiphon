@@ -64,7 +64,10 @@ export function varianceStatus(
   if (asOf < from) {
     return 'not_yet_effective';
   }
-  return rangeContains({ from, ...(variance.expiresOn === undefined ? {} : { to: variance.expiresOn }) }, asOf)
+  return rangeContains(
+    { from, ...(variance.expiresOn === undefined ? {} : { to: variance.expiresOn }) },
+    asOf,
+  )
     ? 'in_effect'
     : 'expired';
 }

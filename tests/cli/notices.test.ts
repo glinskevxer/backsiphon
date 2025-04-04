@@ -19,35 +19,119 @@ beforeEach(async () => {
   }
   register = opened.value;
   await cli(
-    'model', 'add', '--id', 'WK-375', '--maker', 'watkin', '--model', '375',
-    '--class', 'RP', '--sizes', '2', '--listed', '2016-04-01',
+    'model',
+    'add',
+    '--id',
+    'WK-375',
+    '--maker',
+    'watkin',
+    '--model',
+    '375',
+    '--class',
+    'RP',
+    '--sizes',
+    '2',
+    '--listed',
+    '2016-04-01',
   );
   await cli(
-    'tester', 'add', '--id', 'T-118', '--name', 'p. adeyemi', '--agency', 'board',
-    '--certificate', 'BF-4471', '--issued', '2019-05-01', '--expires', '2029-04-30',
-    '--endorsements', 'RP',
+    'tester',
+    'add',
+    '--id',
+    'T-118',
+    '--name',
+    'p. adeyemi',
+    '--agency',
+    'board',
+    '--certificate',
+    'BF-4471',
+    '--issued',
+    '2019-05-01',
+    '--expires',
+    '2029-04-30',
+    '--endorsements',
+    'RP',
   );
   await cli(
-    'gauge', 'add', '--id', 'G-77', '--tester', 'T-118', '--maker', 'midwest',
-    '--serial', '845-C', '--calibrated', '2019-05-01', '--accuracy', '0.2', '--interval', '240',
+    'gauge',
+    'add',
+    '--id',
+    'G-77',
+    '--tester',
+    'T-118',
+    '--maker',
+    'midwest',
+    '--serial',
+    '845-C',
+    '--calibrated',
+    '2019-05-01',
+    '--accuracy',
+    '0.2',
+    '--interval',
+    '240',
   );
   await cli(
-    'connection', 'open', '--account', 'A-1001', '--name', 'kerrigan plating',
-    '--address', '14 forge road', '--use', 'INDUSTRIAL', '--size', '2', '--on', '2018-01-01',
+    'connection',
+    'open',
+    '--account',
+    'A-1001',
+    '--name',
+    'kerrigan plating',
+    '--address',
+    '14 forge road',
+    '--use',
+    'INDUSTRIAL',
+    '--size',
+    '2',
+    '--on',
+    '2018-01-01',
   );
   await cli(
-    'survey', 'record', 'SC-00001', '--on', '2022-01-10', '--surveyor', 'r. okafor',
-    '--findings', 'AUX_WELL',
+    'survey',
+    'record',
+    'SC-00001',
+    '--on',
+    '2022-01-10',
+    '--surveyor',
+    'r. okafor',
+    '--findings',
+    'AUX_WELL',
   );
   await cli(
-    'assembly', 'install', 'SC-00001', '--scope', 'containment', '--class', 'RP',
-    '--model', 'WK-375', '--serial', '1', '--size', '2', '--on', '2022-02-01',
-    '--location', 'vault',
+    'assembly',
+    'install',
+    'SC-00001',
+    '--scope',
+    'containment',
+    '--class',
+    'RP',
+    '--model',
+    'WK-375',
+    '--serial',
+    '1',
+    '--size',
+    '2',
+    '--on',
+    '2022-02-01',
+    '--location',
+    'vault',
   );
   await cli(
-    'test', 'file', 'BA-00001', '--tester', 'T-118', '--gauge', 'G-77',
-    '--on', '2023-03-01', '--filed', '2023-03-01',
-    '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+    'test',
+    'file',
+    'BA-00001',
+    '--tester',
+    'T-118',
+    '--gauge',
+    'G-77',
+    '--on',
+    '2023-03-01',
+    '--filed',
+    '2023-03-01',
+    '--reading',
+    'check1Differential=8.2',
+    '--reading',
+    'reliefOpening=3.1',
   );
 });
 
@@ -113,9 +197,21 @@ describe('reading the letters back', () => {
 
   it('drops a letter off the open list once a passing test lands', async () => {
     await cli(
-      'test', 'file', 'BA-00001', '--tester', 'T-118', '--gauge', 'G-77',
-      '--on', '2024-03-20', '--filed', '2024-03-20',
-      '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-03-20',
+      '--filed',
+      '2024-03-20',
+      '--reading',
+      'check1Differential=8.2',
+      '--reading',
+      'reliefOpening=3.1',
     );
     const open = await cli('notice', 'open');
     expect(open.out).not.toContain('N-000001');
@@ -131,7 +227,13 @@ describe('cancelling a letter', () => {
 
   it('takes one back and says the customer still has it', async () => {
     const cancelled = await cli(
-      'notice', 'cancel', 'N-000001', '--on', '2024-03-08', '--reason', 'wrong address on the file',
+      'notice',
+      'cancel',
+      'N-000001',
+      '--on',
+      '2024-03-08',
+      '--reason',
+      'wrong address on the file',
     );
     expect(cancelled.out).toContain('N-000001 cancelled on 2024-03-08');
     expect(cancelled.out).toContain('the customer has a copy');
@@ -141,7 +243,15 @@ describe('cancelling a letter', () => {
 
   it('will not cancel one twice or before it went out', async () => {
     await cli('notice', 'cancel', 'N-000001', '--on', '2024-03-08', '--reason', 'wrong address');
-    const again = await cli('notice', 'cancel', 'N-000001', '--on', '2024-03-09', '--reason', 'again');
+    const again = await cli(
+      'notice',
+      'cancel',
+      'N-000001',
+      '--on',
+      '2024-03-09',
+      '--reason',
+      'again',
+    );
     expect(again.code).toBe(1);
     const early = await cli('--as-of', '2024-03-05', 'notice', 'run');
     expect(early.out).toContain('0 letters');

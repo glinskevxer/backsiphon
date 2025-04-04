@@ -83,7 +83,9 @@ export function registerTesterCommands(program: Command, io: CliIo, runner: Runn
         ),
       );
       report(io, outcome, (record) => {
-        io.out(`${record.testerId} renewed to ${record.expiresOn}, ${record.endorsements.join(', ')}`);
+        io.out(
+          `${record.testerId} renewed to ${record.expiresOn}, ${record.endorsements.join(', ')}`,
+        );
       });
     });
 
@@ -185,7 +187,11 @@ export function registerTesterCommands(program: Command, io: CliIo, runner: Runn
           { header: 'standing', value: (row: TesterRecord) => row.standing },
           { header: 'filed', value: (row: TesterRecord) => row.filed, align: 'right' },
           { header: 'refused', value: (row: TesterRecord) => row.refused, align: 'right' },
-          { header: 'pass rate', value: (row: TesterRecord) => passRate(row) ?? '', align: 'right' },
+          {
+            header: 'pass rate',
+            value: (row: TesterRecord) => passRate(row) ?? '',
+            align: 'right',
+          },
           {
             header: 'mean days to file',
             value: (row: TesterRecord) => row.meanFilingDays,
@@ -237,7 +243,9 @@ export function registerTesterCommands(program: Command, io: CliIo, runner: Runn
         recalibrate(context.register.db, id, String(options['on']), Number(options['accuracy'])),
       );
       report(io, outcome, (record) => {
-        io.out(`${record.gaugeId} calibrated ${record.calibratedOn}, good to ${calibrationDueOn(record)}`);
+        io.out(
+          `${record.gaugeId} calibrated ${record.calibratedOn}, good to ${calibrationDueOn(record)}`,
+        );
       });
     });
 

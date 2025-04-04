@@ -20,8 +20,17 @@ afterEach(() => {
 describe('contact set', () => {
   it('puts somebody in a role', async () => {
     const set = await cli(
-      'contact', 'set', connectionId, '--role', 'site', '--name', 'j. kerrigan',
-      '--telephone', '555 0142', '--on', '2024-02-01',
+      'contact',
+      'set',
+      connectionId,
+      '--role',
+      'site',
+      '--name',
+      'j. kerrigan',
+      '--telephone',
+      '555 0142',
+      '--on',
+      '2024-02-01',
     );
     expect(set.out).toContain('j. kerrigan is the site contact from 2024-02-01');
     const listed = await cli('contact', 'list', connectionId);
@@ -31,12 +40,30 @@ describe('contact set', () => {
 
   it('retires whoever was in the role', async () => {
     await cli(
-      'contact', 'set', connectionId, '--role', 'site', '--name', 'j. kerrigan',
-      '--telephone', '555 0142', '--on', '2024-02-01',
+      'contact',
+      'set',
+      connectionId,
+      '--role',
+      'site',
+      '--name',
+      'j. kerrigan',
+      '--telephone',
+      '555 0142',
+      '--on',
+      '2024-02-01',
     );
     await cli(
-      'contact', 'set', connectionId, '--role', 'site', '--name', 'r. odiete',
-      '--telephone', '555 0199', '--on', '2025-01-05',
+      'contact',
+      'set',
+      connectionId,
+      '--role',
+      'site',
+      '--name',
+      'r. odiete',
+      '--telephone',
+      '555 0199',
+      '--on',
+      '2025-01-05',
     );
     const live = await cli('contact', 'list', connectionId);
     expect(live.out).toContain('r. odiete');
@@ -47,21 +74,46 @@ describe('contact set', () => {
 
   it('refuses a role nobody has and a connection nobody has', async () => {
     const badRole = await cli(
-      'contact', 'set', connectionId, '--role', 'gatekeeper', '--name', 'x',
-      '--telephone', '1', '--on', '2024-02-01',
+      'contact',
+      'set',
+      connectionId,
+      '--role',
+      'gatekeeper',
+      '--name',
+      'x',
+      '--telephone',
+      '1',
+      '--on',
+      '2024-02-01',
     );
     expect(badRole.err).toContain('is not a role');
     const badConnection = await cli(
-      'contact', 'set', 'SC-00404', '--role', 'site', '--name', 'x',
-      '--telephone', '1', '--on', '2024-02-01',
+      'contact',
+      'set',
+      'SC-00404',
+      '--role',
+      'site',
+      '--name',
+      'x',
+      '--telephone',
+      '1',
+      '--on',
+      '2024-02-01',
     );
     expect(badConnection.code).toBe(1);
   });
 
   it('refuses somebody nobody can reach', async () => {
     const unreachable = await cli(
-      'contact', 'set', connectionId, '--role', 'site', '--name', 'j. kerrigan',
-      '--on', '2024-02-01',
+      'contact',
+      'set',
+      connectionId,
+      '--role',
+      'site',
+      '--name',
+      'j. kerrigan',
+      '--on',
+      '2024-02-01',
     );
     expect(unreachable.err).toContain('no way to reach');
   });
@@ -70,12 +122,32 @@ describe('contact set', () => {
 describe('contact ring', () => {
   it('names the site contact first', async () => {
     await cli(
-      'contact', 'set', connectionId, '--role', 'account', '--name', 'head office',
-      '--telephone', '555 0100', '--on', '2024-02-01',
+      'contact',
+      'set',
+      connectionId,
+      '--role',
+      'account',
+      '--name',
+      'head office',
+      '--telephone',
+      '555 0100',
+      '--on',
+      '2024-02-01',
     );
     await cli(
-      'contact', 'set', connectionId, '--role', 'site', '--name', 'j. kerrigan',
-      '--telephone', '555 0142', '--on', '2024-02-01', '--note', 'ask at the gatehouse',
+      'contact',
+      'set',
+      connectionId,
+      '--role',
+      'site',
+      '--name',
+      'j. kerrigan',
+      '--telephone',
+      '555 0142',
+      '--on',
+      '2024-02-01',
+      '--note',
+      'ask at the gatehouse',
     );
     const ring = await cli('contact', 'ring', connectionId);
     expect(ring.out).toContain('j. kerrigan');
@@ -92,8 +164,17 @@ describe('contact ring', () => {
 describe('contact retire', () => {
   it('takes somebody out and leaves the role empty', async () => {
     await cli(
-      'contact', 'set', connectionId, '--role', 'site', '--name', 'j. kerrigan',
-      '--telephone', '555 0142', '--on', '2024-02-01',
+      'contact',
+      'set',
+      connectionId,
+      '--role',
+      'site',
+      '--name',
+      'j. kerrigan',
+      '--telephone',
+      '555 0142',
+      '--on',
+      '2024-02-01',
     );
     const retired = await cli('contact', 'retire', 'C-00001', '--on', '2025-01-05');
     expect(retired.out).toContain('no longer the site contact');

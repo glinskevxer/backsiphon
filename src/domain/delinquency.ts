@@ -109,13 +109,17 @@ export function delinquencyState(input: DelinquencyInput): DelinquencyState {
   const stage: NoticeStage = current?.stage ?? 'none';
   const next = ladder.rungs.find((rung) => daysPastDue < rung.afterDays);
 
-  reasons.push(`${daysPastDue} days past the due date of ${input.due} on the ${ladder.name} ladder`);
+  reasons.push(
+    `${daysPastDue} days past the due date of ${input.due} on the ${ladder.name} ladder`,
+  );
 
   return {
     stage,
     daysPastDue,
     ladder,
-    ...(next === undefined ? {} : { nextStage: next.stage, nextStageOn: addDays(input.due, next.afterDays) }),
+    ...(next === undefined
+      ? {}
+      : { nextStage: next.stage, nextStageOn: addDays(input.due, next.afterDays) }),
     shutoffEligible: stage === 'shutoff',
     held: false,
     reasons,

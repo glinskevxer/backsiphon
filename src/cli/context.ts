@@ -9,7 +9,12 @@
 import { isCivilDate, type CivilDate } from '../util/dates';
 import { err, ok, type Result } from '../util/result';
 import { loadConfig } from '../service/config';
-import { closeRegister, openRegister, type ProgramPolicy, type Register } from '../service/register';
+import {
+  closeRegister,
+  openRegister,
+  type ProgramPolicy,
+  type Register,
+} from '../service/register';
 import type { CliIo } from './output';
 
 export interface GlobalOptions {

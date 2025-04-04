@@ -11,33 +11,100 @@ const cli = cliRunner(() => register, '2024-09-01');
 
 async function setUpConnection(account: string, use: string): Promise<void> {
   await cli(
-    'connection', 'open', '--account', account, '--name', `premise ${account}`,
-    '--address', 'somewhere', '--use', use, '--size', '2', '--on', '2018-01-01',
+    'connection',
+    'open',
+    '--account',
+    account,
+    '--name',
+    `premise ${account}`,
+    '--address',
+    'somewhere',
+    '--use',
+    use,
+    '--size',
+    '2',
+    '--on',
+    '2018-01-01',
   );
 }
 
 beforeEach(async () => {
-  const opened = openRegister({ file: ':memory:', actor: 'clerk.hines', now: () => '2024-09-01T09:00:00Z' });
+  const opened = openRegister({
+    file: ':memory:',
+    actor: 'clerk.hines',
+    now: () => '2024-09-01T09:00:00Z',
+  });
   if (!opened.ok) {
     throw new Error(opened.error);
   }
   register = opened.value;
   await cli(
-    'model', 'add', '--id', 'WK-375', '--maker', 'watkin', '--model', '375',
-    '--class', 'RP', '--sizes', '2', '--listed', '2016-04-01',
+    'model',
+    'add',
+    '--id',
+    'WK-375',
+    '--maker',
+    'watkin',
+    '--model',
+    '375',
+    '--class',
+    'RP',
+    '--sizes',
+    '2',
+    '--listed',
+    '2016-04-01',
   );
   await cli(
-    'model', 'add', '--id', 'WK-350', '--maker', 'watkin', '--model', '350',
-    '--class', 'DC', '--sizes', '2', '--listed', '2016-04-01',
+    'model',
+    'add',
+    '--id',
+    'WK-350',
+    '--maker',
+    'watkin',
+    '--model',
+    '350',
+    '--class',
+    'DC',
+    '--sizes',
+    '2',
+    '--listed',
+    '2016-04-01',
   );
   await cli(
-    'tester', 'add', '--id', 'T-118', '--name', 'p. adeyemi', '--agency', 'board',
-    '--certificate', 'BF-4471', '--issued', '2019-05-01', '--expires', '2029-04-30',
-    '--endorsements', 'RP,DC',
+    'tester',
+    'add',
+    '--id',
+    'T-118',
+    '--name',
+    'p. adeyemi',
+    '--agency',
+    'board',
+    '--certificate',
+    'BF-4471',
+    '--issued',
+    '2019-05-01',
+    '--expires',
+    '2029-04-30',
+    '--endorsements',
+    'RP,DC',
   );
   await cli(
-    'gauge', 'add', '--id', 'G-77', '--tester', 'T-118', '--maker', 'midwest',
-    '--serial', '845-C', '--calibrated', '2019-05-01', '--accuracy', '0.2', '--interval', '240',
+    'gauge',
+    'add',
+    '--id',
+    'G-77',
+    '--tester',
+    'T-118',
+    '--maker',
+    'midwest',
+    '--serial',
+    '845-C',
+    '--calibrated',
+    '2019-05-01',
+    '--accuracy',
+    '0.2',
+    '--interval',
+    '240',
   );
 });
 
@@ -49,8 +116,15 @@ describe('status', () => {
   beforeEach(async () => {
     await setUpConnection('A-1001', 'INDUSTRIAL');
     await cli(
-      'survey', 'record', 'SC-00001', '--on', '2023-01-10', '--surveyor', 'r. okafor',
-      '--findings', 'AUX_WELL',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-01-10',
+      '--surveyor',
+      'r. okafor',
+      '--findings',
+      'AUX_WELL',
     );
   });
 
@@ -70,14 +144,40 @@ describe('status', () => {
 
   it('turns compliant once the right assembly is fitted and tested', async () => {
     await cli(
-      'assembly', 'install', 'SC-00001', '--scope', 'containment', '--class', 'RP',
-      '--model', 'WK-375', '--serial', '1', '--size', '2', '--on', '2023-02-01',
-      '--location', 'vault',
+      'assembly',
+      'install',
+      'SC-00001',
+      '--scope',
+      'containment',
+      '--class',
+      'RP',
+      '--model',
+      'WK-375',
+      '--serial',
+      '1',
+      '--size',
+      '2',
+      '--on',
+      '2023-02-01',
+      '--location',
+      'vault',
     );
     await cli(
-      'test', 'file', 'BA-00001', '--tester', 'T-118', '--gauge', 'G-77',
-      '--on', '2024-03-01', '--filed', '2024-03-02',
-      '--reading', 'check1Differential=8.2', '--reading', 'reliefOpening=3.1',
+      'test',
+      'file',
+      'BA-00001',
+      '--tester',
+      'T-118',
+      '--gauge',
+      'G-77',
+      '--on',
+      '2024-03-01',
+      '--filed',
+      '2024-03-02',
+      '--reading',
+      'check1Differential=8.2',
+      '--reading',
+      'reliefOpening=3.1',
     );
     const status = await cli('status', 'SC-00001');
     expect(status.out).toMatch(/standing\s+compliant/);
@@ -86,9 +186,23 @@ describe('status', () => {
 
   it('says what a wrong class is short of', async () => {
     await cli(
-      'assembly', 'install', 'SC-00001', '--scope', 'containment', '--class', 'DC',
-      '--model', 'WK-350', '--serial', '2', '--size', '2', '--on', '2023-02-01',
-      '--location', 'vault',
+      'assembly',
+      'install',
+      'SC-00001',
+      '--scope',
+      'containment',
+      '--class',
+      'DC',
+      '--model',
+      'WK-350',
+      '--serial',
+      '2',
+      '--size',
+      '2',
+      '--on',
+      '2023-02-01',
+      '--location',
+      'vault',
     );
     const status = await cli('status', 'SC-00001');
     expect(status.out).toContain('stopsHealthHazard');
@@ -96,7 +210,10 @@ describe('status', () => {
 
   it('writes the whole thing as json', async () => {
     const io = capturingIo();
-    await run(['--json', 'status', 'SC-00001'], { io, runner: borrow(() => register, '2024-09-01') });
+    await run(['--json', 'status', 'SC-00001'], {
+      io,
+      runner: borrow(() => register, '2024-09-01'),
+    });
     const parsed = JSON.parse(io.lines.join('\n')) as { standing: string; connectionId: string };
     expect(parsed.connectionId).toBe('SC-00001');
     expect(parsed.standing).toBe('deficient');
@@ -114,8 +231,15 @@ describe('standing', () => {
     await setUpConnection('A-1001', 'INDUSTRIAL');
     await setUpConnection('A-1002', 'OFFICE');
     await cli(
-      'survey', 'record', 'SC-00001', '--on', '2023-01-10', '--surveyor', 'r',
-      '--findings', 'AUX_WELL',
+      'survey',
+      'record',
+      'SC-00001',
+      '--on',
+      '2023-01-10',
+      '--surveyor',
+      'r',
+      '--findings',
+      'AUX_WELL',
     );
     await cli('survey', 'record', 'SC-00002', '--on', '2023-01-10', '--surveyor', 'r');
   });

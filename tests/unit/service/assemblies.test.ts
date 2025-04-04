@@ -10,7 +10,12 @@ import {
   takeAssemblyOut,
   type InstallInput,
 } from '../../../src/service/assemblies';
-import { delistModel, findAssembly, insertModel, listAssemblies } from '../../../src/storage/repositories/assemblies';
+import {
+  delistModel,
+  findAssembly,
+  insertModel,
+  listAssemblies,
+} from '../../../src/storage/repositories/assemblies';
 import { eventsFor } from '../../../src/storage/repositories/events';
 
 let register: Register;
@@ -87,7 +92,10 @@ describe('putting one in', () => {
   });
 
   it('refuses a class that cannot sit at that point', () => {
-    const result = installAssembly(register, install({ assemblyClass: 'SVB', modelId: 'CB-40S', sizeInches: 1 }));
+    const result = installAssembly(
+      register,
+      install({ assemblyClass: 'SVB', modelId: 'CB-40S', sizeInches: 1 }),
+    );
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.error).toContain('not accepted at a containment point');
@@ -111,7 +119,10 @@ describe('putting one in', () => {
 
   it('refuses a second assembly at a point that already has one', () => {
     installAssembly(register, install());
-    const second = installAssembly(register, install({ serialNumber: '999', installedOn: '2022-01-01' }));
+    const second = installAssembly(
+      register,
+      install({ serialNumber: '999', installedOn: '2022-01-01' }),
+    );
     expect(second.ok).toBe(false);
     if (!second.ok) {
       expect(second.error).toContain('BA-00001');
@@ -122,7 +133,13 @@ describe('putting one in', () => {
     installAssembly(register, install());
     const isolation = installAssembly(
       register,
-      install({ scope: 'isolation', assemblyClass: 'SVB', modelId: 'CB-40S', sizeInches: 1, serialNumber: '888' }),
+      install({
+        scope: 'isolation',
+        assemblyClass: 'SVB',
+        modelId: 'CB-40S',
+        sizeInches: 1,
+        serialNumber: '888',
+      }),
     );
     expect(isolation.ok).toBe(true);
     expect(listAssemblies(register.db, { connectionId: 'SC-00001' })).toHaveLength(2);
@@ -144,7 +161,9 @@ describe('taking one out', () => {
   });
 
   it('records the date and the reason', () => {
-    expect(takeAssemblyOut(register, 'BA-00001', '2024-02-01', 'body cracked by frost').ok).toBe(true);
+    expect(takeAssemblyOut(register, 'BA-00001', '2024-02-01', 'body cracked by frost').ok).toBe(
+      true,
+    );
     expect(findAssembly(register.db, 'BA-00001')?.removedOn).toBe('2024-02-01');
     const events = eventsFor(register.db, 'assembly', 'BA-00001');
     expect(events[1]?.detail).toContain('frost');
@@ -156,7 +175,9 @@ describe('taking one out', () => {
 
   it('frees the point for the next one', () => {
     takeAssemblyOut(register, 'BA-00001', '2024-02-01', 'cracked');
-    expect(installAssembly(register, install({ serialNumber: '999', installedOn: '2024-02-01' })).ok).toBe(true);
+    expect(
+      installAssembly(register, install({ serialNumber: '999', installedOn: '2024-02-01' })).ok,
+    ).toBe(true);
   });
 });
 
@@ -185,7 +206,9 @@ describe('swapping one', () => {
     }
     expect(swapped.value.removed.removedOn).toBe('2024-03-04');
     expect(swapped.value.installed.assemblyId).toBe('BA-00002');
-    expect(listAssemblies(register.db, { connectionId: 'SC-00001', activeOn: '2024-03-04' })).toHaveLength(1);
+    expect(
+      listAssemblies(register.db, { connectionId: 'SC-00001', activeOn: '2024-03-04' }),
+    ).toHaveLength(1);
   });
 
   it('leaves the old one in place when the new one is refused', () => {
@@ -268,7 +291,9 @@ describe('moving one', () => {
     });
   });
 
-  function move(overrides: Partial<Parameters<typeof relocateAssembly>[2]> = {}): ReturnType<typeof relocateAssembly> {
+  function move(
+    overrides: Partial<Parameters<typeof relocateAssembly>[2]> = {},
+  ): ReturnType<typeof relocateAssembly> {
     return relocateAssembly(register, 'BA-00001', {
       connectionId: 'SC-00002',
       scope: 'containment',

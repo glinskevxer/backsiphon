@@ -34,7 +34,10 @@ describe('the manifest', () => {
   });
 
   it('pins every dependency exactly', () => {
-    for (const version of Object.values({ ...manifest.dependencies, ...manifest.devDependencies })) {
+    for (const version of Object.values({
+      ...manifest.dependencies,
+      ...manifest.devDependencies,
+    })) {
       expect(version).toMatch(/^\d+\.\d+\.\d+$/);
     }
   });

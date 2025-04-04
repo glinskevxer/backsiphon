@@ -147,7 +147,12 @@ describe('assemblies', () => {
     insertAssembly(db, assembly());
     insertAssembly(
       db,
-      assembly({ assemblyId: 'BA-2', scope: 'isolation', serialNumber: '2', installedOn: '2021-01-01' }),
+      assembly({
+        assemblyId: 'BA-2',
+        scope: 'isolation',
+        serialNumber: '2',
+        installedOn: '2021-01-01',
+      }),
     );
     expect(listAssemblies(db, { connectionId: 'SC-1' })).toHaveLength(2);
     expect(listAssemblies(db, { scope: 'isolation' })).toHaveLength(1);
@@ -159,7 +164,10 @@ describe('assemblies', () => {
 describe('the assembly at a point', () => {
   it('is the one in the ground on the day', () => {
     insertAssembly(db, assembly({ removedOn: '2022-03-01' }));
-    insertAssembly(db, assembly({ assemblyId: 'BA-2', serialNumber: '9', installedOn: '2022-03-01' }));
+    insertAssembly(
+      db,
+      assembly({ assemblyId: 'BA-2', serialNumber: '9', installedOn: '2022-03-01' }),
+    );
     expect(assemblyAtPoint(db, 'SC-1', 'containment', '2021-01-01')?.assemblyId).toBe('BA-1');
     expect(assemblyAtPoint(db, 'SC-1', 'containment', '2023-01-01')?.assemblyId).toBe('BA-2');
     expect(assemblyAtPoint(db, 'SC-1', 'containment', '2018-01-01')).toBeUndefined();
@@ -172,7 +180,10 @@ describe('the assembly at a point', () => {
 
   it('takes the newest when two are somehow in the ground at once', () => {
     insertAssembly(db, assembly());
-    insertAssembly(db, assembly({ assemblyId: 'BA-2', serialNumber: '9', installedOn: '2020-01-01' }));
+    insertAssembly(
+      db,
+      assembly({ assemblyId: 'BA-2', serialNumber: '9', installedOn: '2020-01-01' }),
+    );
     expect(assemblyAtPoint(db, 'SC-1', 'containment', '2024-01-01')?.assemblyId).toBe('BA-2');
   });
 });

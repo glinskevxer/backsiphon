@@ -1,6 +1,13 @@
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { closeDatabase, execute, openDatabase, selectAll, tableNames, type Database } from '../../../src/storage/db';
+import {
+  closeDatabase,
+  execute,
+  openDatabase,
+  selectAll,
+  tableNames,
+  type Database,
+} from '../../../src/storage/db';
 import { MIGRATIONS, migrate } from '../../../src/storage/schema';
 
 const NOW = '2024-03-18T08:00:00Z';
@@ -129,7 +136,21 @@ describe('what the schema refuses', () => {
            containment_degree, isolation_degree, air_gap_required, backpressure, basis,
            next_survey_due, recorded_at
          ) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        ['SV-9', 'SC-1', '2024-02-01', 'r', 1, 'OFFICE', 'severe', 'none', 0, 0, 'survey', '2025-02-01', NOW],
+        [
+          'SV-9',
+          'SC-1',
+          '2024-02-01',
+          'r',
+          1,
+          'OFFICE',
+          'severe',
+          'none',
+          0,
+          0,
+          'survey',
+          '2025-02-01',
+          NOW,
+        ],
       ),
     ).toThrow();
   });

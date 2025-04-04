@@ -92,13 +92,13 @@ export function noticeAlreadySent(
   stage: Exclude<NoticeStage, 'none'>,
 ): boolean {
   return (
-    selectOne<{ total: number }>(
+    (selectOne<{ total: number }>(
       db,
       `select count(*) as total from notices
        where connection_id = ? and due_date = ? and stage = ?`,
       [connectionId, dueDate, stage],
-    )?.total ?? 0
-  ) > 0;
+    )?.total ?? 0) > 0
+  );
 }
 
 export function noticesForConnection(db: Database, connectionId: string): NoticeRecord[] {

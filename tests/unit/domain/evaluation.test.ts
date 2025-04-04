@@ -42,24 +42,36 @@ describe('a double check', () => {
   });
 
   it('fails when a check is well under', () => {
-    const result = evaluate(report({ asFound: { check1Differential: 0.4, check2Differential: 1.8 } }), context);
+    const result = evaluate(
+      report({ asFound: { check1Differential: 0.4, check2Differential: 1.8 } }),
+      context,
+    );
     expect(result.outcome).toBe('fail');
     expect(result.judgements[0]?.verdict).toBe('fail');
   });
 
   it('reads a shortfall inside the gauge band as marginal', () => {
-    const result = evaluate(report({ asFound: { check1Differential: 0.9, check2Differential: 1.8 } }), context);
+    const result = evaluate(
+      report({ asFound: { check1Differential: 0.9, check2Differential: 1.8 } }),
+      context,
+    );
     expect(result.outcome).toBe('marginal');
     expect(result.judgements[0]?.note).toContain('certified to');
   });
 
   it('fails once the shortfall is outside the band', () => {
-    const result = evaluate(report({ asFound: { check1Differential: 0.79, check2Differential: 1.8 } }), context);
+    const result = evaluate(
+      report({ asFound: { check1Differential: 0.79, check2Differential: 1.8 } }),
+      context,
+    );
     expect(result.outcome).toBe('fail');
   });
 
   it('reads exactly the minimum as a pass', () => {
-    const result = evaluate(report({ asFound: { check1Differential: 1, check2Differential: 1 } }), context);
+    const result = evaluate(
+      report({ asFound: { check1Differential: 1, check2Differential: 1 } }),
+      context,
+    );
     expect(result.outcome).toBe('pass');
   });
 
@@ -89,7 +101,9 @@ describe('a double check', () => {
 
 describe('a reduced pressure assembly', () => {
   it('passes when both readings clear and the gap holds', () => {
-    expect(evaluate(rp({ check1Differential: 8.2, reliefOpening: 3.1 }), context).outcome).toBe('pass');
+    expect(evaluate(rp({ check1Differential: 8.2, reliefOpening: 3.1 }), context).outcome).toBe(
+      'pass',
+    );
   });
 
   it('fails the first check under five', () => {

@@ -52,9 +52,7 @@ export function recordSurvey(
     return err(`there is no connection with the id ${input.connectionId}`);
   }
   if (!isInService(connection, input.surveyedOn)) {
-    return err(
-      `the connection ${input.connectionId} was not in service on ${input.surveyedOn}`,
-    );
+    return err(`the connection ${input.connectionId} was not in service on ${input.surveyedOn}`);
   }
 
   const assessment = assess({

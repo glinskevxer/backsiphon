@@ -45,51 +45,53 @@ export function registerContactCommands(program: Command, io: CliIo, runner: Run
     .option('--telephone <number>', 'a telephone number')
     .option('--email <address>', 'an email address')
     .option('--note <note>', 'anything worth knowing before ringing them')
-    .action((connectionId: string, options: Record<string, string | undefined>, command: Command) => {
-      const outcome = runner(globals(command), io, (context) => {
-        if (findConnection(context.register.db, connectionId) === undefined) {
-          return err(`there is no connection with the id ${connectionId}`);
-        }
-        const role = String(options['role']) as ContactRole;
-        if (!CONTACT_ROLES.includes(role)) {
-          return err(`${role} is not a role, try ${CONTACT_ROLES.join(', ')}`);
-        }
-        const ids = selectAll<{ contact_id: string }>(
-          context.register.db,
-          "select contact_id from contacts where contact_id like 'C-%'",
-        );
-        const record: Contact = {
-          contactId: nextContactId(ids),
-          connectionId,
-          role,
-          name: String(options['name']),
-          ...(options['telephone'] === undefined
-            ? {}
-            : { telephone: String(options['telephone']) }),
-          ...(options['email'] === undefined ? {} : { email: String(options['email']) }),
-          ...(options['note'] === undefined ? {} : { note: String(options['note']) }),
-          addedOn: String(options['on']),
-        };
-        return withTransaction(context.register.db, () => {
-          const written = replaceContact(context.register.db, record);
-          if (!written.ok) {
-            return written;
+    .action(
+      (connectionId: string, options: Record<string, string | undefined>, command: Command) => {
+        const outcome = runner(globals(command), io, (context) => {
+          if (findConnection(context.register.db, connectionId) === undefined) {
+            return err(`there is no connection with the id ${connectionId}`);
           }
-          appendEvent(context.register.db, {
-            happenedAt: context.register.now(),
-            actor: context.register.actor,
-            kind: 'contact_set',
-            subjectKind: 'connection',
-            subjectId: connectionId,
-            detail: `${record.role}: ${record.name}`,
+          const role = String(options['role']) as ContactRole;
+          if (!CONTACT_ROLES.includes(role)) {
+            return err(`${role} is not a role, try ${CONTACT_ROLES.join(', ')}`);
+          }
+          const ids = selectAll<{ contact_id: string }>(
+            context.register.db,
+            "select contact_id from contacts where contact_id like 'C-%'",
+          );
+          const record: Contact = {
+            contactId: nextContactId(ids),
+            connectionId,
+            role,
+            name: String(options['name']),
+            ...(options['telephone'] === undefined
+              ? {}
+              : { telephone: String(options['telephone']) }),
+            ...(options['email'] === undefined ? {} : { email: String(options['email']) }),
+            ...(options['note'] === undefined ? {} : { note: String(options['note']) }),
+            addedOn: String(options['on']),
+          };
+          return withTransaction(context.register.db, () => {
+            const written = replaceContact(context.register.db, record);
+            if (!written.ok) {
+              return written;
+            }
+            appendEvent(context.register.db, {
+              happenedAt: context.register.now(),
+              actor: context.register.actor,
+              kind: 'contact_set',
+              subjectKind: 'connection',
+              subjectId: connectionId,
+              detail: `${record.role}: ${record.name}`,
+            });
+            return written;
           });
-          return written;
         });
-      });
-      report(io, outcome, (record) => {
-        io.out(`${record.name} is the ${record.role} contact from ${record.addedOn}`);
-      });
-    });
+        report(io, outcome, (record) => {
+          io.out(`${record.name} is the ${record.role} contact from ${record.addedOn}`);
+        });
+      },
+    );
 
   contact
     .command('retire')
@@ -110,31 +112,33 @@ export function registerContactCommands(program: Command, io: CliIo, runner: Run
     .description('the contacts on a connection')
     .argument('<connection>', 'the connection id')
     .option('--all', 'include the ones who have been retired')
-    .action((connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
-      const outcome = runner(globals(command), io, (context) =>
-        ok({
-          context,
-          rows: contactsFor(context.register.db, connectionId, options['all'] === true),
-        }),
-      );
-      report(io, outcome, ({ context, rows }) => {
-        if (context.json) {
-          writeJson(io, rows);
-          return;
-        }
-        for (const line of table(rows, [
-          { header: 'contact', value: (row: Contact) => row.contactId },
-          { header: 'role', value: (row: Contact) => row.role },
-          { header: 'name', value: (row: Contact) => row.name },
-          { header: 'telephone', value: (row: Contact) => row.telephone },
-          { header: 'email', value: (row: Contact) => row.email },
-          { header: 'since', value: (row: Contact) => row.addedOn },
-          { header: 'retired', value: (row: Contact) => row.retiredOn },
-        ])) {
-          io.out(line);
-        }
-      });
-    });
+    .action(
+      (connectionId: string, options: Record<string, boolean | undefined>, command: Command) => {
+        const outcome = runner(globals(command), io, (context) =>
+          ok({
+            context,
+            rows: contactsFor(context.register.db, connectionId, options['all'] === true),
+          }),
+        );
+        report(io, outcome, ({ context, rows }) => {
+          if (context.json) {
+            writeJson(io, rows);
+            return;
+          }
+          for (const line of table(rows, [
+            { header: 'contact', value: (row: Contact) => row.contactId },
+            { header: 'role', value: (row: Contact) => row.role },
+            { header: 'name', value: (row: Contact) => row.name },
+            { header: 'telephone', value: (row: Contact) => row.telephone },
+            { header: 'email', value: (row: Contact) => row.email },
+            { header: 'since', value: (row: Contact) => row.addedOn },
+            { header: 'retired', value: (row: Contact) => row.retiredOn },
+          ])) {
+            io.out(line);
+          }
+        });
+      },
+    );
 
   contact
     .command('ring')

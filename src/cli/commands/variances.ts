@@ -36,21 +36,23 @@ export function registerVarianceCommands(program: Command, io: CliIo, runner: Ru
     .requiredOption('--on <date>', 'the day the application arrived')
     .option('--scope <scope>', 'containment or isolation', 'containment')
     .option('--note <note>', 'what the customer says')
-    .action((connectionId: string, options: Record<string, string | undefined>, command: Command) => {
-      const outcome = runner(globals(command), io, (context) =>
-        applyForVariance(context.register, {
-          connectionId,
-          appliedOn: String(options['on']),
-          acceptedClass: String(options['accept']) as AssemblyClass,
-          scope: String(options['scope'] ?? 'containment') as ProtectionScope,
-          ...(options['note'] === undefined ? {} : { note: String(options['note']) }),
-        }),
-      );
-      report(io, outcome, (record) => {
-        io.out(`${record.varianceId} taken, asking for a ${record.acceptedClass}`);
-        io.out('the notice ladder is held on a pollutional hazard while this is pending');
-      });
-    });
+    .action(
+      (connectionId: string, options: Record<string, string | undefined>, command: Command) => {
+        const outcome = runner(globals(command), io, (context) =>
+          applyForVariance(context.register, {
+            connectionId,
+            appliedOn: String(options['on']),
+            acceptedClass: String(options['accept']) as AssemblyClass,
+            scope: String(options['scope'] ?? 'containment') as ProtectionScope,
+            ...(options['note'] === undefined ? {} : { note: String(options['note']) }),
+          }),
+        );
+        report(io, outcome, (record) => {
+          io.out(`${record.varianceId} taken, asking for a ${record.acceptedClass}`);
+          io.out('the notice ladder is held on a pollutional hazard while this is pending');
+        });
+      },
+    );
 
   variance
     .command('grant')

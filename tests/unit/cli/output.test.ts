@@ -70,10 +70,12 @@ describe('a table', () => {
 
 describe('the other shapes', () => {
   it('lines a label and value pair up', () => {
-    expect(describePairs([['id', 'BA-1'], ['location', 'meter vault']])).toEqual([
-      'id        BA-1',
-      'location  meter vault',
-    ]);
+    expect(
+      describePairs([
+        ['id', 'BA-1'],
+        ['location', 'meter vault'],
+      ]),
+    ).toEqual(['id        BA-1', 'location  meter vault']);
   });
 
   it('underlines a heading to its own width', () => {

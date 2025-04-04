@@ -10,7 +10,13 @@
 
 import type { AssemblyClass } from './assembly';
 import { minimumFor, procedureFor, type BufferRule, type ProcedureStep } from './procedure';
-import { effectiveReadings, missingReadings, strayReadings, type Readings, type TestReport } from './report';
+import {
+  effectiveReadings,
+  missingReadings,
+  strayReadings,
+  type Readings,
+  type TestReport,
+} from './report';
 
 export type Outcome = 'pass' | 'marginal' | 'fail' | 'incomplete';
 
@@ -54,7 +60,10 @@ export interface EvaluationContext {
 
 export function evaluate(report: TestReport, context: EvaluationContext): Evaluation {
   const asFound = judgeReadings(report.assemblyClassTested, report.asFound, context);
-  const effective = report.asLeft === undefined ? asFound : judgeReadings(report.assemblyClassTested, effectiveReadings(report), context);
+  const effective =
+    report.asLeft === undefined
+      ? asFound
+      : judgeReadings(report.assemblyClassTested, effectiveReadings(report), context);
 
   const notes = [...effective.notes];
   if (report.asLeft !== undefined) {
