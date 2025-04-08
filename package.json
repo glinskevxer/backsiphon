@@ -22,7 +22,8 @@
     "format": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"",
     "handbook": "tsx scripts/build-handbook.ts",
     "handbook:check": "tsx scripts/build-handbook.ts --check",
-    "export-check": "bash scripts/export-check.sh"
+    "export-check": "bash scripts/export-check.sh",
+    "audit": "npm audit --json > audit.json || true && tsx scripts/audit-dependencies.ts --from-audit audit.json"
   },
   "dependencies": {
     "better-sqlite3": "11.8.1",
