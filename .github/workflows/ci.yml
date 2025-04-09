@@ -87,6 +87,8 @@ jobs:
       - run: npm ci
       - name: export check
         run: npm run export-check
+      - name: release check
+        run: npm run release-check
 
   audit:
     name: dependency advisories
@@ -98,7 +100,11 @@ jobs:
           node-version: '20.18.1'
           cache: npm
       - run: npm ci
-      - name: read the advisories
-        run: npm audit --json > audit.json || true
+      - name: read the advisories against what ships
+        run: npm audit --omit=dev --json > audit.json || true
       - name: decide about them
         run: npx tsx scripts/audit-dependencies.ts --from-audit audit.json
+      - name: read the advisories against the toolchain, for information
+        run: npm audit --json > audit-dev.json || true
+      - name: print them
+        run: npx tsx scripts/audit-dependencies.ts --from-audit audit-dev.json --report-only

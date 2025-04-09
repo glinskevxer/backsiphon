@@ -7,6 +7,11 @@
  * reported advisory does not fail this. What fails it is an advisory nobody
  * has written a line about, and an acceptance that has gone past the date the
  * office said it would look at it again.
+ *
+ * The gate reads the production dependencies only, because those are the ones
+ * that go out on the register. The development advisories are printed in the
+ * same run and are not allowed to stop a build: a linter with a slow regular
+ * expression in it is not a thing that reaches a water district.
  */
 
 import { readFileSync } from 'node:fs';
@@ -107,12 +112,17 @@ function main(argv: ReadonlyArray<string>): number {
     console.error('usage: audit-dependencies --from-audit <file written by npm audit --json>');
     return 2;
   }
+  const reportOnly = argv.includes('--report-only');
   const decision = decide(
     readAdvisories(readFileSync(String(argv[index + 1]), 'utf8')),
     new Date().toISOString().slice(0, 10),
   );
   for (const line of describe(decision)) {
     console.log(line);
+  }
+  if (reportOnly) {
+    console.log('report only, nothing here fails the build');
+    return 0;
   }
   return decision.ok ? 0 : 1;
 }

@@ -79,3 +79,13 @@ describe('deciding about them', () => {
     expect(lines[1]).toContain('undecided: 2044 other high');
   });
 });
+
+describe('the two audits the office runs', () => {
+  it('gates on what ships and reports on the toolchain', () => {
+    const shipping = decide(readAdvisories('{}'), '2025-04-01', []);
+    expect(shipping.ok).toBe(true);
+    const toolchain = decide(readAdvisories(REPORT), '2025-04-01', []);
+    expect(toolchain.ok).toBe(false);
+    expect(toolchain.undecided).toHaveLength(2);
+  });
+});
