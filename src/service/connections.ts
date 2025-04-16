@@ -15,11 +15,13 @@ import { appendEvent } from '../storage/repositories/events';
 import {
   disconnect,
   findConnection,
+  findConnectionByAccount,
   insertConnection,
   updateConnection,
   type ConnectionRecord,
 } from '../storage/repositories/connections';
-import { withTransaction } from '../storage/db';
+import { execute, withTransaction } from '../storage/db';
+import { describeConstraintError } from '../storage/rows';
 import { mintId, type Register } from './register';
 
 /**
@@ -158,6 +160,65 @@ export function changePremiseUse(
       resurveyNeeded: true,
       previousUseCode: existing.premiseUseCode,
     });
+  });
+}
+
+export interface Renumber {
+  readonly accountNumber: string;
+  readonly on: CivilDate;
+  readonly reason: string;
+}
+
+/**
+ * The billing system renumbers an account. Nothing about the water changes:
+ * the same pipe, the same premise, the same assemblies and the same test
+ * history. Only the number the office says on the telephone moves, so this is
+ * a change to one column and a line on the trail, and it deliberately does not
+ * touch anything else.
+ */
+export function renumberAccount(
+  register: Register,
+  connectionId: string,
+  change: Renumber,
+): Result<ConnectionRecord, string> {
+  const existing = findConnection(register.db, connectionId);
+  if (existing === undefined) {
+    return err(`there is no connection with the id ${connectionId}`);
+  }
+  const wanted = change.accountNumber.trim();
+  if (wanted === '') {
+    return err('a connection has to carry an account number');
+  }
+  if (wanted === existing.accountNumber) {
+    return err(`the connection ${connectionId} is already on account ${wanted}`);
+  }
+  if (change.reason.trim() === '') {
+    return err('renumbering an account has to say why');
+  }
+  const clash = findConnectionByAccount(register.db, wanted);
+  if (clash !== undefined) {
+    return err(`the account ${wanted} is already against ${clash.connectionId}`);
+  }
+
+  return withTransaction(register.db, () => {
+    try {
+      execute(
+        register.db,
+        'update service_connections set account_number = ? where connection_id = ?',
+        [wanted, connectionId],
+      );
+    } catch (error) {
+      return err(describeConstraintError(error, `the account ${wanted}`));
+    }
+    appendEvent(register.db, {
+      happenedAt: register.now(),
+      actor: register.actor,
+      kind: 'account_renumbered',
+      subjectKind: 'connection',
+      subjectId: connectionId,
+      detail: `${existing.accountNumber} became ${wanted} on ${change.on}: ${change.reason}`,
+    });
+    return ok({ ...existing, accountNumber: wanted });
   });
 }
 

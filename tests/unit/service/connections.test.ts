@@ -5,6 +5,7 @@ import {
   changePremiseUse,
   closeConnection,
   openConnection,
+  renumberAccount,
   type NewConnection,
 } from '../../../src/service/connections';
 import {
@@ -221,5 +222,79 @@ describe('the fixture geometry', () => {
       false,
     );
     expect(updateFixtureFacts(register.db, 'SC-00404', { indoorRiser: true }).ok).toBe(false);
+  });
+});
+
+describe('renumbering an account', () => {
+  beforeEach(() => {
+    openConnection(register, input());
+  });
+
+  it('moves the number and says what it did not touch', () => {
+    const moved = renumberAccount(register, 'SC-00001', {
+      accountNumber: 'A-2001',
+      on: '2025-04-01',
+      reason: 'the billing system was rebuilt',
+    });
+    expect(moved.ok).toBe(true);
+    const found = findConnection(register.db, 'SC-00001');
+    expect(found?.accountNumber).toBe('A-2001');
+    expect(found?.premiseUseCode).toBe('PLATING');
+    expect(found?.connectedOn).toBe('2019-04-02');
+  });
+
+  it('writes what it was and what it became on the trail', () => {
+    renumberAccount(register, 'SC-00001', {
+      accountNumber: 'A-2001',
+      on: '2025-04-01',
+      reason: 'the billing system was rebuilt',
+    });
+    const events = eventsFor(register.db, 'connection', 'SC-00001');
+    expect(events[1]?.kind).toBe('account_renumbered');
+    expect(events[1]?.detail).toContain('A-1001 became A-2001');
+  });
+
+  it('refuses a number that is against another connection', () => {
+    openConnection(register, input({ accountNumber: 'A-1002', premiseName: 'another' }));
+    const clash = renumberAccount(register, 'SC-00001', {
+      accountNumber: 'A-1002',
+      on: '2025-04-01',
+      reason: 'a mistake',
+    });
+    expect(clash.ok).toBe(false);
+    if (!clash.ok) {
+      expect(clash.error).toContain('SC-00002');
+    }
+  });
+
+  it('refuses the number it already has, an empty one, and no reason', () => {
+    expect(
+      renumberAccount(register, 'SC-00001', {
+        accountNumber: 'A-1001',
+        on: '2025-04-01',
+        reason: 'x',
+      }).ok,
+    ).toBe(false);
+    expect(
+      renumberAccount(register, 'SC-00001', { accountNumber: '  ', on: '2025-04-01', reason: 'x' })
+        .ok,
+    ).toBe(false);
+    expect(
+      renumberAccount(register, 'SC-00001', {
+        accountNumber: 'A-3001',
+        on: '2025-04-01',
+        reason: ' ',
+      }).ok,
+    ).toBe(false);
+  });
+
+  it('says so when there is no such connection', () => {
+    expect(
+      renumberAccount(register, 'SC-00404', {
+        accountNumber: 'A-2001',
+        on: '2025-04-01',
+        reason: 'x',
+      }).ok,
+    ).toBe(false);
   });
 });

@@ -6,7 +6,12 @@ import type { Command } from 'commander';
 
 import { err, ok } from '../../util/result';
 import { PREMISE_USES } from '../../domain/premise';
-import { changePremiseUse, closeConnection, openConnection } from '../../service/connections';
+import {
+  changePremiseUse,
+  closeConnection,
+  openConnection,
+  renumberAccount,
+} from '../../service/connections';
 import {
   findConnection,
   listConnections,
@@ -154,6 +159,27 @@ export function registerConnectionCommands(program: Command, io: CliIo, runner: 
         if (change.resurveyNeeded) {
           io.out('the survey on file is against the old use, walk it again');
         }
+      });
+    });
+
+  connection
+    .command('renumber')
+    .description('move a connection onto a new account number and nothing else')
+    .argument('<id>', 'the connection id')
+    .requiredOption('--account <number>', 'the new account number')
+    .requiredOption('--on <date>', 'the day it changed')
+    .requiredOption('--reason <reason>', 'why the billing system moved it')
+    .action((id: string, options: Record<string, string>, command: Command) => {
+      const outcome = runner(globals(command), io, (context) =>
+        renumberAccount(context.register, id, {
+          accountNumber: String(options['account']),
+          on: String(options['on']),
+          reason: String(options['reason']),
+        }),
+      );
+      report(io, outcome, (record) => {
+        io.out(`${record.connectionId} is on account ${record.accountNumber}`);
+        io.out('the survey, the assemblies and the test history are untouched');
       });
     });
 
