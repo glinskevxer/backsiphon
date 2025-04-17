@@ -7,6 +7,7 @@ import type { Command } from 'commander';
 import { ok } from '../../util/result';
 import { programSummary, workList, type WorkItem } from '../../service/reporting';
 import { annualReturn, returnRows } from '../../service/annual';
+import { drawSchedule, peakMonth, type ScheduleMonth } from '../../service/schedule';
 import { writeCsv } from '../../util/csv';
 import { describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
@@ -69,6 +70,58 @@ export function registerReportCommands(program: Command, io: CliIo, runner: Runn
         if (summary.shutoffEligible.length > 0) {
           io.out('');
           io.out(`shutoff eligible: ${summary.shutoffEligible.join(', ')}`);
+        }
+      });
+    });
+
+  program
+    .command('schedule')
+    .description('what falls due month by month for the year ahead')
+    .option('--months <count>', 'how many months to draw', '12')
+    .option('--route <route>', 'only this route')
+    .action((options: Record<string, string | undefined>, command: Command) => {
+      const outcome = runner(globals(command), io, (context) =>
+        ok({
+          context,
+          schedule: drawSchedule(context.register, {
+            asOf: context.asOf,
+            months: Number(options['months'] ?? 12),
+            ...(options['route'] === undefined ? {} : { route: String(options['route']) }),
+          }),
+        }),
+      );
+      report(io, outcome, ({ context, schedule }) => {
+        if (context.json) {
+          writeJson(io, schedule);
+          return;
+        }
+        for (const line of heading(`tests falling due from ${schedule.from}`)) {
+          io.out(line);
+        }
+        for (const line of table(schedule.months, [
+          { header: 'month', value: (row: ScheduleMonth) => row.month },
+          { header: 'tests due', value: (row: ScheduleMonth) => row.due, align: 'right' },
+          {
+            header: 'of those health hazard',
+            value: (row: ScheduleMonth) => row.healthHazard,
+            align: 'right',
+          },
+          {
+            header: 'connections',
+            value: (row: ScheduleMonth) => row.connections.length,
+            align: 'right',
+          },
+        ])) {
+          io.out(line);
+        }
+        io.out('');
+        const peak = peakMonth(schedule);
+        if (peak !== undefined && peak.due > 0) {
+          io.out(`the busiest month is ${peak.month} with ${peak.due} tests in it`);
+        }
+        io.out(`${schedule.alreadyLate} tests are already past due`);
+        if (schedule.unreadable > 0) {
+          io.out(`${schedule.unreadable} connections could not be read at all`);
         }
       });
     });
