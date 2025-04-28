@@ -24,7 +24,7 @@ import type { AssemblyModel } from '../../domain/approvals';
 import { firstTimeFailureRate, fleetRecord, type ModelRecord } from '../../service/fleet';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 function sizes(value: string): number[] {
   return value
@@ -97,16 +97,17 @@ export function registerAssemblyCommands(program: Command, io: CliIo, runner: Ru
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'model', value: (row: AssemblyModel) => row.modelId },
-          { header: 'maker', value: (row: AssemblyModel) => row.maker },
-          { header: 'class', value: (row: AssemblyModel) => row.assemblyClass },
-          { header: 'sizes', value: (row: AssemblyModel) => row.sizes.join(' ') },
-          { header: 'listed', value: (row: AssemblyModel) => row.listedOn },
-          { header: 'delisted', value: (row: AssemblyModel) => row.delistedOn },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'model', value: (row: AssemblyModel) => row.modelId },
+            { header: 'maker', value: (row: AssemblyModel) => row.maker },
+            { header: 'class', value: (row: AssemblyModel) => row.assemblyClass },
+            { header: 'sizes', value: (row: AssemblyModel) => row.sizes.join(' ') },
+            { header: 'listed', value: (row: AssemblyModel) => row.listedOn },
+            { header: 'delisted', value: (row: AssemblyModel) => row.delistedOn },
+          ]),
+        );
       });
     });
 
@@ -129,23 +130,24 @@ export function registerAssemblyCommands(program: Command, io: CliIo, runner: Ru
           );
           return;
         }
-        for (const line of table(rows, [
-          { header: 'model', value: (row: ModelRecord) => row.modelId },
-          { header: 'maker', value: (row: ModelRecord) => row.maker },
-          { header: 'class', value: (row: ModelRecord) => row.assemblyClass },
-          { header: 'listing', value: (row: ModelRecord) => row.listing },
-          { header: 'fitted', value: (row: ModelRecord) => row.fitted, align: 'right' },
-          { header: 'out', value: (row: ModelRecord) => row.removed, align: 'right' },
-          { header: 'mean age', value: (row: ModelRecord) => row.meanAgeYears, align: 'right' },
-          { header: 'tests', value: (row: ModelRecord) => row.testsJudged, align: 'right' },
-          {
-            header: 'failed first time',
-            value: (row: ModelRecord) => firstTimeFailureRate(row) ?? 'too few',
-            align: 'right',
-          },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'model', value: (row: ModelRecord) => row.modelId },
+            { header: 'maker', value: (row: ModelRecord) => row.maker },
+            { header: 'class', value: (row: ModelRecord) => row.assemblyClass },
+            { header: 'listing', value: (row: ModelRecord) => row.listing },
+            { header: 'fitted', value: (row: ModelRecord) => row.fitted, align: 'right' },
+            { header: 'out', value: (row: ModelRecord) => row.removed, align: 'right' },
+            { header: 'mean age', value: (row: ModelRecord) => row.meanAgeYears, align: 'right' },
+            { header: 'tests', value: (row: ModelRecord) => row.testsJudged, align: 'right' },
+            {
+              header: 'failed first time',
+              value: (row: ModelRecord) => firstTimeFailureRate(row) ?? 'too few',
+              align: 'right',
+            },
+          ]),
+        );
       });
     });
 
@@ -278,18 +280,19 @@ export function registerAssemblyCommands(program: Command, io: CliIo, runner: Ru
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'assembly', value: (row: InstalledAssembly) => row.assemblyId },
-          { header: 'connection', value: (row: InstalledAssembly) => row.connectionId },
-          { header: 'scope', value: (row: InstalledAssembly) => row.scope },
-          { header: 'class', value: (row: InstalledAssembly) => row.assemblyClass },
-          { header: 'model', value: (row: InstalledAssembly) => row.modelId },
-          { header: 'serial', value: (row: InstalledAssembly) => row.serialNumber },
-          { header: 'fitted', value: (row: InstalledAssembly) => row.installedOn },
-          { header: 'removed', value: (row: InstalledAssembly) => row.removedOn },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'assembly', value: (row: InstalledAssembly) => row.assemblyId },
+            { header: 'connection', value: (row: InstalledAssembly) => row.connectionId },
+            { header: 'scope', value: (row: InstalledAssembly) => row.scope },
+            { header: 'class', value: (row: InstalledAssembly) => row.assemblyClass },
+            { header: 'model', value: (row: InstalledAssembly) => row.modelId },
+            { header: 'serial', value: (row: InstalledAssembly) => row.serialNumber },
+            { header: 'fitted', value: (row: InstalledAssembly) => row.installedOn },
+            { header: 'removed', value: (row: InstalledAssembly) => row.removedOn },
+          ]),
+        );
       });
     });
 

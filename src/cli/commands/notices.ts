@@ -13,7 +13,7 @@ import {
 } from '../../storage/repositories/notices';
 import { heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerNoticeCommands(program: Command, io: CliIo, runner: Runner): void {
   const notice = program.command('notice').description('the letters that go out');
@@ -41,21 +41,20 @@ export function registerNoticeCommands(program: Command, io: CliIo, runner: Runn
         if (options['dryRun'] === true) {
           io.out('this was a dry run, nothing was written');
         }
-        for (const line of table(run.issued, [
-          { header: 'notice', value: (row: NoticeRecord) => row.noticeId },
-          { header: 'connection', value: (row: NoticeRecord) => row.connectionId },
-          { header: 'stage', value: (row: NoticeRecord) => row.stage },
-          { header: 'due', value: (row: NoticeRecord) => row.dueDate },
-          { header: 'days past', value: (row: NoticeRecord) => row.daysPastDue, align: 'right' },
-          { header: 'ladder', value: (row: NoticeRecord) => row.ladder },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(run.issued, [
+            { header: 'notice', value: (row: NoticeRecord) => row.noticeId },
+            { header: 'connection', value: (row: NoticeRecord) => row.connectionId },
+            { header: 'stage', value: (row: NoticeRecord) => row.stage },
+            { header: 'due', value: (row: NoticeRecord) => row.dueDate },
+            { header: 'days past', value: (row: NoticeRecord) => row.daysPastDue, align: 'right' },
+            { header: 'ladder', value: (row: NoticeRecord) => row.ladder },
+          ]),
+        );
         if (run.skipped.length > 0) {
           io.out('');
-          for (const line of heading('skipped')) {
-            io.out(line);
-          }
+          printLines(io, heading('skipped'));
           for (const entry of run.skipped) {
             io.out(`  ${entry.connectionId}: ${entry.reason}`);
           }
@@ -75,15 +74,16 @@ export function registerNoticeCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'notice', value: (row: NoticeRecord) => row.noticeId },
-          { header: 'connection', value: (row: NoticeRecord) => row.connectionId },
-          { header: 'stage', value: (row: NoticeRecord) => row.stage },
-          { header: 'issued', value: (row: NoticeRecord) => row.issuedOn },
-          { header: 'due', value: (row: NoticeRecord) => row.dueDate },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'notice', value: (row: NoticeRecord) => row.noticeId },
+            { header: 'connection', value: (row: NoticeRecord) => row.connectionId },
+            { header: 'stage', value: (row: NoticeRecord) => row.stage },
+            { header: 'issued', value: (row: NoticeRecord) => row.issuedOn },
+            { header: 'due', value: (row: NoticeRecord) => row.dueDate },
+          ]),
+        );
       });
     });
 
@@ -118,20 +118,19 @@ export function registerNoticeCommands(program: Command, io: CliIo, runner: Runn
             writeJson(io, rows);
             return;
           }
-          for (const line of table(rows, [
-            { header: 'notice', value: (row: NoticeRecord) => row.noticeId },
-            { header: 'stage', value: (row: NoticeRecord) => row.stage },
-            { header: 'issued', value: (row: NoticeRecord) => row.issuedOn },
-            { header: 'cleared', value: (row: NoticeRecord) => row.clearedOn },
-          ])) {
-            io.out(line);
-          }
+          printLines(
+            io,
+            table(rows, [
+              { header: 'notice', value: (row: NoticeRecord) => row.noticeId },
+              { header: 'stage', value: (row: NoticeRecord) => row.stage },
+              { header: 'issued', value: (row: NoticeRecord) => row.issuedOn },
+              { header: 'cleared', value: (row: NoticeRecord) => row.clearedOn },
+            ]),
+          );
           const latest = rows[0];
           if (options['body'] === true && latest !== undefined) {
             io.out('');
-            for (const line of latest.body.split('\n')) {
-              io.out(line);
-            }
+            printLines(io, latest.body.split('\n'));
           }
         });
       },

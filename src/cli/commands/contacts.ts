@@ -19,7 +19,7 @@ import { appendEvent } from '../../storage/repositories/events';
 import { selectAll, withTransaction } from '../../storage/db';
 import { describe, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 function nextContactId(rows: ReadonlyArray<{ contact_id: string }>): string {
   let highest = 0;
@@ -125,17 +125,18 @@ export function registerContactCommands(program: Command, io: CliIo, runner: Run
             writeJson(io, rows);
             return;
           }
-          for (const line of table(rows, [
-            { header: 'contact', value: (row: Contact) => row.contactId },
-            { header: 'role', value: (row: Contact) => row.role },
-            { header: 'name', value: (row: Contact) => row.name },
-            { header: 'telephone', value: (row: Contact) => row.telephone },
-            { header: 'email', value: (row: Contact) => row.email },
-            { header: 'since', value: (row: Contact) => row.addedOn },
-            { header: 'retired', value: (row: Contact) => row.retiredOn },
-          ])) {
-            io.out(line);
-          }
+          printLines(
+            io,
+            table(rows, [
+              { header: 'contact', value: (row: Contact) => row.contactId },
+              { header: 'role', value: (row: Contact) => row.role },
+              { header: 'name', value: (row: Contact) => row.name },
+              { header: 'telephone', value: (row: Contact) => row.telephone },
+              { header: 'email', value: (row: Contact) => row.email },
+              { header: 'since', value: (row: Contact) => row.addedOn },
+              { header: 'retired', value: (row: Contact) => row.retiredOn },
+            ]),
+          );
         });
       },
     );
@@ -156,14 +157,15 @@ export function registerContactCommands(program: Command, io: CliIo, runner: Run
           writeJson(io, found);
           return;
         }
-        for (const line of describe([
-          ['ring', found.name],
-          ['role', found.role],
-          ['telephone', found.telephone],
-          ['note', found.note],
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          describe([
+            ['ring', found.name],
+            ['role', found.role],
+            ['telephone', found.telephone],
+            ['note', found.note],
+          ]),
+        );
       });
     });
 }

@@ -8,7 +8,7 @@ import { ok } from '../../util/result';
 import { backupTo, checkIntegrity } from '../../service/backup';
 import { describe, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerBackupCommands(program: Command, io: CliIo, runner: Runner): void {
   program
@@ -25,14 +25,15 @@ export function registerBackupCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, written);
           return;
         }
-        for (const line of describe([
-          ['written to', written.file],
-          ['bytes', written.bytes],
-          ['pages', written.pages],
-          ['schema', written.schemaVersion],
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          describe([
+            ['written to', written.file],
+            ['bytes', written.bytes],
+            ['pages', written.pages],
+            ['schema', written.schemaVersion],
+          ]),
+        );
       });
     });
 

@@ -19,7 +19,7 @@ import {
 } from '../../storage/repositories/connections';
 import { describe, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerConnectionCommands(program: Command, io: CliIo, runner: Runner): void {
   const connection = program
@@ -84,20 +84,21 @@ export function registerConnectionCommands(program: Command, io: CliIo, runner: 
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'id', value: (row: ConnectionRecord) => row.connectionId },
-          { header: 'account', value: (row: ConnectionRecord) => row.accountNumber },
-          { header: 'premise', value: (row: ConnectionRecord) => row.premiseName },
-          { header: 'use', value: (row: ConnectionRecord) => row.premiseUseCode },
-          {
-            header: 'size',
-            value: (row: ConnectionRecord) => row.serviceSizeInches,
-            align: 'right',
-          },
-          { header: 'route', value: (row: ConnectionRecord) => row.route },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'id', value: (row: ConnectionRecord) => row.connectionId },
+            { header: 'account', value: (row: ConnectionRecord) => row.accountNumber },
+            { header: 'premise', value: (row: ConnectionRecord) => row.premiseName },
+            { header: 'use', value: (row: ConnectionRecord) => row.premiseUseCode },
+            {
+              header: 'size',
+              value: (row: ConnectionRecord) => row.serviceSizeInches,
+              align: 'right',
+            },
+            { header: 'route', value: (row: ConnectionRecord) => row.route },
+          ]),
+        );
       });
     });
 
@@ -117,23 +118,24 @@ export function registerConnectionCommands(program: Command, io: CliIo, runner: 
           writeJson(io, record);
           return;
         }
-        for (const line of describe([
-          ['id', record.connectionId],
-          ['account', record.accountNumber],
-          ['premise', record.premiseName],
-          ['address', record.premiseAddress],
-          ['use', record.premiseUseCode],
-          ['size', record.serviceSizeInches],
-          ['fire service', record.fireService],
-          ['purveyor metered', record.purveyorMetered],
-          ['connected', record.connectedOn],
-          ['disconnected', record.disconnectedOn],
-          ['route', record.route],
-          ['riser above outlet', record.outletElevationInches],
-          ['indoor riser', record.indoorRiser],
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          describe([
+            ['id', record.connectionId],
+            ['account', record.accountNumber],
+            ['premise', record.premiseName],
+            ['address', record.premiseAddress],
+            ['use', record.premiseUseCode],
+            ['size', record.serviceSizeInches],
+            ['fire service', record.fireService],
+            ['purveyor metered', record.purveyorMetered],
+            ['connected', record.connectedOn],
+            ['disconnected', record.disconnectedOn],
+            ['route', record.route],
+            ['riser above outlet', record.outletElevationInches],
+            ['indoor riser', record.indoorRiser],
+          ]),
+        );
       });
     });
 

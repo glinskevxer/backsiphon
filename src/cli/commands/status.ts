@@ -18,7 +18,7 @@ import { search, type SearchHit } from '../../service/search';
 import { listConnections } from '../../storage/repositories/connections';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 function pointLines(point: PointCompliance): string[] {
   const lines = describe([
@@ -59,44 +59,31 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
             return;
           }
           if (options['explain'] === true) {
-            for (const line of explanationLines(explainStatus(status))) {
-              io.out(line);
-            }
+            printLines(io, explanationLines(explainStatus(status)));
             return;
           }
-          for (const line of heading(`${status.connectionId} as at ${status.asOf}`)) {
-            io.out(line);
-          }
-          for (const line of describe([
-            ['standing', status.standing],
-            ['urgency', status.urgency],
-            ['shutoff eligible', status.shutoffEligible],
-            [
-              'survey',
-              `${status.protection.survey.surveyId} walked ${status.protection.survey.surveyedOn}`,
-            ],
-            ['containment hazard', status.protection.survey.containmentDegree],
-            ['isolation hazard', status.protection.survey.isolationDegree],
-          ])) {
-            io.out(line);
-          }
-          for (const line of bullet(status.reasons.map((reason) => reason))) {
-            io.out(line);
-          }
+          printLines(io, heading(`${status.connectionId} as at ${status.asOf}`));
+          printLines(
+            io,
+            describe([
+              ['standing', status.standing],
+              ['urgency', status.urgency],
+              ['shutoff eligible', status.shutoffEligible],
+              [
+                'survey',
+                `${status.protection.survey.surveyId} walked ${status.protection.survey.surveyedOn}`,
+              ],
+              ['containment hazard', status.protection.survey.containmentDegree],
+              ['isolation hazard', status.protection.survey.isolationDegree],
+            ]),
+          );
+          printLines(io, bullet(status.reasons.map((reason) => reason)));
           io.out('');
-          for (const line of heading('containment')) {
-            io.out(line);
-          }
-          for (const line of pointLines(status.containment)) {
-            io.out(line);
-          }
+          printLines(io, heading('containment'));
+          printLines(io, pointLines(status.containment));
           io.out('');
-          for (const line of heading('isolation')) {
-            io.out(line);
-          }
-          for (const line of pointLines(status.isolation)) {
-            io.out(line);
-          }
+          printLines(io, heading('isolation'));
+          printLines(io, pointLines(status.isolation));
         });
       },
     );
@@ -127,16 +114,17 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
             io.out('nothing matched');
             return;
           }
-          for (const line of table(hits, [
-            { header: 'connection', value: (row: SearchHit) => row.connectionId },
-            { header: 'account', value: (row: SearchHit) => row.accountNumber },
-            { header: 'premise', value: (row: SearchHit) => row.premiseName },
-            { header: 'address', value: (row: SearchHit) => row.premiseAddress },
-            { header: 'matched', value: (row: SearchHit) => row.matchedOn },
-            { header: 'on', value: (row: SearchHit) => row.matchedValue },
-          ])) {
-            io.out(line);
-          }
+          printLines(
+            io,
+            table(hits, [
+              { header: 'connection', value: (row: SearchHit) => row.connectionId },
+              { header: 'account', value: (row: SearchHit) => row.accountNumber },
+              { header: 'premise', value: (row: SearchHit) => row.premiseName },
+              { header: 'address', value: (row: SearchHit) => row.premiseAddress },
+              { header: 'matched', value: (row: SearchHit) => row.matchedOn },
+              { header: 'on', value: (row: SearchHit) => row.matchedValue },
+            ]),
+          );
         });
       },
     );
@@ -155,14 +143,15 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, entries);
           return;
         }
-        for (const line of table(entries, [
-          { header: 'when', value: (row: TimelineEntry) => row.on },
-          { header: 'what', value: (row: TimelineEntry) => row.kind },
-          { header: 'reference', value: (row: TimelineEntry) => row.reference },
-          { header: 'summary', value: (row: TimelineEntry) => row.summary },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(entries, [
+            { header: 'when', value: (row: TimelineEntry) => row.on },
+            { header: 'what', value: (row: TimelineEntry) => row.kind },
+            { header: 'reference', value: (row: TimelineEntry) => row.reference },
+            { header: 'summary', value: (row: TimelineEntry) => row.summary },
+          ]),
+        );
       });
     });
 
@@ -196,36 +185,31 @@ export function registerStatusCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, { standing: rows, skipped });
           return;
         }
-        for (const line of table(rows, [
-          { header: 'connection', value: (row: ComplianceStatus) => row.connectionId },
-          { header: 'standing', value: (row: ComplianceStatus) => row.standing },
-          { header: 'urgency', value: (row: ComplianceStatus) => row.urgency },
-          {
-            header: 'containment',
-            value: (row: ComplianceStatus) => row.containment.point.effectiveClass ?? 'none',
-          },
-          {
-            header: 'fitted',
-            value: (row: ComplianceStatus) => row.containment.assembly?.assemblyClass ?? 'none',
-          },
-          { header: 'test due', value: (row: ComplianceStatus) => row.containment.due?.due },
-          {
-            header: 'notice',
-            value: (row: ComplianceStatus) => row.containment.delinquency?.stage,
-          },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'connection', value: (row: ComplianceStatus) => row.connectionId },
+            { header: 'standing', value: (row: ComplianceStatus) => row.standing },
+            { header: 'urgency', value: (row: ComplianceStatus) => row.urgency },
+            {
+              header: 'containment',
+              value: (row: ComplianceStatus) => row.containment.point.effectiveClass ?? 'none',
+            },
+            {
+              header: 'fitted',
+              value: (row: ComplianceStatus) => row.containment.assembly?.assemblyClass ?? 'none',
+            },
+            { header: 'test due', value: (row: ComplianceStatus) => row.containment.due?.due },
+            {
+              header: 'notice',
+              value: (row: ComplianceStatus) => row.containment.delinquency?.stage,
+            },
+          ]),
+        );
         if (skipped.length > 0) {
           io.out('');
-          for (const line of heading('not read')) {
-            io.out(line);
-          }
-          for (const line of bullet(
-            skipped.map((entry) => `${entry.connectionId}: ${entry.reason}`),
-          )) {
-            io.out(line);
-          }
+          printLines(io, heading('not read'));
+          printLines(io, bullet(skipped.map((entry) => `${entry.connectionId}: ${entry.reason}`)));
         }
       });
     });

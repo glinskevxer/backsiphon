@@ -21,7 +21,7 @@ import {
 } from '../../storage/repositories/events';
 import { heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 const SUBJECT_KINDS: SubjectKind[] = [
   'connection',
@@ -55,14 +55,15 @@ export function registerAuditCommands(program: Command, io: CliIo, runner: Runne
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'when', value: (row: EventRecord) => row.happenedAt },
-          { header: 'who', value: (row: EventRecord) => row.actor },
-          { header: 'what', value: (row: EventRecord) => row.kind },
-          { header: 'detail', value: (row: EventRecord) => row.detail },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'when', value: (row: EventRecord) => row.happenedAt },
+            { header: 'who', value: (row: EventRecord) => row.actor },
+            { header: 'what', value: (row: EventRecord) => row.kind },
+            { header: 'detail', value: (row: EventRecord) => row.detail },
+          ]),
+        );
       });
     });
 
@@ -91,14 +92,15 @@ export function registerAuditCommands(program: Command, io: CliIo, runner: Runne
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'when', value: (row: EventRecord) => row.happenedAt },
-          { header: 'who', value: (row: EventRecord) => row.actor },
-          { header: 'what', value: (row: EventRecord) => row.kind },
-          { header: 'about', value: (row: EventRecord) => `${row.subjectKind} ${row.subjectId}` },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'when', value: (row: EventRecord) => row.happenedAt },
+            { header: 'who', value: (row: EventRecord) => row.actor },
+            { header: 'what', value: (row: EventRecord) => row.kind },
+            { header: 'about', value: (row: EventRecord) => `${row.subjectKind} ${row.subjectId}` },
+          ]),
+        );
       });
     });
 
@@ -118,15 +120,14 @@ export function registerAuditCommands(program: Command, io: CliIo, runner: Runne
           writeJson(io, { total, kinds });
           return;
         }
-        for (const line of heading(`${total} events on the trail`)) {
-          io.out(line);
-        }
-        for (const line of table(kinds, [
-          { header: 'kind', value: (row) => row.kind },
-          { header: 'how many', value: (row) => row.total, align: 'right' },
-        ])) {
-          io.out(line);
-        }
+        printLines(io, heading(`${total} events on the trail`));
+        printLines(
+          io,
+          table(kinds, [
+            { header: 'kind', value: (row) => row.kind },
+            { header: 'how many', value: (row) => row.total, align: 'right' },
+          ]),
+        );
       });
     });
 

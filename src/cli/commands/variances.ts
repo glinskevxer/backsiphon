@@ -13,7 +13,7 @@ import { protectionStatus } from '../../service/protection';
 import { listGranted, variancesForConnection } from '../../storage/repositories/variances';
 import { bullet, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 function conditions(value: string | undefined): string[] {
   if (value === undefined) {
@@ -79,9 +79,7 @@ export function registerVarianceCommands(program: Command, io: CliIo, runner: Ru
             `${record.effectiveFrom ?? 'the decision'} to ${record.expiresOn ?? 'no end date'}`,
         );
         io.out('the test cycle and the notice ladder are unchanged');
-        for (const line of bullet(record.conditions)) {
-          io.out(line);
-        }
+        printLines(io, bullet(record.conditions));
       });
     });
 
@@ -138,18 +136,19 @@ export function registerVarianceCommands(program: Command, io: CliIo, runner: Ru
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'variance', value: (row: Variance) => row.varianceId },
-          { header: 'connection', value: (row: Variance) => row.connectionId },
-          { header: 'accepts', value: (row: Variance) => row.acceptedClass },
-          { header: 'applied', value: (row: Variance) => row.appliedOn },
-          { header: 'decision', value: (row: Variance) => row.decision ?? 'pending' },
-          { header: 'from', value: (row: Variance) => row.effectiveFrom },
-          { header: 'until', value: (row: Variance) => row.expiresOn },
-          { header: 'standing', value: (row: Variance) => statusOf(context, row) },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'variance', value: (row: Variance) => row.varianceId },
+            { header: 'connection', value: (row: Variance) => row.connectionId },
+            { header: 'accepts', value: (row: Variance) => row.acceptedClass },
+            { header: 'applied', value: (row: Variance) => row.appliedOn },
+            { header: 'decision', value: (row: Variance) => row.decision ?? 'pending' },
+            { header: 'from', value: (row: Variance) => row.effectiveFrom },
+            { header: 'until', value: (row: Variance) => row.expiresOn },
+            { header: 'standing', value: (row: Variance) => statusOf(context, row) },
+          ]),
+        );
       });
     });
 }

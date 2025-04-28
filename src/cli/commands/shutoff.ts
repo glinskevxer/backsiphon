@@ -17,7 +17,7 @@ import {
 } from '../../service/shutoff';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerShutoffCommands(program: Command, io: CliIo, runner: Runner): void {
   const shutoff = program.command('shutoff').description('shutoff orders and restorations');
@@ -114,18 +114,19 @@ export function registerShutoffCommands(program: Command, io: CliIo, runner: Run
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'order', value: (row: ShutoffOrder) => row.orderId },
-          { header: 'connection', value: (row: ShutoffOrder) => row.connectionId },
-          { header: 'raised', value: (row: ShutoffOrder) => row.raisedOn },
-          { header: 'by', value: (row: ShutoffOrder) => row.raisedBy },
-          { header: 'carried out', value: (row: ShutoffOrder) => row.executedOn },
-          { header: 'restored', value: (row: ShutoffOrder) => row.restoredOn },
-          { header: 'called off', value: (row: ShutoffOrder) => row.cancelledOn },
-          { header: 'reason', value: (row: ShutoffOrder) => row.reason },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'order', value: (row: ShutoffOrder) => row.orderId },
+            { header: 'connection', value: (row: ShutoffOrder) => row.connectionId },
+            { header: 'raised', value: (row: ShutoffOrder) => row.raisedOn },
+            { header: 'by', value: (row: ShutoffOrder) => row.raisedBy },
+            { header: 'carried out', value: (row: ShutoffOrder) => row.executedOn },
+            { header: 'restored', value: (row: ShutoffOrder) => row.restoredOn },
+            { header: 'called off', value: (row: ShutoffOrder) => row.cancelledOn },
+            { header: 'reason', value: (row: ShutoffOrder) => row.reason },
+          ]),
+        );
       });
     });
 }

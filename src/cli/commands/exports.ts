@@ -10,7 +10,7 @@ import { ok } from '../../util/result';
 import { buildExport, EXPORT_NAMES, toCsv, toRecords } from '../../service/exports';
 import { writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerExportCommands(program: Command, io: CliIo, runner: Runner): void {
   program
@@ -36,9 +36,7 @@ export function registerExportCommands(program: Command, io: CliIo, runner: Runn
         }
         const text = toCsv(table);
         if (options['to'] === undefined) {
-          for (const line of text.split('\n')) {
-            io.out(line);
-          }
+          printLines(io, text.split('\n'));
           return;
         }
         writeFileSync(String(options['to']), `${text}\n`);

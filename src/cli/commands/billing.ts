@@ -14,7 +14,7 @@ import {
 } from '../../service/billing';
 import { heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerBillingCommands(program: Command, io: CliIo, runner: Runner): void {
   const billing = program.command('billing').description('the annual fee and the penalties');
@@ -33,13 +33,9 @@ export function registerBillingCommands(program: Command, io: CliIo, runner: Run
           writeJson(io, invoice);
           return;
         }
-        for (const line of heading(`${invoice.connectionId}, account ${invoice.accountNumber}`)) {
-          io.out(line);
-        }
+        printLines(io, heading(`${invoice.connectionId}, account ${invoice.accountNumber}`));
         io.out(`billed against a ${invoice.requiredClass ?? 'nothing required'}`);
-        for (const line of describeInvoice(invoice)) {
-          io.out(line);
-        }
+        printLines(io, describeInvoice(invoice));
       });
     });
 
@@ -63,19 +59,20 @@ export function registerBillingCommands(program: Command, io: CliIo, runner: Run
           writeJson(io, run);
           return;
         }
-        for (const line of table(run.invoices, [
-          { header: 'connection', value: (row: ConnectionInvoice) => row.connectionId },
-          { header: 'account', value: (row: ConnectionInvoice) => row.accountNumber },
-          { header: 'billed as', value: (row: ConnectionInvoice) => row.requiredClass ?? 'none' },
-          { header: 'notice', value: (row: ConnectionInvoice) => row.stage },
-          {
-            header: 'total',
-            value: (row: ConnectionInvoice) => formatCents(row.invoice.totalCents),
-            align: 'right',
-          },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(run.invoices, [
+            { header: 'connection', value: (row: ConnectionInvoice) => row.connectionId },
+            { header: 'account', value: (row: ConnectionInvoice) => row.accountNumber },
+            { header: 'billed as', value: (row: ConnectionInvoice) => row.requiredClass ?? 'none' },
+            { header: 'notice', value: (row: ConnectionInvoice) => row.stage },
+            {
+              header: 'total',
+              value: (row: ConnectionInvoice) => formatCents(row.invoice.totalCents),
+              align: 'right',
+            },
+          ]),
+        );
         io.out('');
         io.out(`${run.invoices.length} invoices, ${formatCents(run.totalCents)} in total`);
         for (const entry of run.skipped) {

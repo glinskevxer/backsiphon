@@ -11,7 +11,7 @@ import { manualSections } from '../../service/manual';
 import { writeCsv } from '../../util/csv';
 import { describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerConfigCommands(program: Command, io: CliIo, runner: Runner): void {
   program
@@ -31,21 +31,15 @@ export function registerConfigCommands(program: Command, io: CliIo, runner: Runn
           return;
         }
         for (const section of sections) {
-          for (const line of heading(section.title)) {
-            io.out(line);
-          }
+          printLines(io, heading(section.title));
           if (options['csv'] === true) {
-            for (const line of writeCsv(section.headers, section.rows).split('\n')) {
-              io.out(line);
-            }
+            printLines(io, writeCsv(section.headers, section.rows).split('\n'));
           } else {
             const columns = section.headers.map((header, index) => ({
               header,
               value: (row: ReadonlyArray<string>): string => row[index] ?? '',
             }));
-            for (const line of table(section.rows, columns)) {
-              io.out(line);
-            }
+            printLines(io, table(section.rows, columns));
           }
           io.out('');
         }
@@ -65,14 +59,15 @@ export function registerConfigCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, loaded);
           return;
         }
-        for (const line of describe([
-          ['connections', loaded.connections],
-          ['assemblies fitted', loaded.assemblies],
-          ['reports filed', loaded.reports],
-          ['letters that went out', loaded.notices],
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          describe([
+            ['connections', loaded.connections],
+            ['assemblies fitted', loaded.assemblies],
+            ['reports filed', loaded.reports],
+            ['letters that went out', loaded.notices],
+          ]),
+        );
       });
     });
 
@@ -87,30 +82,28 @@ export function registerConfigCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, { configFile: context.configFile ?? null, policy });
           return;
         }
-        for (const line of heading('settings')) {
-          io.out(line);
-        }
-        for (const line of describe([
-          ['config file', context.configFile ?? `none found, looked for ${CONFIG_FILENAME}`],
-          ['purveyor', policy.purveyorName],
-          ['filing window days', policy.filingWindowDays],
-          ['survey a new connection within', policy.newConnectionSurveyDays],
-        ])) {
-          io.out(line);
-        }
+        printLines(io, heading('settings'));
+        printLines(
+          io,
+          describe([
+            ['config file', context.configFile ?? `none found, looked for ${CONFIG_FILENAME}`],
+            ['purveyor', policy.purveyorName],
+            ['filing window days', policy.filingWindowDays],
+            ['survey a new connection within', policy.newConnectionSurveyDays],
+          ]),
+        );
         io.out('');
-        for (const line of heading('test cycle')) {
-          io.out(line);
-        }
-        for (const line of describe([
-          ['interval months', policy.cycle.intervalMonths],
-          ['close watch months', policy.cycle.closeWatchIntervalMonths],
-          ['close watch uses', policy.cycle.closeWatchUses.join(' ')],
-          ['days to the first test', policy.cycle.newInstallGraceDays],
-          ['working days to repair', policy.cycle.repairWorkdays],
-        ])) {
-          io.out(line);
-        }
+        printLines(io, heading('test cycle'));
+        printLines(
+          io,
+          describe([
+            ['interval months', policy.cycle.intervalMonths],
+            ['close watch months', policy.cycle.closeWatchIntervalMonths],
+            ['close watch uses', policy.cycle.closeWatchUses.join(' ')],
+            ['days to the first test', policy.cycle.newInstallGraceDays],
+            ['working days to repair', policy.cycle.repairWorkdays],
+          ]),
+        );
       });
     });
 }

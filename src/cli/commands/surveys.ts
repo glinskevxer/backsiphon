@@ -16,7 +16,7 @@ import {
 import { currentSurvey, surveyHistory, type SurveyRow } from '../../storage/repositories/surveys';
 import { bullet, describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 function splitCodes(value: string | undefined): string[] {
   if (value === undefined || value.trim() === '') {
@@ -94,42 +94,42 @@ export function registerSurveyCommands(program: Command, io: CliIo, runner: Runn
             return;
           }
           if (options['history'] === true) {
-            for (const line of table(rows, [
-              { header: 'survey', value: (row: SurveyRow) => row.surveyId },
-              { header: 'walked', value: (row: SurveyRow) => row.surveyedOn },
-              { header: 'surveyor', value: (row: SurveyRow) => row.surveyor },
-              { header: 'containment', value: (row: SurveyRow) => row.containmentDegree },
-              { header: 'isolation', value: (row: SurveyRow) => row.isolationDegree },
-              { header: 'next due', value: (row: SurveyRow) => row.nextSurveyDue },
-            ])) {
-              io.out(line);
-            }
+            printLines(
+              io,
+              table(rows, [
+                { header: 'survey', value: (row: SurveyRow) => row.surveyId },
+                { header: 'walked', value: (row: SurveyRow) => row.surveyedOn },
+                { header: 'surveyor', value: (row: SurveyRow) => row.surveyor },
+                { header: 'containment', value: (row: SurveyRow) => row.containmentDegree },
+                { header: 'isolation', value: (row: SurveyRow) => row.isolationDegree },
+                { header: 'next due', value: (row: SurveyRow) => row.nextSurveyDue },
+              ]),
+            );
             return;
           }
           const row = rows[0];
           if (row === undefined) {
             return;
           }
-          for (const line of describe([
-            ['survey', row.surveyId],
-            ['walked', row.surveyedOn],
-            ['surveyor', row.surveyor],
-            ['access granted', row.accessGranted],
-            ['premise use', row.premiseUseCode],
-            ['containment', row.containmentDegree],
-            ['isolation', row.isolationDegree],
-            ['air gap required', row.airGapRequired],
-            ['backpressure', row.backpressure],
-            ['basis', row.basis],
-            ['next survey due', row.nextSurveyDue],
-          ])) {
-            io.out(line);
-          }
+          printLines(
+            io,
+            describe([
+              ['survey', row.surveyId],
+              ['walked', row.surveyedOn],
+              ['surveyor', row.surveyor],
+              ['access granted', row.accessGranted],
+              ['premise use', row.premiseUseCode],
+              ['containment', row.containmentDegree],
+              ['isolation', row.isolationDegree],
+              ['air gap required', row.airGapRequired],
+              ['backpressure', row.backpressure],
+              ['basis', row.basis],
+              ['next survey due', row.nextSurveyDue],
+            ]),
+          );
           if (row.findingCodes.length > 0) {
             io.out('findings');
-            for (const line of bullet(row.findingCodes.map(describeFinding))) {
-              io.out(line);
-            }
+            printLines(io, bullet(row.findingCodes.map(describeFinding)));
           }
         });
       },
@@ -151,25 +151,20 @@ export function registerSurveyCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, { due: rows, neverSurveyed: unwalked });
           return;
         }
-        for (const line of heading('surveys due')) {
-          io.out(line);
-        }
-        for (const line of table(rows, [
-          { header: 'connection', value: (row: SurveyRow) => row.connectionId },
-          { header: 'last walked', value: (row: SurveyRow) => row.surveyedOn },
-          { header: 'due', value: (row: SurveyRow) => row.nextSurveyDue },
-          { header: 'containment', value: (row: SurveyRow) => row.containmentDegree },
-        ])) {
-          io.out(line);
-        }
+        printLines(io, heading('surveys due'));
+        printLines(
+          io,
+          table(rows, [
+            { header: 'connection', value: (row: SurveyRow) => row.connectionId },
+            { header: 'last walked', value: (row: SurveyRow) => row.surveyedOn },
+            { header: 'due', value: (row: SurveyRow) => row.nextSurveyDue },
+            { header: 'containment', value: (row: SurveyRow) => row.containmentDegree },
+          ]),
+        );
         if (unwalked.length > 0) {
           io.out('');
-          for (const line of heading('never walked at all')) {
-            io.out(line);
-          }
-          for (const line of bullet(unwalked)) {
-            io.out(line);
-          }
+          printLines(io, heading('never walked at all'));
+          printLines(io, bullet(unwalked));
         }
       });
     });
@@ -198,21 +193,20 @@ export function registerSurveyCommands(program: Command, io: CliIo, runner: Runn
         if (options['dryRun'] === true) {
           io.out('this was a dry run, nothing was written');
         }
-        for (const line of table(run.letters, [
-          { header: 'connection', value: (row: SurveyLetter) => row.connectionId },
-          { header: 'account', value: (row: SurveyLetter) => row.accountNumber },
-          { header: 'premise', value: (row: SurveyLetter) => row.premiseName },
-          { header: 'why', value: (row: SurveyLetter) => row.reason },
-          { header: 'last walked', value: (row: SurveyLetter) => row.lastWalked },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(run.letters, [
+            { header: 'connection', value: (row: SurveyLetter) => row.connectionId },
+            { header: 'account', value: (row: SurveyLetter) => row.accountNumber },
+            { header: 'premise', value: (row: SurveyLetter) => row.premiseName },
+            { header: 'why', value: (row: SurveyLetter) => row.reason },
+            { header: 'last walked', value: (row: SurveyLetter) => row.lastWalked },
+          ]),
+        );
         const first = run.letters[0];
         if (options['body'] === true && first !== undefined) {
           io.out('');
-          for (const line of first.body.split('\n')) {
-            io.out(line);
-          }
+          printLines(io, first.body.split('\n'));
         }
       });
     });
@@ -227,14 +221,15 @@ export function registerSurveyCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, HAZARD_FINDINGS);
           return;
         }
-        for (const line of table(HAZARD_FINDINGS, [
-          { header: 'code', value: (row) => row.code },
-          { header: 'degree', value: (row) => row.degree },
-          { header: 'scopes', value: (row) => row.scopes.join(' ') },
-          { header: 'what it is', value: (row) => row.label },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(HAZARD_FINDINGS, [
+            { header: 'code', value: (row) => row.code },
+            { header: 'degree', value: (row) => row.degree },
+            { header: 'scopes', value: (row) => row.scopes.join(' ') },
+            { header: 'what it is', value: (row) => row.label },
+          ]),
+        );
       });
     });
 }
@@ -256,15 +251,16 @@ export function registerPremiseUseCommand(program: Command, io: CliIo, runner: R
           writeJson(io, PREMISE_USES);
           return;
         }
-        for (const line of table(PREMISE_USES, [
-          { header: 'code', value: (row) => row.code },
-          { header: 'what it is', value: (row) => row.label },
-          { header: 'carries', value: (row) => row.categoricalDegree },
-          { header: 'survey every', value: (row) => `${row.surveyIntervalMonths} months` },
-          { header: 'walked', value: (row) => (row.surveyRefused ? 'never' : 'yes') },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(PREMISE_USES, [
+            { header: 'code', value: (row) => row.code },
+            { header: 'what it is', value: (row) => row.label },
+            { header: 'carries', value: (row) => row.categoricalDegree },
+            { header: 'survey every', value: (row) => `${row.surveyIntervalMonths} months` },
+            { header: 'walked', value: (row) => (row.surveyRefused ? 'never' : 'yes') },
+          ]),
+        );
       });
     });
 }

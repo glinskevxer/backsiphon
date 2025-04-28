@@ -11,7 +11,7 @@ import { describeImport, importReportsCsv } from '../../service/imports';
 import { describeConnectionImport, importConnectionsCsv } from '../../service/connection-import';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerImportCommands(program: Command, io: CliIo, runner: Runner): void {
   program
@@ -42,12 +42,13 @@ export function registerImportCommands(program: Command, io: CliIo, runner: Runn
         io.out(describeConnectionImport(summary));
         if (summary.rejected.length > 0) {
           io.out('');
-          for (const line of table(summary.rejected, [
-            { header: 'line', value: (row) => row.line, align: 'right' },
-            { header: 'why', value: (row) => row.reason },
-          ])) {
-            io.out(line);
-          }
+          printLines(
+            io,
+            table(summary.rejected, [
+              { header: 'line', value: (row) => row.line, align: 'right' },
+              { header: 'why', value: (row) => row.reason },
+            ]),
+          );
         }
       });
     });
@@ -85,26 +86,28 @@ export function registerImportCommands(program: Command, io: CliIo, runner: Runn
         if (refused.length > 0) {
           io.out('');
           io.out('refused, so those assemblies are still untested');
-          for (const line of table(refused, [
-            { header: 'line', value: (row) => row.line, align: 'right' },
-            { header: 'assembly', value: (row) => row.assemblyId },
-            {
-              header: 'because',
-              value: (row) => row.outcome.ruling.reasons.map((reason) => reason.code).join(' '),
-            },
-          ])) {
-            io.out(line);
-          }
+          printLines(
+            io,
+            table(refused, [
+              { header: 'line', value: (row) => row.line, align: 'right' },
+              { header: 'assembly', value: (row) => row.assemblyId },
+              {
+                header: 'because',
+                value: (row) => row.outcome.ruling.reasons.map((reason) => reason.code).join(' '),
+              },
+            ]),
+          );
         }
         if (summary.rejected.length > 0) {
           io.out('');
           io.out('rows nobody could read');
-          for (const line of table(summary.rejected, [
-            { header: 'line', value: (row) => row.line, align: 'right' },
-            { header: 'why', value: (row) => row.reason },
-          ])) {
-            io.out(line);
-          }
+          printLines(
+            io,
+            table(summary.rejected, [
+              { header: 'line', value: (row) => row.line, align: 'right' },
+              { header: 'why', value: (row) => row.reason },
+            ]),
+          );
         }
       });
     });

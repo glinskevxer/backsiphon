@@ -26,7 +26,7 @@ import {
 import { testerRecord, testerRoster, passRate, type TesterRecord } from '../../service/testers';
 import { describe, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 function endorsements(value: string): AssemblyClass[] {
   return value
@@ -117,22 +117,23 @@ export function registerTesterCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'id', value: (row: TesterCertification) => row.testerId },
-          { header: 'name', value: (row: TesterCertification) => row.name },
-          { header: 'agency', value: (row: TesterCertification) => row.agency },
-          { header: 'expires', value: (row: TesterCertification) => row.expiresOn },
-          {
-            header: 'standing',
-            value: (row: TesterCertification) => certificationStatus(row, context.asOf),
-          },
-          {
-            header: 'endorsed for',
-            value: (row: TesterCertification) => row.endorsements.join(' '),
-          },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'id', value: (row: TesterCertification) => row.testerId },
+            { header: 'name', value: (row: TesterCertification) => row.name },
+            { header: 'agency', value: (row: TesterCertification) => row.agency },
+            { header: 'expires', value: (row: TesterCertification) => row.expiresOn },
+            {
+              header: 'standing',
+              value: (row: TesterCertification) => certificationStatus(row, context.asOf),
+            },
+            {
+              header: 'endorsed for',
+              value: (row: TesterCertification) => row.endorsements.join(' '),
+            },
+          ]),
+        );
       });
     });
 
@@ -150,22 +151,23 @@ export function registerTesterCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, { ...record, passRate: passRate(record) ?? null });
           return;
         }
-        for (const line of describe([
-          ['tester', `${record.testerId}, ${record.name}`],
-          ['certificate', record.standing],
-          ['reports filed', record.filed],
-          ['accepted', record.accepted],
-          ['refused', record.refused],
-          ['passing', record.passed],
-          ['failing', record.failed],
-          ['repairs on site', record.repairs],
-          ['pass rate', passRate(record) ?? 'nothing accepted yet'],
-          ['mean days to file', record.meanFilingDays],
-          ['worst days to file', record.worstFilingDays],
-          ['refused for', record.refusalCodes.join(', ')],
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          describe([
+            ['tester', `${record.testerId}, ${record.name}`],
+            ['certificate', record.standing],
+            ['reports filed', record.filed],
+            ['accepted', record.accepted],
+            ['refused', record.refused],
+            ['passing', record.passed],
+            ['failing', record.failed],
+            ['repairs on site', record.repairs],
+            ['pass rate', passRate(record) ?? 'nothing accepted yet'],
+            ['mean days to file', record.meanFilingDays],
+            ['worst days to file', record.worstFilingDays],
+            ['refused for', record.refusalCodes.join(', ')],
+          ]),
+        );
       });
     });
 
@@ -181,25 +183,26 @@ export function registerTesterCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'tester', value: (row: TesterRecord) => row.testerId },
-          { header: 'name', value: (row: TesterRecord) => row.name },
-          { header: 'standing', value: (row: TesterRecord) => row.standing },
-          { header: 'filed', value: (row: TesterRecord) => row.filed, align: 'right' },
-          { header: 'refused', value: (row: TesterRecord) => row.refused, align: 'right' },
-          {
-            header: 'pass rate',
-            value: (row: TesterRecord) => passRate(row) ?? '',
-            align: 'right',
-          },
-          {
-            header: 'mean days to file',
-            value: (row: TesterRecord) => row.meanFilingDays,
-            align: 'right',
-          },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'tester', value: (row: TesterRecord) => row.testerId },
+            { header: 'name', value: (row: TesterRecord) => row.name },
+            { header: 'standing', value: (row: TesterRecord) => row.standing },
+            { header: 'filed', value: (row: TesterRecord) => row.filed, align: 'right' },
+            { header: 'refused', value: (row: TesterRecord) => row.refused, align: 'right' },
+            {
+              header: 'pass rate',
+              value: (row: TesterRecord) => passRate(row) ?? '',
+              align: 'right',
+            },
+            {
+              header: 'mean days to file',
+              value: (row: TesterRecord) => row.meanFilingDays,
+              align: 'right',
+            },
+          ]),
+        );
       });
     });
 
@@ -276,17 +279,18 @@ export function registerTesterCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'gauge', value: (row: Gauge) => row.gaugeId },
-          { header: 'maker', value: (row: Gauge) => row.maker },
-          { header: 'serial', value: (row: Gauge) => row.serialNumber },
-          { header: 'calibrated', value: (row: Gauge) => row.calibratedOn },
-          { header: 'due', value: (row: Gauge) => calibrationDueOn(row) },
-          { header: 'band', value: (row: Gauge) => row.accuracyPsid, align: 'right' },
-          { header: 'standing', value: (row: Gauge) => gaugeStatus(row, context.asOf) },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'gauge', value: (row: Gauge) => row.gaugeId },
+            { header: 'maker', value: (row: Gauge) => row.maker },
+            { header: 'serial', value: (row: Gauge) => row.serialNumber },
+            { header: 'calibrated', value: (row: Gauge) => row.calibratedOn },
+            { header: 'due', value: (row: Gauge) => calibrationDueOn(row) },
+            { header: 'band', value: (row: Gauge) => row.accuracyPsid, align: 'right' },
+            { header: 'standing', value: (row: Gauge) => gaugeStatus(row, context.asOf) },
+          ]),
+        );
       });
     });
 }

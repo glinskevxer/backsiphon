@@ -17,7 +17,7 @@ import { findAssembly } from '../../storage/repositories/assemblies';
 import { reportsForAssembly, type StoredReport } from '../../storage/repositories/reports';
 import { bullet, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 const TRUE_WORDS = ['yes', 'y', 'true', 'held', 'tight'];
 const FALSE_WORDS = ['no', 'n', 'false', 'weeping', 'leaking'];
@@ -109,17 +109,13 @@ export function registerTestCommands(program: Command, io: CliIo, runner: Runner
         io.out(`${filed.stored.report.reportId} filed`);
         if (!filed.ruling.admissible) {
           io.out('the office cannot accept this report, so the assembly is still untested');
-          for (const line of bullet(filed.ruling.reasons.map((reason) => reason.detail))) {
-            io.out(line);
-          }
+          printLines(io, bullet(filed.ruling.reasons.map((reason) => reason.detail)));
           return;
         }
         io.out(
           `the readings come to ${filed.evaluation.outcome} on the ${filed.evaluation.phase} set`,
         );
-        for (const line of bullet(filed.evaluation.judgements.map((judgement) => judgement.note))) {
-          io.out(line);
-        }
+        printLines(io, bullet(filed.evaluation.judgements.map((judgement) => judgement.note)));
         if (filed.noticesCleared > 0) {
           io.out(`${filed.noticesCleared} open notices cleared`);
         }
@@ -143,20 +139,21 @@ export function registerTestCommands(program: Command, io: CliIo, runner: Runner
           writeJson(io, rows);
           return;
         }
-        for (const line of table(rows, [
-          { header: 'report', value: (row: StoredReport) => row.report.reportId },
-          { header: 'tested', value: (row: StoredReport) => row.report.testedOn },
-          { header: 'tester', value: (row: StoredReport) => row.report.testerId },
-          { header: 'accepted', value: (row: StoredReport) => row.admissible },
-          { header: 'outcome', value: (row: StoredReport) => row.outcome },
-          { header: 'as found', value: (row: StoredReport) => row.asFoundOutcome },
-          {
-            header: 'refused because',
-            value: (row: StoredReport) => row.inadmissibleCodes.join(' '),
-          },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(rows, [
+            { header: 'report', value: (row: StoredReport) => row.report.reportId },
+            { header: 'tested', value: (row: StoredReport) => row.report.testedOn },
+            { header: 'tester', value: (row: StoredReport) => row.report.testerId },
+            { header: 'accepted', value: (row: StoredReport) => row.admissible },
+            { header: 'outcome', value: (row: StoredReport) => row.outcome },
+            { header: 'as found', value: (row: StoredReport) => row.asFoundOutcome },
+            {
+              header: 'refused because',
+              value: (row: StoredReport) => row.inadmissibleCodes.join(' '),
+            },
+          ]),
+        );
       });
     });
 
@@ -175,9 +172,7 @@ export function registerTestCommands(program: Command, io: CliIo, runner: Runner
       });
       report(io, outcome, (keys) => {
         io.out(`a ${assemblyClass} report carries`);
-        for (const line of bullet(keys)) {
-          io.out(line);
-        }
+        printLines(io, bullet(keys));
       });
     });
 }

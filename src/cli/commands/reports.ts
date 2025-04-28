@@ -11,7 +11,7 @@ import { drawSchedule, peakMonth, type ScheduleMonth } from '../../service/sched
 import { writeCsv } from '../../util/csv';
 import { describe, heading, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 function percent(value: number): string {
   return `${(value * 100).toFixed(1)} percent`;
@@ -30,43 +30,40 @@ export function registerReportCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, summary);
           return;
         }
-        for (const line of heading(`the register as at ${summary.asOf}`)) {
-          io.out(line);
-        }
-        for (const line of describe([
-          ['connections', summary.connections],
-          ['assemblies fitted', summary.assemblies],
-          ['of those testable', summary.testableAssemblies],
-          ['tested inside the cycle', percent(summary.complianceRate)],
-          ['never surveyed', summary.neverSurveyed],
-        ])) {
-          io.out(line);
-        }
+        printLines(io, heading(`the register as at ${summary.asOf}`));
+        printLines(
+          io,
+          describe([
+            ['connections', summary.connections],
+            ['assemblies fitted', summary.assemblies],
+            ['of those testable', summary.testableAssemblies],
+            ['tested inside the cycle', percent(summary.complianceRate)],
+            ['never surveyed', summary.neverSurveyed],
+          ]),
+        );
         io.out('');
-        for (const line of heading('standing')) {
-          io.out(line);
-        }
-        for (const line of describe([
-          ['compliant', summary.byStanding.compliant],
-          ['nothing due yet', summary.byStanding.not_yet_due],
-          ['overdue', summary.byStanding.overdue],
-          ['deficient', summary.byStanding.deficient],
-          ['eligible for shutoff', summary.byStanding.shutoff_eligible],
-          ['could not be read', summary.byStanding.unreadable],
-        ])) {
-          io.out(line);
-        }
+        printLines(io, heading('standing'));
+        printLines(
+          io,
+          describe([
+            ['compliant', summary.byStanding.compliant],
+            ['nothing due yet', summary.byStanding.not_yet_due],
+            ['overdue', summary.byStanding.overdue],
+            ['deficient', summary.byStanding.deficient],
+            ['eligible for shutoff', summary.byStanding.shutoff_eligible],
+            ['could not be read', summary.byStanding.unreadable],
+          ]),
+        );
         io.out('');
-        for (const line of heading('containment hazard')) {
-          io.out(line);
-        }
-        for (const line of describe([
-          ['health', summary.byDegree.health],
-          ['pollutional', summary.byDegree.nonhealth],
-          ['none', summary.byDegree.none],
-        ])) {
-          io.out(line);
-        }
+        printLines(io, heading('containment hazard'));
+        printLines(
+          io,
+          describe([
+            ['health', summary.byDegree.health],
+            ['pollutional', summary.byDegree.nonhealth],
+            ['none', summary.byDegree.none],
+          ]),
+        );
         if (summary.shutoffEligible.length > 0) {
           io.out('');
           io.out(`shutoff eligible: ${summary.shutoffEligible.join(', ')}`);
@@ -95,25 +92,24 @@ export function registerReportCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, schedule);
           return;
         }
-        for (const line of heading(`tests falling due from ${schedule.from}`)) {
-          io.out(line);
-        }
-        for (const line of table(schedule.months, [
-          { header: 'month', value: (row: ScheduleMonth) => row.month },
-          { header: 'tests due', value: (row: ScheduleMonth) => row.due, align: 'right' },
-          {
-            header: 'of those health hazard',
-            value: (row: ScheduleMonth) => row.healthHazard,
-            align: 'right',
-          },
-          {
-            header: 'connections',
-            value: (row: ScheduleMonth) => row.connections.length,
-            align: 'right',
-          },
-        ])) {
-          io.out(line);
-        }
+        printLines(io, heading(`tests falling due from ${schedule.from}`));
+        printLines(
+          io,
+          table(schedule.months, [
+            { header: 'month', value: (row: ScheduleMonth) => row.month },
+            { header: 'tests due', value: (row: ScheduleMonth) => row.due, align: 'right' },
+            {
+              header: 'of those health hazard',
+              value: (row: ScheduleMonth) => row.healthHazard,
+              align: 'right',
+            },
+            {
+              header: 'connections',
+              value: (row: ScheduleMonth) => row.connections.length,
+              align: 'right',
+            },
+          ]),
+        );
         io.out('');
         const peak = peakMonth(schedule);
         if (peak !== undefined && peak.due > 0) {
@@ -147,17 +143,11 @@ export function registerReportCommands(program: Command, io: CliIo, runner: Runn
             ['measure', 'value'],
             rows.map(([label, value]) => [label, String(value)]),
           );
-          for (const line of text.split('\n')) {
-            io.out(line);
-          }
+          printLines(io, text.split('\n'));
           return;
         }
-        for (const line of heading(`return for ${entry.year}, as at ${entry.asOf}`)) {
-          io.out(line);
-        }
-        for (const line of describe(rows)) {
-          io.out(line);
-        }
+        printLines(io, heading(`return for ${entry.year}, as at ${entry.asOf}`));
+        printLines(io, describe(rows));
       });
     });
 
@@ -182,18 +172,19 @@ export function registerReportCommands(program: Command, io: CliIo, runner: Runn
           writeJson(io, items);
           return;
         }
-        for (const line of table(items, [
-          { header: 'route', value: (row: WorkItem) => row.route },
-          { header: 'connection', value: (row: WorkItem) => row.connectionId },
-          { header: 'account', value: (row: WorkItem) => row.accountNumber },
-          { header: 'address', value: (row: WorkItem) => row.address },
-          { header: 'assembly', value: (row: WorkItem) => row.assemblyId ?? 'none fitted' },
-          { header: 'where', value: (row: WorkItem) => row.location },
-          { header: 'due', value: (row: WorkItem) => row.due },
-          { header: 'why', value: (row: WorkItem) => row.urgency },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(items, [
+            { header: 'route', value: (row: WorkItem) => row.route },
+            { header: 'connection', value: (row: WorkItem) => row.connectionId },
+            { header: 'account', value: (row: WorkItem) => row.accountNumber },
+            { header: 'address', value: (row: WorkItem) => row.address },
+            { header: 'assembly', value: (row: WorkItem) => row.assemblyId ?? 'none fitted' },
+            { header: 'where', value: (row: WorkItem) => row.location },
+            { header: 'due', value: (row: WorkItem) => row.due },
+            { header: 'why', value: (row: WorkItem) => row.urgency },
+          ]),
+        );
       });
     });
 }

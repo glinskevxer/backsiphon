@@ -8,7 +8,7 @@ import { ok } from '../../util/result';
 import { examine, type Finding } from '../../service/doctor';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, report } from '../shared';
+import { globals, printLines, report } from '../shared';
 
 export function registerDoctorCommands(program: Command, io: CliIo, runner: Runner): void {
   program
@@ -32,14 +32,15 @@ export function registerDoctorCommands(program: Command, io: CliIo, runner: Runn
           io.out('nothing to report');
           return;
         }
-        for (const line of table(findings, [
-          { header: 'severity', value: (row: Finding) => row.severity },
-          { header: 'check', value: (row: Finding) => row.check },
-          { header: 'subject', value: (row: Finding) => row.subject },
-          { header: 'detail', value: (row: Finding) => row.detail },
-        ])) {
-          io.out(line);
-        }
+        printLines(
+          io,
+          table(findings, [
+            { header: 'severity', value: (row: Finding) => row.severity },
+            { header: 'check', value: (row: Finding) => row.check },
+            { header: 'subject', value: (row: Finding) => row.subject },
+            { header: 'detail', value: (row: Finding) => row.detail },
+          ]),
+        );
         io.out('');
         io.out(`${examination.faults} faults, ${examination.warnings} warnings`);
       });

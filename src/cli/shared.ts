@@ -9,8 +9,8 @@
 import type { Command } from 'commander';
 
 import type { Result } from '../util/result';
-import type { GlobalOptions } from './context';
-import type { CliIo } from './output';
+import type { CommandContext, GlobalOptions } from './context';
+import { writeJson, type CliIo } from './output';
 
 /** The options from this command and every parent of it. */
 export function globals(command: Command): GlobalOptions {
@@ -28,4 +28,29 @@ export function report<T>(io: CliIo, outcome: Result<T, string>, onOk: (value: T
     return;
   }
   onOk(outcome.value);
+}
+
+/**
+ * Write json where the caller asked for json, and columns otherwise. Every
+ * command had this three line branch in it, and two of them had it wrong: they
+ * printed the columns and then the json underneath.
+ */
+export function printOr<T>(
+  io: CliIo,
+  context: Pick<CommandContext, 'json'>,
+  value: T,
+  printer: (value: T) => void,
+): void {
+  if (context.json) {
+    writeJson(io, value);
+    return;
+  }
+  printer(value);
+}
+
+/** Print a list of lines, which is what most of the printers end up doing. */
+export function printLines(io: CliIo, lines: ReadonlyArray<string>): void {
+  for (const line of lines) {
+    io.out(line);
+  }
 }
