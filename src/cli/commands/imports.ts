@@ -9,11 +9,62 @@ import type { Command } from 'commander';
 import { err, ok } from '../../util/result';
 import { describeImport, importReportsCsv } from '../../service/imports';
 import { describeConnectionImport, importConnectionsCsv } from '../../service/connection-import';
+import { importTesterRoster, lapsedTesters } from '../../service/tester-import';
 import { table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, printLines, report } from '../shared';
 
 export function registerImportCommands(program: Command, io: CliIo, runner: Runner): void {
+  program
+    .command('import-testers')
+    .description('take the certified tester list off the agency')
+    .argument('<file>', 'the csv list they published')
+    .action((file: string, _options: unknown, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => {
+        let text: string;
+        try {
+          text = readFileSync(file, 'utf8');
+        } catch (error) {
+          return err(
+            `${file} could not be read: ${error instanceof Error ? error.message : String(error)}`,
+          );
+        }
+        const summary = importTesterRoster(context.register, text);
+        return summary.ok
+          ? ok({
+              context,
+              summary: summary.value,
+              lapsed: lapsedTesters(context.register, context.asOf),
+            })
+          : summary;
+      });
+      report(io, outcome, ({ context, summary, lapsed }) => {
+        if (context.json) {
+          writeJson(io, { ...summary, lapsed });
+          return;
+        }
+        io.out(
+          `${summary.rows.length} on the list, ${summary.added} added, ${summary.renewed} renewed, ` +
+            `${summary.rejected.length} rejected`,
+        );
+        if (summary.notOnTheList.length > 0) {
+          io.out(`not on the agency list any more: ${summary.notOnTheList.join(', ')}`);
+        }
+        if (lapsed.length > 0) {
+          io.out(`the office would refuse a report from: ${lapsed.join(', ')}`);
+        }
+        if (summary.rejected.length > 0) {
+          printLines(
+            io,
+            table(summary.rejected, [
+              { header: 'line', value: (row) => row.line, align: 'right' },
+              { header: 'why', value: (row) => row.reason },
+            ]),
+          );
+        }
+      });
+    });
+
   program
     .command('import-connections')
     .description('take the district in from the billing system')
