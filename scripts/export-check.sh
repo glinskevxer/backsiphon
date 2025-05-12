@@ -48,5 +48,6 @@ fi
 
 echo "checking the handbook is the one the tables produce"
 npx tsx scripts/build-handbook.ts --check >/dev/null
+npx tsx scripts/build-command-reference.ts --check >/dev/null
 
 echo "export check passed"

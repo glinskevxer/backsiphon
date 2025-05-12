@@ -24,7 +24,9 @@
     "handbook:check": "tsx scripts/build-handbook.ts --check",
     "export-check": "bash scripts/export-check.sh",
     "audit": "npm audit --omit=dev --json > audit.json || true && tsx scripts/audit-dependencies.ts --from-audit audit.json",
-    "release-check": "tsx scripts/release-check.ts"
+    "release-check": "tsx scripts/release-check.ts",
+    "commands": "tsx scripts/build-command-reference.ts",
+    "commands:check": "tsx scripts/build-command-reference.ts --check"
   },
   "dependencies": {
     "better-sqlite3": "11.8.1",

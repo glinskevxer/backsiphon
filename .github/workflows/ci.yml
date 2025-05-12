@@ -72,6 +72,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run handbook:check
+      - run: npm run commands:check
 
   export:
     name: what git would ship
