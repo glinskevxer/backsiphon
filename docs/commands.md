@@ -513,6 +513,7 @@ notice run [options]
 
 - `--dry-run` work them out without writing anything
 - `--route <route>` only this route
+- `--limit <count>` stop after this many letters
 
 ## notice open
 

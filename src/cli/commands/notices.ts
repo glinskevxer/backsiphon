@@ -23,12 +23,14 @@ export function registerNoticeCommands(program: Command, io: CliIo, runner: Runn
     .description('work out and write the letters due today')
     .option('--dry-run', 'work them out without writing anything')
     .option('--route <route>', 'only this route')
+    .option('--limit <count>', 'stop after this many letters')
     .action((options: Record<string, string | boolean | undefined>, command: Command) => {
       const outcome = runner(globals(command), io, (context) => {
         const run = runNotices(context.register, {
           asOf: context.asOf,
           ...(options['dryRun'] === true ? { dryRun: true } : {}),
           ...(options['route'] === undefined ? {} : { route: String(options['route']) }),
+          ...(options['limit'] === undefined ? {} : { limit: Number(options['limit']) }),
         });
         return run.ok ? ok({ context, run: run.value }) : run;
       });

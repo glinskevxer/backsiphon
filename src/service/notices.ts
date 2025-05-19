@@ -34,6 +34,12 @@ export interface NoticeRunOptions {
   readonly dryRun?: boolean;
   /** Only this route, for an office that walks one at a time. */
   readonly route?: string;
+  /**
+   * Stop after this many letters. An office that has not run this for a year
+   * does not want four hundred letters in one envelope run, it wants the worst
+   * hundred today and the rest next week.
+   */
+  readonly limit?: number;
 }
 
 export interface SkippedConnection {
@@ -58,6 +64,7 @@ export function runNotices(
 
   const issued: NoticeRecord[] = [];
   const skipped: SkippedConnection[] = [];
+  const pending: Array<{ notice: NoticeRecord; accountNumber: string }> = [];
   let sequence = nextNoticeSequence(register);
 
   for (const connection of connections) {
@@ -93,29 +100,45 @@ export function runNotices(
 
     if (options.dryRun === true) {
       issued.push(notice);
+      if (options.limit !== undefined && issued.length >= options.limit) {
+        break;
+      }
       continue;
     }
 
-    const written = withTransaction(register.db, () => {
-      const stored = insertNotice(register.db, notice);
-      if (!stored.ok) {
-        return stored;
-      }
-      appendEvent(register.db, {
-        happenedAt: register.now(),
-        actor: register.actor,
-        kind: 'notice_issued',
-        subjectKind: 'notice',
-        subjectId: notice.noticeId,
-        detail: `${notice.stage} notice to ${connection.accountNumber}, ${notice.daysPastDue} days past due`,
-      });
-      return stored;
-    });
-    if (!written.ok) {
-      skipped.push({ connectionId: connection.connectionId, reason: written.error });
-      continue;
+    pending.push({ notice, accountNumber: connection.accountNumber });
+    if (options.limit !== undefined && pending.length >= options.limit) {
+      break;
     }
-    issued.push(notice);
+  }
+
+  // one transaction for the whole run rather than one per letter. on a
+  // district of a few hundred that is the difference between a run somebody
+  // waits for and a run somebody makes a cup of tea during.
+  if (pending.length > 0) {
+    withTransaction(register.db, () => {
+      for (const entry of pending) {
+        const stored = insertNotice(register.db, entry.notice);
+        if (!stored.ok) {
+          skipped.push({
+            connectionId: entry.notice.connectionId,
+            reason: stored.error,
+          });
+          continue;
+        }
+        appendEvent(register.db, {
+          happenedAt: register.now(),
+          actor: register.actor,
+          kind: 'notice_issued',
+          subjectKind: 'notice',
+          subjectId: entry.notice.noticeId,
+          detail:
+            `${entry.notice.stage} notice to ${entry.accountNumber}, ` +
+            `${entry.notice.daysPastDue} days past due`,
+        });
+        issued.push(entry.notice);
+      }
+    });
   }
 
   return ok({ issued, skipped, considered: connections.length });
