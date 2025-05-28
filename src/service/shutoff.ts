@@ -12,8 +12,9 @@ import type { CivilDate } from '../util/dates';
 import { err, ok, type Result } from '../util/result';
 import { execute, selectAll, selectOne, withTransaction } from '../storage/db';
 import { appendEvent } from '../storage/repositories/events';
+import { SHUTOFF_ID } from '../util/ids';
 import { complianceFor } from './compliance';
-import type { Register } from './register';
+import { mintId, type Register } from './register';
 
 export interface ShutoffOrder {
   readonly orderId: string;
@@ -92,21 +93,6 @@ export function openOrders(register: Register): ShutoffOrder[] {
   ).map(toOrder);
 }
 
-function nextOrderId(register: Register): string {
-  const rows = selectAll<{ order_id: string }>(
-    register.db,
-    "select order_id from shutoff_orders where order_id like 'SO-%'",
-  );
-  let highest = 0;
-  for (const row of rows) {
-    const sequence = Number(row.order_id.slice(3));
-    if (Number.isInteger(sequence) && sequence > highest) {
-      highest = sequence;
-    }
-  }
-  return `SO-${String(highest + 1).padStart(4, '0')}`;
-}
-
 export function raiseOrder(
   register: Register,
   connectionId: string,
@@ -130,7 +116,7 @@ export function raiseOrder(
   }
 
   const order: ShutoffOrder = {
-    orderId: nextOrderId(register),
+    orderId: mintId(register, SHUTOFF_ID, 'shutoff_orders', 'order_id'),
     connectionId,
     raisedOn,
     raisedBy: register.actor,

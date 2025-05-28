@@ -21,6 +21,8 @@ export const ASSEMBLY_ID: IdShape = { prefix: 'BA', width: 5 };
 export const REPORT_ID: IdShape = { prefix: 'TR', width: 6 };
 export const NOTICE_ID: IdShape = { prefix: 'N', width: 6 };
 export const VARIANCE_ID: IdShape = { prefix: 'V', width: 4 };
+export const SHUTOFF_ID: IdShape = { prefix: 'SO', width: 4 };
+export const CONTACT_ID: IdShape = { prefix: 'C', width: 5 };
 
 export function formatId(shape: IdShape, sequence: number): string {
   if (!Number.isInteger(sequence) || sequence < 1) {

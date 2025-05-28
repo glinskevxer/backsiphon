@@ -3,6 +3,8 @@ import { describe, expect, it } from 'vitest';
 import {
   ASSEMBLY_ID,
   CONNECTION_ID,
+  CONTACT_ID,
+  SHUTOFF_ID,
   formatId,
   nextId,
   nextIds,
@@ -82,5 +84,26 @@ describe('what a clerk typed', () => {
 
   it('refuses words', () => {
     expect(normaliseId(CONNECTION_ID, 'the plating shop').ok).toBe(false);
+  });
+});
+
+describe('the shapes the register mints', () => {
+  it('gives every shape a prefix and a width', () => {
+    for (const shape of [CONNECTION_ID, ASSEMBLY_ID, REPORT_ID, SHUTOFF_ID, CONTACT_ID]) {
+      expect(shape.prefix).toMatch(/^[A-Z]{1,2}$/);
+      expect(shape.width).toBeGreaterThanOrEqual(4);
+    }
+  });
+
+  it('keeps the prefixes apart, so an id says what it is', () => {
+    const prefixes = [CONNECTION_ID, ASSEMBLY_ID, REPORT_ID, SHUTOFF_ID, CONTACT_ID].map(
+      (shape) => shape.prefix,
+    );
+    expect(new Set(prefixes).size).toBe(prefixes.length);
+  });
+
+  it('formats the two newest shapes the way the office writes them', () => {
+    expect(formatId(SHUTOFF_ID, 1)).toBe('SO-0001');
+    expect(formatId(CONTACT_ID, 42)).toBe('C-00042');
   });
 });

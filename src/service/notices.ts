@@ -25,8 +25,7 @@ import {
 import { complianceFor, type ComplianceStatus, type PointCompliance } from './compliance';
 import { describeLetterRun, summarise } from './letters';
 import { formatId, parseId } from '../util/ids';
-import { selectAll } from '../storage/db';
-import type { Register } from './register';
+import { mintId, type Register } from './register';
 
 export interface NoticeRunOptions {
   readonly asOf: CivilDate;
@@ -65,7 +64,7 @@ export function runNotices(
   const issued: NoticeRecord[] = [];
   const skipped: SkippedConnection[] = [];
   const pending: Array<{ notice: NoticeRecord; accountNumber: string }> = [];
-  let sequence = nextNoticeSequence(register);
+  let sequence = sequenceOf(mintId(register, NOTICE_ID, 'notices', 'notice_id'));
 
   for (const connection of connections) {
     const status = complianceFor(register, connection.connectionId, options.asOf);
@@ -205,22 +204,6 @@ export function noticeBody(register: Register, status: ComplianceStatus, due: Du
   return lines.join('\n');
 }
 
-function nextNoticeSequence(register: Register): number {
-  const rows = selectAll<{ notice_id: string }>(
-    register.db,
-    'select notice_id from notices where notice_id like ?',
-    [`${NOTICE_ID.prefix}-%`],
-  );
-  let highest = 0;
-  for (const row of rows) {
-    const parsed = parseId(NOTICE_ID, row.notice_id);
-    if (parsed.ok && parsed.value > highest) {
-      highest = parsed.value;
-    }
-  }
-  return highest + 1;
-}
-
 /**
  * Take a letter back. The office does this when it wrote to the wrong address
  * or when the customer turns out to have filed on time and the paperwork was
@@ -263,6 +246,12 @@ export function cancelNotice(
     });
     return cleared;
   });
+}
+
+/** The number inside an id the register has just minted. */
+function sequenceOf(id: string): number {
+  const parsed = parseId(NOTICE_ID, id);
+  return parsed.ok ? parsed.value : 1;
 }
 
 export function describeRun(run: NoticeRun): string {

@@ -16,21 +16,12 @@ import {
   type ContactRole,
 } from '../../storage/repositories/contacts';
 import { appendEvent } from '../../storage/repositories/events';
-import { selectAll, withTransaction } from '../../storage/db';
+import { withTransaction } from '../../storage/db';
+import { CONTACT_ID } from '../../util/ids';
+import { mintId } from '../../service/register';
 import { describe, table, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
 import { globals, printLines, report } from '../shared';
-
-function nextContactId(rows: ReadonlyArray<{ contact_id: string }>): string {
-  let highest = 0;
-  for (const row of rows) {
-    const sequence = Number(row.contact_id.slice(2));
-    if (Number.isInteger(sequence) && sequence > highest) {
-      highest = sequence;
-    }
-  }
-  return `C-${String(highest + 1).padStart(5, '0')}`;
-}
 
 export function registerContactCommands(program: Command, io: CliIo, runner: Runner): void {
   const contact = program.command('contact').description('who to write to and who to telephone');
@@ -55,12 +46,8 @@ export function registerContactCommands(program: Command, io: CliIo, runner: Run
           if (!CONTACT_ROLES.includes(role)) {
             return err(`${role} is not a role, try ${CONTACT_ROLES.join(', ')}`);
           }
-          const ids = selectAll<{ contact_id: string }>(
-            context.register.db,
-            "select contact_id from contacts where contact_id like 'C-%'",
-          );
           const record: Contact = {
-            contactId: nextContactId(ids),
+            contactId: mintId(context.register, CONTACT_ID, 'contacts', 'contact_id'),
             connectionId,
             role,
             name: String(options['name']),
