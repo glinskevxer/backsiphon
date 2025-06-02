@@ -782,6 +782,14 @@ write a consistent copy of the register somewhere else
 backup [options] <file>
 ```
 
+## read-backup
+
+look inside a backup file without touching the register
+
+```
+read-backup [options] <file>
+```
+
 ## verify
 
 ask sqlite whether the file itself is sound

@@ -125,6 +125,28 @@ export function schemaVersion(db: Database): string | undefined {
   return selectOne<{ id: string }>(db, `select id from ${LEDGER} order by id desc limit 1`)?.id;
 }
 
+/**
+ * The version of a store this process may not write to, and may not even be
+ * one of ours. Reading a backup goes through here: the version reader above
+ * creates the ledger if it is missing, which is exactly right on a live store
+ * and exactly wrong on a file somebody handed the office in an envelope.
+ */
+export function schemaVersionIfPresent(db: Database): string | undefined {
+  try {
+    const ledger = selectOne<{ name: string }>(
+      db,
+      "select name from sqlite_master where type = 'table' and name = ?",
+      [LEDGER],
+    );
+    if (ledger === undefined) {
+      return undefined;
+    }
+    return selectOne<{ id: string }>(db, `select id from ${LEDGER} order by id desc limit 1`)?.id;
+  } catch {
+    return undefined;
+  }
+}
+
 function firstDuplicateId(migrations: ReadonlyArray<Migration>): string | undefined {
   const seen = new Set<string>();
   for (const migration of migrations) {

@@ -5,6 +5,7 @@ import {
   appliedMigrations,
   checksumOf,
   schemaVersion,
+  schemaVersionIfPresent,
   type Migration,
 } from '../../../src/storage/migrations';
 import { closeDatabase, openDatabase, tableNames, type Database } from '../../../src/storage/db';
@@ -144,5 +145,25 @@ describe('checksums', () => {
 
   it('is a short hex string', () => {
     expect(checksumOf(first)).toMatch(/^[0-9a-f]{32}$/);
+  });
+});
+
+describe('reading the version off a store this process may not write to', () => {
+  it('reads it where the ledger is there', () => {
+    const store = open();
+    applyMigrations(store, [first], NOW);
+    expect(schemaVersionIfPresent(store)).toBe('001_meters');
+  });
+
+  it('says nothing rather than creating a ledger', () => {
+    const store = open();
+    expect(schemaVersionIfPresent(store)).toBeUndefined();
+    expect(tableNames(store)).toEqual([]);
+  });
+
+  it('says nothing for a database that is not ours', () => {
+    const store = open();
+    store.exec('create table something_else (id integer primary key)');
+    expect(schemaVersionIfPresent(store)).toBeUndefined();
   });
 });

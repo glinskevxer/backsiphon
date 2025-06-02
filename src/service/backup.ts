@@ -10,9 +10,9 @@
 import { existsSync, statSync } from 'node:fs';
 
 import { err, ok, type Result } from '../util/result';
-import { selectOne } from '../storage/db';
+import { closeDatabase, openDatabase, selectOne, type Database } from '../storage/db';
 import { appendEvent } from '../storage/repositories/events';
-import { schemaVersion } from '../storage/migrations';
+import { schemaVersion, schemaVersionIfPresent } from '../storage/migrations';
 import type { Register } from './register';
 
 export interface BackupOutcome {
@@ -60,6 +60,61 @@ export interface IntegrityOutcome {
   readonly ok: boolean;
   readonly messages: ReadonlyArray<string>;
   readonly foreignKeyProblems: number;
+}
+
+export interface BackupReading {
+  readonly file: string;
+  readonly schemaVersion: string;
+  readonly connections: number;
+  readonly assemblies: number;
+  readonly reports: number;
+  readonly notices: number;
+  readonly events: number;
+  readonly sound: boolean;
+}
+
+/**
+ * Read a backup without touching the live register.
+ *
+ * The office has a drawer of these and no way of telling which one is which. It
+ * opens the file read only, on purpose: a restore is a decision somebody makes
+ * after looking, and looking should not be able to change anything.
+ */
+export function readBackup(file: string): Result<BackupReading, string> {
+  if (!existsSync(file)) {
+    return err(`there is no file at ${file}`);
+  }
+  let db: Database;
+  try {
+    db = openDatabase({ file, readOnly: true });
+  } catch (error) {
+    return err(
+      `${file} could not be opened: ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+  try {
+    const version = schemaVersionIfPresent(db);
+    if (version === undefined) {
+      return err(`${file} is not a register this program wrote`);
+    }
+    const integrity = db.pragma('integrity_check') as Array<{ integrity_check: string }>;
+    return ok({
+      file,
+      schemaVersion: version,
+      connections: count(db, 'service_connections'),
+      assemblies: count(db, 'assemblies'),
+      reports: count(db, 'test_reports'),
+      notices: count(db, 'notices'),
+      events: count(db, 'events'),
+      sound: integrity.length === 1 && integrity[0]?.integrity_check === 'ok',
+    });
+  } finally {
+    closeDatabase(db);
+  }
+}
+
+function count(db: Database, table: string): number {
+  return selectOne<{ total: number }>(db, `select count(*) as total from ${table}`)?.total ?? 0;
 }
 
 /** What SQLite itself says about the file, which is worth asking before a backup. */

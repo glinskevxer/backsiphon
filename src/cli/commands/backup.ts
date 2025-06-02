@@ -5,10 +5,10 @@
 import type { Command } from 'commander';
 
 import { ok } from '../../util/result';
-import { backupTo, checkIntegrity } from '../../service/backup';
+import { backupTo, checkIntegrity, readBackup } from '../../service/backup';
 import { describe, writeJson, type CliIo } from '../output';
 import type { Runner } from '../program';
-import { globals, printLines, report } from '../shared';
+import { globals, printLines, printOr, report } from '../shared';
 
 export function registerBackupCommands(program: Command, io: CliIo, runner: Runner): void {
   program
@@ -34,6 +34,34 @@ export function registerBackupCommands(program: Command, io: CliIo, runner: Runn
             ['schema', written.schemaVersion],
           ]),
         );
+      });
+    });
+
+  program
+    .command('read-backup')
+    .description('look inside a backup file without touching the register')
+    .argument('<file>', 'the backup to read')
+    .action((file: string, _options: unknown, command: Command) => {
+      const outcome = runner(globals(command), io, (context) => {
+        const reading = readBackup(file);
+        return reading.ok ? ok({ context, reading: reading.value }) : reading;
+      });
+      report(io, outcome, ({ context, reading }) => {
+        printOr(io, context, reading, (value) => {
+          printLines(
+            io,
+            describe([
+              ['file', value.file],
+              ['schema', value.schemaVersion],
+              ['sound', value.sound],
+              ['connections', value.connections],
+              ['assemblies', value.assemblies],
+              ['test reports', value.reports],
+              ['notices', value.notices],
+              ['events', value.events],
+            ]),
+          );
+        });
       });
     });
 
