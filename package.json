@@ -1,6 +1,6 @@
 {
   "name": "backsiphon",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Cross connection control register for a drinking water purveyor",
   "license": "UNLICENSED",
@@ -27,7 +27,9 @@
     "release-check": "tsx scripts/release-check.ts",
     "commands": "tsx scripts/build-command-reference.ts",
     "commands:check": "tsx scripts/build-command-reference.ts --check",
-    "check": "bash scripts/check.sh"
+    "check": "bash scripts/check.sh",
+    "version:write": "tsx scripts/build-version.ts",
+    "version:check": "tsx scripts/build-version.ts --check"
   },
   "dependencies": {
     "better-sqlite3": "11.8.1",

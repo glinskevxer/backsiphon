@@ -6,6 +6,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { main } from '../../src/cli/main';
+import { VERSION } from '../../src/version';
 
 let logged: string[] = [];
 let errored: string[] = [];
@@ -43,9 +44,9 @@ describe('main', () => {
     expect(code).not.toBe(0);
   });
 
-  it('prints its own version', async () => {
+  it('prints the version the manifest carries', async () => {
     const code = await main(['--version']);
     expect(code).toBe(0);
-    expect(logged.join('\n')).toMatch(/\d+\.\d+\.\d+/);
+    expect(logged.join('\n').trim()).toBe(VERSION);
   });
 });

@@ -27,6 +27,7 @@ step 'types' npm run typecheck --silent
 step 'tests' npm test --silent
 step 'handbook' npm run handbook:check --silent
 step 'command reference' npm run commands:check --silent
+step 'version' npm run version:check --silent
 step 'release checks' npm run release-check --silent
 
 if [ ${#failed[@]} -eq 0 ]; then

@@ -12,6 +12,7 @@ import { Command } from 'commander';
 import type { Result } from '../util/result';
 import { withContext, type CommandContext, type GlobalOptions } from './context';
 import { capturingIo, countingIo, type CliIo } from './output';
+import { VERSION } from '../version';
 import { registerConnectionCommands } from './commands/connections';
 import { registerPremiseUseCommand, registerSurveyCommands } from './commands/surveys';
 import { registerAssemblyCommands } from './commands/assemblies';
@@ -53,7 +54,7 @@ export function buildProgram(options: ProgramOptions): Command {
   program
     .name(PROGRAM_NAME)
     .description('cross connection control register for a drinking water purveyor')
-    .version(options.version ?? '0.1.0')
+    .version(options.version ?? VERSION)
     .option('-s, --store <file>', 'the register file, or whatever the config file says')
     .option('--as-of <date>', 'answer as at this day rather than today')
     .option('--actor <name>', 'the clerk the trail is written against', 'cli')

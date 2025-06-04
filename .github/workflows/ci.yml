@@ -85,6 +85,7 @@ jobs:
       - run: npm ci
       - run: npm run handbook:check
       - run: npm run commands:check
+      - run: npm run version:check
 
   export:
     name: what git would ship

@@ -16,6 +16,8 @@ import { openRegister, closeRegister } from '../src/service/register';
 import { programSummary } from '../src/service/reporting';
 import { loadDemoDistrict } from '../src/service/demo';
 import { handbookIsCurrent } from './build-handbook';
+import { referenceIsCurrent } from './build-command-reference';
+import { manifestVersion, versionModuleIsCurrent } from './build-version';
 
 export interface Check {
   readonly name: string;
@@ -87,6 +89,24 @@ export function smokeCheck(): Check {
   }
 }
 
+export function versionModuleCheck(): Check {
+  const ok = versionModuleIsCurrent();
+  return {
+    name: 'the version the command line reports',
+    ok,
+    detail: ok ? `reports ${manifestVersion()}` : 'run npm run version:write',
+  };
+}
+
+export function commandReferenceCheck(): Check {
+  const ok = referenceIsCurrent();
+  return {
+    name: 'command reference',
+    ok,
+    detail: ok ? 'the reference matches the program' : 'run npm run commands',
+  };
+}
+
 export function handbookCheck(): Check {
   const ok = handbookIsCurrent();
   return {
@@ -97,7 +117,15 @@ export function handbookCheck(): Check {
 }
 
 export function runChecks(): Check[] {
-  return [versionCheck(), migrationOrderCheck(), migrationIdCheck(), handbookCheck(), smokeCheck()];
+  return [
+    versionCheck(),
+    versionModuleCheck(),
+    migrationOrderCheck(),
+    migrationIdCheck(),
+    handbookCheck(),
+    commandReferenceCheck(),
+    smokeCheck(),
+  ];
 }
 
 function main(): number {

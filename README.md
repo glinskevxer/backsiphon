@@ -2,6 +2,8 @@
 
 A cross connection control register for a drinking water purveyor.
 
+[![ci](https://github.com/glinskevxer/backsiphon/actions/workflows/ci.yml/badge.svg)](https://github.com/glinskevxer/backsiphon/actions/workflows/ci.yml)
+
 It keeps the hazard survey of every service connection, works out what backflow
 protection each one has to carry, holds the annual test reports filed against
 those assemblies, and runs the notice clock when a test does not arrive.
@@ -36,3 +38,19 @@ leaves it out of date.
 6. the tester and the gauge decide whether the office can accept the report
 7. the last passing accepted test decides when the next one is due
 8. the hazard degree decides how fast the letters climb
+
+## What is generated and what is written
+
+Three files are written by the program rather than by a person, and ci refuses
+a change that leaves any of them behind:
+
+- `docs/handbook.md`, from the hazard, premise, assembly and fee tables
+- `docs/commands.md`, from the command line itself
+- `src/version.ts`, from the version in `package.json`
+
+## Checks
+
+`npm run check` runs everything ci runs, in the same order, on one machine.
+`npm run export-check` goes further: it unpacks the tree git would ship,
+installs it from the lock file, builds it, and drives the command line against
+a store it makes itself.
