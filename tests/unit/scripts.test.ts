@@ -6,10 +6,13 @@
  * the checks ci runs, which meant a green local run and a red build.
  */
 
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
+
+import { generatedFilesMarkedCheck, GENERATED_FILES } from '../../scripts/release-check';
 
 const root = resolve(__dirname, '..', '..');
 
@@ -65,6 +68,50 @@ describe('the export check', () => {
 
   it('checks that a refusal comes back non zero', () => {
     expect(script('export-check.sh')).toContain('a refusal came back zero');
+  });
+});
+
+describe('the attributes', () => {
+  function attributes(): string {
+    return readFileSync(resolve(root, '.gitattributes'), 'utf8');
+  }
+
+  it('marks every file a script writes as generated', () => {
+    for (const file of GENERATED_FILES) {
+      expect(attributes()).toContain(`${file} linguist-generated=true`);
+    }
+  });
+
+  it('marks nothing that a person actually wrote', () => {
+    const marked = attributes()
+      .split('\n')
+      .filter((line) => line.includes('linguist-generated'))
+      .map((line) => line.split(' ')[0]);
+    expect([...marked].sort()).toEqual([...GENERATED_FILES].sort());
+  });
+
+  it('decides the line endings here rather than on whoever cloned it', () => {
+    expect(attributes()).toContain('text=auto eol=lf');
+  });
+
+  it('leaves the typescript to count as typescript', () => {
+    expect(attributes()).not.toContain('linguist-language');
+    expect(attributes()).not.toContain('linguist-vendored');
+  });
+
+  it('is checked by the release check', () => {
+    expect(generatedFilesMarkedCheck().ok).toBe(true);
+  });
+
+  it('has left no carriage returns in anything tracked', () => {
+    const tracked = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' })
+      .split('\n')
+      .filter((file) => file !== '' && !file.endsWith('.sqlite'));
+    const withCarriageReturns = tracked.filter((file) =>
+      readFileSync(resolve(root, file), 'utf8').includes('\r'),
+    );
+    expect(withCarriageReturns).toEqual([]);
+    expect(tracked.length).toBeGreaterThan(200);
   });
 });
 

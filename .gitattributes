@@ -1,0 +1,13 @@
+# Line endings are decided here rather than by whoever cloned it. The office
+# has run this on a windows laptop twice and both times the diff was the whole
+# tree.
+* text=auto eol=lf
+*.sh text eol=lf
+
+# Three files in this repository are written by a script out of the program
+# itself, and are checked in so that a reader does not have to run anything.
+# Marking them keeps them out of the language statistics, collapses them in a
+# diff, and stops a review arguing about a file nobody typed.
+docs/handbook.md linguist-generated=true
+docs/commands.md linguist-generated=true
+src/version.ts linguist-generated=true

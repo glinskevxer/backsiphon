@@ -89,6 +89,35 @@ export function smokeCheck(): Check {
   }
 }
 
+/**
+ * Every file a script writes has to be marked as one.
+ *
+ * An unmarked generated file counts toward the language statistics and shows
+ * up in a review as though somebody wrote it. This is the check that catches a
+ * fourth generator being added and the attribute being forgotten.
+ */
+export const GENERATED_FILES: ReadonlyArray<string> = [
+  'docs/handbook.md',
+  'docs/commands.md',
+  'src/version.ts',
+];
+
+export function generatedFilesMarkedCheck(): Check {
+  const attributes = readFileSync(resolve(root, '.gitattributes'), 'utf8');
+  const unmarked = GENERATED_FILES.filter(
+    (file) =>
+      !new RegExp(`^${file.replace('.', '\\.')} .*linguist-generated=true`, 'm').test(attributes),
+  );
+  return {
+    name: 'generated files are marked',
+    ok: unmarked.length === 0,
+    detail:
+      unmarked.length === 0
+        ? `${GENERATED_FILES.length} marked linguist-generated`
+        : `not marked in .gitattributes: ${unmarked.join(', ')}`,
+  };
+}
+
 export function versionModuleCheck(): Check {
   const ok = versionModuleIsCurrent();
   return {
@@ -120,6 +149,7 @@ export function runChecks(): Check[] {
   return [
     versionCheck(),
     versionModuleCheck(),
+    generatedFilesMarkedCheck(),
     migrationOrderCheck(),
     migrationIdCheck(),
     handbookCheck(),

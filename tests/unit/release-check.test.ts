@@ -45,6 +45,7 @@ describe('the release checks', () => {
     expect(checks.map((check) => check.name)).toEqual([
       'version',
       'the version the command line reports',
+      'generated files are marked',
       'migration order',
       'migration ids',
       'handbook',
